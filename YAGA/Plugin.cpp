@@ -20,28 +20,24 @@ namespace GOTHIC_ENGINE {
   }
 
   void Game_Loop() {
+GameReaderLoop();
   }
 
   void Game_PostLoop() {
   }
 
   void Game_MenuLoop() {
-zCMenu* activeMenu = zCMenu::GetActive();
-zCMenuItem* menuItem = activeMenu->GetActiveItem();
-if (zinput->KeyToggled(KEY_K))
-{
-nvdaController_speakText(ConvertToWchar(menuItem->GetText(0)));
-nvdaController_speakText(ConvertToWchar(menuItem->GetText(1)));
-}
   }
 
   // Information about current saving or loading world
   TSaveLoadGameInfo& SaveLoadGameInfo = UnionCore::SaveLoadGameInfo;
 
   void Game_SaveBegin() {
+nvdaController_speakText(L"Saving game...");
   }
 
   void Game_SaveEnd() {
+nvdaController_speakText(L"Game saved successfully.");
   }
 
   void LoadBegin() {

@@ -2782,6 +2782,8 @@
     <ClInclude Include="UnionHeader.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="DialogReader.cpp" />
+    <ClInclude Include="MenuReader.cpp" />
+    <ClInclude Include="GameReader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".build_settings.inl">

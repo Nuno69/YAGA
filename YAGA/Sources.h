@@ -5,6 +5,7 @@
 #pragma region Includes
 #include "DialogReader.cpp"
 #include "MenuReader.cpp"
+#include "GameReader.cpp"
 #include "Plugin.cpp"
 #pragma endregion
 

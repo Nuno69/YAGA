@@ -2,4 +2,5 @@
 
 // User API for zCMenu
 // Add your methods here
-
+void PreviousOption_Union();
+void NextOption_Union();

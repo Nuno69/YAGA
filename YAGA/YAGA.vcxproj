@@ -858,6 +858,14 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="GameReader.cpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="MenuReader.cpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="nvdaController.h" />
     <ClInclude Include="Plugin.cpp" />
     <ClCompile Include="Interface.cpp" />
