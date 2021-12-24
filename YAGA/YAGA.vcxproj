@@ -885,6 +885,10 @@
   <ItemGroup>
     <ClInclude Include="Plugin.h" />
     <ClInclude Include="Headers.h" />
+    <ClInclude Include="Radar.cpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="resource.h" />
     <ClInclude Include="Sources.h" />
     <ClInclude Include="UnionAfx.h" />

@@ -2784,6 +2784,7 @@
     <ClInclude Include="DialogReader.cpp" />
     <ClInclude Include="MenuReader.cpp" />
     <ClInclude Include="GameReader.cpp" />
+    <ClInclude Include="Radar.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".build_settings.inl">

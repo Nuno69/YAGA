@@ -10,7 +10,6 @@ namespace GOTHIC_ENGINE {
   }
   
   void Game_Init() {
-      nvdaController_speakText(L"Loading game...");
   }
 
   void Game_Exit() {
@@ -21,6 +20,7 @@ namespace GOTHIC_ENGINE {
 
   void Game_Loop() {
 GameReaderLoop();
+RadarLoop();
   }
 
   void Game_PostLoop() {
@@ -41,9 +41,11 @@ nvdaController_speakText(L"Game saved successfully.");
   }
 
   void LoadBegin() {
+nvdaController_speakText(L"Loading game...");
   }
 
   void LoadEnd() {
+nvdaController_speakText(L"Game loaded succcessfully");
   }
 
   void Game_LoadBegin_NewGame() {

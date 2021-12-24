@@ -6,6 +6,7 @@
 #include "DialogReader.cpp"
 #include "MenuReader.cpp"
 #include "GameReader.cpp"
+#include "Radar.cpp"
 #include "Plugin.cpp"
 #pragma endregion
 

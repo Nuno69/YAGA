@@ -27,63 +27,63 @@ zSTRING GetPlayerFacing()
 {
 return player->human_ai->GetFootPos();
 }
-//const string GetWordForAngle(int angle)
-//{
-//	switch (angle)
+const string GetWordForAngle(int angle)
+{
+//	SWITCH (ANGLE)
 //	{
-//case 0:
-//return "N";
-//break;
-//case 1:
-//return "N at "+angle+" degree";
-//break;
-//case 2 ... 44:
-//return "NE at "+angle+" degrees";
-//break;
-//case 45:
-//return "NE";
-//break;
-//case 46 ... 89:
-//return "NE at "+angle+" degrees";
-//break;
-//case 90:
-//return "E";
-//break;
-//case 91 ... 134:
-//return "SE at "+angle+" degrees";
-//break;
-//case 135:
-//return "SE";
-//break;
-//case 136 ... 179:
-//return "SE at "+angle+" degrees";
-//break;
-//case 180:
-//return "S";
-//break;
-//case 181 ... 224:
-//return "SW at "+angle+" degrees";
-//break;
-//case 225:
-//return "SW";
-//break;
-//case 226 ... 269:
-//return "SW at "+angle+" degrees";
-//break;
-//case 270:
-//return "W";
-//break;
-//case 271 ... 314:
-//return "NW at "+angle+" degrees";
-//break;
-//case 315:
-//return "NW";
-//break;
-//case 316 ... 359:
-//return "NW at "+angle+" degrees";
-//break;
-//	default:
-//		break;
+//CASE 0:
+//RETURN "N";
+//BREAK;
+//CASE 1:
+//RETURN "N AT "+ANGLE+" DEGREE";
+//BREAK;
+//CASE 2 ... 44:
+//RETURN "NE AT "+ANGLE+" DEGREES";
+//BREAK;
+//CASE 45:
+//RETURN "NE";
+//BREAK;
+//CASE 46 ... 89:
+//RETURN "NE AT "+ANGLE+" DEGREES";
+//BREAK;
+//CASE 90:
+//RETURN "E";
+//BREAK;
+//CASE 91 ... 134:
+//RETURN "SE AT "+ANGLE+" DEGREES";
+//BREAK;
+//CASE 135:
+//RETURN "SE";
+//BREAK;
+//CASE 136 ... 179:
+//RETURN "SE AT "+ANGLE+" DEGREES";
+//BREAK;
+//CASE 180:
+//RETURN "S";
+//BREAK;
+//CASE 181 ... 224:
+//RETURN "SW AT "+ANGLE+" DEGREES";
+//BREAK;
+//CASE 225:
+//RETURN "SW";
+//BREAK;
+//CASE 226 ... 269:
+//RETURN "SW AT "+ANGLE+" DEGREES";
+//BREAK;
+//CASE 270:
+//RETURN "W";
+//BREAK;
+//CASE 271 ... 314:
+//RETURN "NW AT "+ANGLE+" DEGREES";
+//BREAK;
+//CASE 315:
+//RETURN "NW";
+//BREAK;
+//CASE 316 ... 359:
+//RETURN "NW AT "+ANGLE+" DEGREES";
+//BREAK;
+//	DEFAULT:
+//		BREAK;
 //	}
-//}
+}
 }
