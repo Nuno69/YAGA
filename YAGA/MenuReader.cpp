@@ -1,8 +1,6 @@
 // Supported with union (c) 2020 Union team
 // Union SOURCE file
-
 namespace GOTHIC_ENGINE {
-	// Add your code here . . .
 HOOK Ivk_PreviousOption_Union PATCH(&zCMenu::PreviousOption, &zCMenu::PreviousOption_Union);
 void zCMenu::PreviousOption_Union()
 {

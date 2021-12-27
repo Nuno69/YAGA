@@ -86,4 +86,9 @@ const string GetWordForAngle(int angle)
 //		BREAK;
 //	}
 }
+int IsBehind(int angle)
+{
+if (angle >=0 || angle <=90 || angle >=270 || angle<=359) return 0;
+return 1;
+}
 }
