@@ -5,6 +5,9 @@
 #pragma region Includes
 #include "UnionHeader.h"
 #include "Utils.h"
+#include "zSpeechEngine.h"
+#include "zSpeechEngineZhengdu.h"
+#include "zSpeech.h"
 #include "Plugin.h"
 #pragma endregion
 // ...

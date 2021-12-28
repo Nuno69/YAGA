@@ -1,0 +1,38 @@
+// Supported with union (c) 2020 Union team
+// Union SOURCE file
+
+namespace GOTHIC_ENGINE {
+	// Add your code here . . .
+	zSpeechEngineZhengdu::zSpeechEngineZhengdu() :
+zSpeechEngine(L"ZDSR"),
+zhengdu(LoadLibrary("ZDSRAPI.DLL")),
+initTTS(NULL),
+speak(NULL),
+stopSpeak(NULL)
+{
+		if (zhengdu)
+			{
+initTTS = (InitTTS)GetProcAddress(zhengdu, "InitTTS");
+speak = (Speak)GetProcAddress(zhengdu, "Speak");
+stopSpeak = (StopSpeak)GetProcAddress(zhengdu, "StopSpeak");
+			}
+}
+zSpeechEngineZhengdu::~zSpeechEngineZhengdu()
+{
+if (zhengdu) FreeLibrary(zhengdu);
+}
+int zSpeechEngineZhengdu::Read(const zSTRING *str, int interrupt)
+{
+speak(ConvertToWchar((char*)str), interrupt);
+return 1;
+}
+int zSpeechEngineZhengdu::IsReady()
+{
+if (initTTS(1) !=0 || initTTS(1) !=2) return 0;
+return 1;
+}
+void zSpeechEngineZhengdu::StopReading()
+{
+stopSpeak();
+}
+}

@@ -220,6 +220,9 @@
     <Filter Include="Plugin\Workspace\Helpers">
       <UniqueIdentifier>{0e781e2c-3c33-48e9-9c5c-01c1a40795f1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Plugin\Workspace\zSpeech">
+      <UniqueIdentifier>{061dafec-e031-44bb-9edf-6d1e1a001b91}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Interface.cpp">
@@ -2799,6 +2802,18 @@
     </ClInclude>
     <ClInclude Include="Utils.h">
       <Filter>Plugin\Workspace\Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="zSpeechEngine.h">
+      <Filter>Plugin\Workspace\zSpeech</Filter>
+    </ClInclude>
+    <ClInclude Include="zSpeechEngineZhengdu.h">
+      <Filter>Plugin\Workspace\zSpeech</Filter>
+    </ClInclude>
+    <ClInclude Include="zSpeechEngineZhengdu.cpp">
+      <Filter>Plugin\Workspace\zSpeech</Filter>
+    </ClInclude>
+    <ClInclude Include="zSpeech.h">
+      <Filter>Plugin\Workspace\zSpeech</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

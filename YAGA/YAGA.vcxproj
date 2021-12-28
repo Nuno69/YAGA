@@ -880,6 +880,22 @@
     <ClCompile Include="ZenGin\Gothic_I_Classic\ClassDeclarators_G1.cpp" />
     <ClCompile Include="ZenGin\Gothic_I_Classic\Globals_G1.cpp" />
     <ClCompile Include="ZenGin\Gothic_I_Classic\Statics_G1.cpp" />
+    <ClInclude Include="zSpeech.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="zSpeechEngine.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="zSpeechEngineZhengdu.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="zSpeechEngineZhengdu.cpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Plugin.h" />
