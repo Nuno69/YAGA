@@ -53,9 +53,7 @@ if (changed)
 selectedNPC = nearNPC[vCursorPosition];
 if (selectedNPC)
 {
-nvdaController_speakText(ConvertToWchar(selectedNPC->GetName(1)));
-zSTRING angle = player->GetAngle(selectedNPC);
-nvdaController_speakText(ConvertToWchar(angle));
+// Speak NPC Name and angle
 requestTracking = true;
 changed = false;
 }
@@ -75,12 +73,11 @@ if (!informedAboutFocusCollect && player->focus_vob!=nullptr && focusedVob !=pla
 {
 informedAboutFocusCollect = true;
 focusedVob = player->focus_vob;
-nvdaController_speakText(ConvertToWchar(focusedVob->GetObjectName()));
+// Speak focused object name
 }
 if (informedAboutFocusCollect && focusedVob !=nullptr)
 {
  informedAboutFocusCollect=false;
 }
-
 }
 }

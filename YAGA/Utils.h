@@ -23,69 +23,7 @@ zVEC3 at = source->GetAtVectorWorld();
 float radian = Alg_AngleUnitRad(position, at);
 return (radian *DEGREE_LONG);
 }
-zSTRING GetPlayerFacing()
-{
-return player->human_ai->GetFootPos();
-}
-const string GetWordForAngle(int angle)
-{
-//	SWITCH (ANGLE)
-//	{
-//CASE 0:
-//RETURN "N";
-//BREAK;
-//CASE 1:
-//RETURN "N AT "+ANGLE+" DEGREE";
-//BREAK;
-//CASE 2 ... 44:
-//RETURN "NE AT "+ANGLE+" DEGREES";
-//BREAK;
-//CASE 45:
-//RETURN "NE";
-//BREAK;
-//CASE 46 ... 89:
-//RETURN "NE AT "+ANGLE+" DEGREES";
-//BREAK;
-//CASE 90:
-//RETURN "E";
-//BREAK;
-//CASE 91 ... 134:
-//RETURN "SE AT "+ANGLE+" DEGREES";
-//BREAK;
-//CASE 135:
-//RETURN "SE";
-//BREAK;
-//CASE 136 ... 179:
-//RETURN "SE AT "+ANGLE+" DEGREES";
-//BREAK;
-//CASE 180:
-//RETURN "S";
-//BREAK;
-//CASE 181 ... 224:
-//RETURN "SW AT "+ANGLE+" DEGREES";
-//BREAK;
-//CASE 225:
-//RETURN "SW";
-//BREAK;
-//CASE 226 ... 269:
-//RETURN "SW AT "+ANGLE+" DEGREES";
-//BREAK;
-//CASE 270:
-//RETURN "W";
-//BREAK;
-//CASE 271 ... 314:
-//RETURN "NW AT "+ANGLE+" DEGREES";
-//BREAK;
-//CASE 315:
-//RETURN "NW";
-//BREAK;
-//CASE 316 ... 359:
-//RETURN "NW AT "+ANGLE+" DEGREES";
-//BREAK;
-//	DEFAULT:
-//		BREAK;
-//	}
-}
+
 int IsBehind(int angle)
 {
 if (angle >=0 || angle <=90 || angle >=270 || angle<=359) return 0;

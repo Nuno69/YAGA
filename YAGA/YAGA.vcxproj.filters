@@ -214,6 +214,12 @@
     <Filter Include="Engine SDK\4. Gothic II NoTR\Overloads">
       <UniqueIdentifier>{225cc81e-eae0-432b-9f39-e93512644977}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Plugin\Workspace\Features">
+      <UniqueIdentifier>{4b822471-193d-45d7-b971-5f83e156ea4d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Plugin\Workspace\Helpers">
+      <UniqueIdentifier>{0e781e2c-3c33-48e9-9c5c-01c1a40795f1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Interface.cpp">
@@ -2778,13 +2784,22 @@
       <Filter>Plugin\Workspace\Plugin</Filter>
     </ClInclude>
     <ClInclude Include="resource.h" />
-    <ClInclude Include="nvdaController.h" />
     <ClInclude Include="UnionHeader.h" />
-    <ClInclude Include="Utils.h" />
-    <ClInclude Include="DialogReader.cpp" />
-    <ClInclude Include="MenuReader.cpp" />
-    <ClInclude Include="GameReader.cpp" />
-    <ClInclude Include="Radar.cpp" />
+    <ClInclude Include="DialogReader.cpp">
+      <Filter>Plugin\Workspace\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="GameReader.cpp">
+      <Filter>Plugin\Workspace\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="MenuReader.cpp">
+      <Filter>Plugin\Workspace\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="Radar.cpp">
+      <Filter>Plugin\Workspace\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils.h">
+      <Filter>Plugin\Workspace\Helpers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include=".build_settings.inl">

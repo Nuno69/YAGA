@@ -5,12 +5,10 @@ HOOK Ivk_PreviousOption_Union PATCH(&zCMenu::PreviousOption, &zCMenu::PreviousOp
 void zCMenu::PreviousOption_Union()
 {
 THISCALL(Ivk_PreviousOption_Union)();
-nvdaController_speakText(ConvertToWchar(ComposeReading(zCMenu::GetActiveItem())));
 }
 HOOK Ivk_NextOption_Union PATCH(&zCMenu::NextOption, &zCMenu::NextOption_Union);
 void zCMenu::NextOption_Union()
 {
 	THISCALL(Ivk_NextOption_Union)();
-	nvdaController_speakText(ConvertToWchar(ComposeReading(zCMenu::GetActiveItem())));
 }
 }

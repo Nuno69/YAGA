@@ -6,7 +6,5 @@
 #include "UnionHeader.h"
 #include "Utils.h"
 #include "Plugin.h"
-#include "nvdaController.h"
 #pragma endregion
-
 // ...
