@@ -15,6 +15,14 @@ public:
 	int IsReady();
 
 private:
+typedef int (__stdcall *NVDAController_speakText)(const wchar_t *);
+typedef int (__stdcall *NVDAController_cancelSpeech)();
+typedef int (__stdcall *NVDAController_testIfRunning)();
 
+private:
+HINSTANCE nvda;
+NVDAController_speakText nvdaController_speakText;
+NVDAController_cancelSpeech nvdaController_cancelSpeech;
+NVDAController_testIfRunning nvdaController_testIfRunning;
 };
 }

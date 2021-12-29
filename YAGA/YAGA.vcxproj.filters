@@ -2821,6 +2821,9 @@
     <ClInclude Include="zSpeechEngineNVDA.h">
       <Filter>Plugin\Workspace\zSpeech</Filter>
     </ClInclude>
+    <ClInclude Include="zSpeechEngineNVDA.cpp">
+      <Filter>Plugin\Workspace\zSpeech</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include=".build_settings.inl">

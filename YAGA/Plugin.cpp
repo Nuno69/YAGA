@@ -7,10 +7,10 @@ namespace GOTHIC_ENGINE {
   // Your code ...
 
   void Game_Entry() {
-InitializeSpeech(0);
   }
   
   void Game_Init() {
+      InitializeSpeech(zoptions->ReadInt("YAGA", "DefaultSpeechEngine", 1));
   }
 
   void Game_Exit() {
@@ -28,7 +28,6 @@ RadarLoop();
   }
 
   void Game_MenuLoop() {
-Read(L"Dupa");
   }
 
   // Information about current saving or loading world

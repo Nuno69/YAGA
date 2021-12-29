@@ -9,6 +9,9 @@ void InitializeSpeech(int engine)
 		{
 case 0:
 activeEngine = new zSpeechEngineZhengdu();
+break;
+case 1:
+activeEngine = new zSpeechEngineNVDA();
 			default:
 				break;
 		}

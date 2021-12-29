@@ -9,6 +9,7 @@
 #include "Radar.cpp"
 #include "zSpeechEngineZhengdu.cpp"
 #include "zSpeech.cpp"
+#include "zSpeechEngineNVDA.cpp"
 #include "Plugin.cpp"
 #pragma endregion
 
