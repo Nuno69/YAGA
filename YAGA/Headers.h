@@ -8,6 +8,7 @@
 #include "zSpeechEngine.h"
 #include "zSpeechEngineZhengdu.h"
 #include "zSpeech.h"
+#include "zSpeechEngineNVDA.h"
 #include "Plugin.h"
 #pragma endregion
 // ...

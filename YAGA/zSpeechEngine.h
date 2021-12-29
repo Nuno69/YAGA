@@ -13,7 +13,7 @@ public:
 virtual ~zSpeechEngine() {}
 
 public:
-virtual int Read(const zSTRING *message, int interrupt) = 0;
+virtual int Read(const wchar_t *message, int interrupt) = 0;
 virtual void StopReading() = 0;
 virtual int IsReady() = 0;
 

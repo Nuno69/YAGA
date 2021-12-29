@@ -10,13 +10,13 @@ zSpeechEngineZhengdu();
 ~zSpeechEngineZhengdu();
 
 public:
-int Read(const zSTRING *str, int interrupt);
+int Read(const wchar_t *str, int interrupt);
 void StopReading();
 int IsReady();
 
 private:
-typedef int (__stdcall *InitTTS)(int);
-typedef void (__stdcall *Speak)(const wchar_t *, int);
+typedef int (__stdcall *InitTTS)(int channelType);
+typedef void (__stdcall *Speak)(const wchar_t *text, int bInterrupt);
 typedef void(__stdcall *StopSpeak)();
 
 private:

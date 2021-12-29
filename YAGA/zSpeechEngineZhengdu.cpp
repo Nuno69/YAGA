@@ -15,15 +15,16 @@ stopSpeak(NULL)
 initTTS = (InitTTS)GetProcAddress(zhengdu, "InitTTS");
 speak = (Speak)GetProcAddress(zhengdu, "Speak");
 stopSpeak = (StopSpeak)GetProcAddress(zhengdu, "StopSpeak");
+initTTS(1);
 			}
 }
 zSpeechEngineZhengdu::~zSpeechEngineZhengdu()
 {
 if (zhengdu) FreeLibrary(zhengdu);
 }
-int zSpeechEngineZhengdu::Read(const zSTRING *str, int interrupt)
+int zSpeechEngineZhengdu::Read(const wchar_t *str, int interrupt)
 {
-speak(ConvertToWchar((char*)str), interrupt);
+speak(str, interrupt);
 return 1;
 }
 int zSpeechEngineZhengdu::IsReady()

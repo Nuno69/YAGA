@@ -884,7 +884,15 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="zSpeech.cpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="zSpeechEngine.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="zSpeechEngineNVDA.h">
       <SubType>
       </SubType>
     </ClInclude>

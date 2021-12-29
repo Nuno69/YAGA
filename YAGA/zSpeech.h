@@ -3,8 +3,8 @@
 
 namespace GOTHIC_ENGINE {
 	// Add your code here . . .
-void InitializeSpeech();
+void InitializeSpeech(int engine);
 void UnInitializeSpeech();
-int Read (const zSTRING str);
+int Read (const wchar_t *str);
 void SilenceSpeech();
 }

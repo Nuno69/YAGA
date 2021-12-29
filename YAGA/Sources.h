@@ -8,6 +8,7 @@
 #include "GameReader.cpp"
 #include "Radar.cpp"
 #include "zSpeechEngineZhengdu.cpp"
+#include "zSpeech.cpp"
 #include "Plugin.cpp"
 #pragma endregion
 
