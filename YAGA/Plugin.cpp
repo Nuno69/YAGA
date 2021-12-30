@@ -10,7 +10,8 @@ namespace GOTHIC_ENGINE {
   }
   
   void Game_Init() {
-      InitializeSpeech(zoptions->ReadInt("YAGA", "DefaultSpeechEngine", 1));
+Settings::SpeechEngine();
+      InitializeSpeech(Settings::zSpeechDefaultEngine);
   }
 
   void Game_Exit() {
@@ -21,7 +22,7 @@ namespace GOTHIC_ENGINE {
 
   void Game_Loop() {
 GameReaderLoop();
-RadarLoop();
+//RadarLoop();
   }
 
   void Game_PostLoop() {

@@ -223,6 +223,12 @@
     <Filter Include="Plugin\Workspace\zSpeech">
       <UniqueIdentifier>{061dafec-e031-44bb-9edf-6d1e1a001b91}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Plugin\Workspace\Features\Readers">
+      <UniqueIdentifier>{11cd505f-576d-4d6a-b8d1-f96dcdc31e5e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Plugin\Workspace\Features\Radar">
+      <UniqueIdentifier>{490bff19-34e8-4d78-9aca-cd452fb28a66}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Interface.cpp">
@@ -2788,18 +2794,6 @@
     </ClInclude>
     <ClInclude Include="resource.h" />
     <ClInclude Include="UnionHeader.h" />
-    <ClInclude Include="DialogReader.cpp">
-      <Filter>Plugin\Workspace\Features</Filter>
-    </ClInclude>
-    <ClInclude Include="GameReader.cpp">
-      <Filter>Plugin\Workspace\Features</Filter>
-    </ClInclude>
-    <ClInclude Include="MenuReader.cpp">
-      <Filter>Plugin\Workspace\Features</Filter>
-    </ClInclude>
-    <ClInclude Include="Radar.cpp">
-      <Filter>Plugin\Workspace\Features</Filter>
-    </ClInclude>
     <ClInclude Include="Utils.h">
       <Filter>Plugin\Workspace\Helpers</Filter>
     </ClInclude>
@@ -2823,6 +2817,24 @@
     </ClInclude>
     <ClInclude Include="zSpeechEngineNVDA.cpp">
       <Filter>Plugin\Workspace\zSpeech</Filter>
+    </ClInclude>
+    <ClInclude Include="DialogReader.cpp">
+      <Filter>Plugin\Workspace\Features\Readers</Filter>
+    </ClInclude>
+    <ClInclude Include="GameReader.cpp">
+      <Filter>Plugin\Workspace\Features\Readers</Filter>
+    </ClInclude>
+    <ClInclude Include="MenuReader.cpp">
+      <Filter>Plugin\Workspace\Features\Readers</Filter>
+    </ClInclude>
+    <ClInclude Include="zSpeechSettings.h">
+      <Filter>Plugin\Workspace\zSpeech</Filter>
+    </ClInclude>
+    <ClInclude Include="NPCTracker.h">
+      <Filter>Plugin\Workspace\Features\Radar</Filter>
+    </ClInclude>
+    <ClInclude Include="NPCTracker.cpp">
+      <Filter>Plugin\Workspace\Features\Radar</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

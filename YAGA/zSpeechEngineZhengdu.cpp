@@ -15,7 +15,7 @@ stopSpeak(NULL)
 initTTS = (InitTTS)GetProcAddress(zhengdu, "InitTTS");
 speak = (Speak)GetProcAddress(zhengdu, "Speak");
 stopSpeak = (StopSpeak)GetProcAddress(zhengdu, "StopSpeak");
-initTTS(1);
+initTTS(Settings::zSpeechZDUseMultiChannel);
 			}
 }
 zSpeechEngineZhengdu::~zSpeechEngineZhengdu()

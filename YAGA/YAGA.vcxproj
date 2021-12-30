@@ -866,6 +866,14 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="NPCTracker.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="NPCTracker.cpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="Plugin.cpp" />
     <ClCompile Include="Interface.cpp" />
     <ClCompile Include="ZenGin\Gothic_II_Addon\ClassDeclarators_G2A.cpp" />
@@ -908,14 +916,14 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="zSpeechSettings.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Plugin.h" />
     <ClInclude Include="Headers.h" />
-    <ClInclude Include="Radar.cpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
     <ClInclude Include="resource.h" />
     <ClInclude Include="Sources.h" />
     <ClInclude Include="UnionAfx.h" />
