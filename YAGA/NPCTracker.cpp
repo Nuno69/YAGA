@@ -36,4 +36,10 @@ return 1;
 void NPCTracker::ClearList() {nearbyNPC.EmptyList();}
 
 void NPCTracker::UpdateNPCNumber() {numberOfNPC = nearbyNPC.GetNum(); }
+
+oCNpc * NPCTracker::GetSelectedNPC()
+{
+if (selectedNPC) return selectedNPC;
+return nullptr;
+}
 }

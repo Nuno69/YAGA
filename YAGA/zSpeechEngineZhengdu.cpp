@@ -12,10 +12,13 @@ stopSpeak(NULL)
 {
 		if (zhengdu)
 			{
+ wchar_t *channelName;
+Settings::zSpeechZDUseMultiChannel = (Settings::zSpeechZDUseMultiChannel) ? 0 : 1;
+channelName = (Settings::zSpeechZDUseMultiChannel) ? NULL : L"YAGA";
 initTTS = (InitTTS)GetProcAddress(zhengdu, "InitTTS");
 speak = (Speak)GetProcAddress(zhengdu, "Speak");
 stopSpeak = (StopSpeak)GetProcAddress(zhengdu, "StopSpeak");
-initTTS(Settings::zSpeechZDUseMultiChannel);
+initTTS(Settings::zSpeechZDUseMultiChannel, channelName);
 			}
 }
 zSpeechEngineZhengdu::~zSpeechEngineZhengdu()
@@ -29,7 +32,6 @@ return 1;
 }
 int zSpeechEngineZhengdu::IsReady()
 {
-if (initTTS(1) !=0 || initTTS(1) !=2) return 0;
 return 1;
 }
 void zSpeechEngineZhengdu::StopReading()
