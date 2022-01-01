@@ -11,6 +11,8 @@ namespace GOTHIC_ENGINE {
   
   void Game_Init() {
 Settings::SpeechEngine();
+Settings::NPCTracker();
+InitializeVobTracker();
       InitializeSpeech(Settings::zSpeechDefaultEngine);
   }
 
@@ -21,8 +23,7 @@ Settings::SpeechEngine();
   }
 
   void Game_Loop() {
-GameReaderLoop();
-//RadarLoop();
+VobTrackerLoop();
   }
 
   void Game_PostLoop() {

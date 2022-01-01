@@ -25,12 +25,12 @@ int MoveToPreviousNPC();
 int MoveToNextNPC();
 int SelectNPCAtCursor();
 int AddNPC(oCNpc *npc);
+int GetCurrentNumOfNPC();
 void ClearList();
 void UpdateNPCNumber();
 oCNpc* GetSelectedNPC();
 
 public:
-NPCTracker();
 ~NPCTracker() {nearbyNPC.DeleteList();}
 };
 }

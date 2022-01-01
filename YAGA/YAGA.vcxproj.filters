@@ -2836,6 +2836,9 @@
     <ClInclude Include="NPCTracker.cpp">
       <Filter>Plugin\Workspace\Features\Radar</Filter>
     </ClInclude>
+    <ClInclude Include="VobTracker.cpp">
+      <Filter>Plugin\Workspace\Features\Radar</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include=".build_settings.inl">

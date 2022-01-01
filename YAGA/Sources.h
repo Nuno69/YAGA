@@ -10,6 +10,7 @@
 #include "zSpeech.cpp"
 #include "zSpeechEngineNVDA.cpp"
 #include "NPCTracker.cpp"
+#include "VobTracker.cpp"
 #include "Plugin.cpp"
 #pragma endregion
 

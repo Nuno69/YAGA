@@ -30,8 +30,11 @@ int NPCTracker::AddNPC(oCNpc *npc)
 {
 if (!npc) return 0;
 nearbyNPC.InsertEnd(npc);
+UpdateNPCNumber();
 return 1;
 }
+
+int NPCTracker::GetCurrentNumOfNPC() {return numberOfNPC;}
 
 void NPCTracker::ClearList() {nearbyNPC.EmptyList();}
 
