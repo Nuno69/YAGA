@@ -306,7 +306,7 @@
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)Bin\</OutDir>
     <IncludePath>$(ProjectDir)\;$(ProjectDir)\ZenGin\Gothic_UserAPI\;$(ALLUSERSPROFILE)\Union\SDK\Union\v1.0l\Include\;$(ALLUSERSPROFILE)\Union\SDK\DirectX7\include\;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)\lib\;$(ALLUSERSPROFILE)\Union\SDK\Union\v1.0l\Lib\;$(ALLUSERSPROFILE)\Union\SDK\DirectX7\Lib\;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(ALLUSERSPROFILE)\Union\SDK\Union\v1.0l\Lib\;$(ALLUSERSPROFILE)\Union\SDK\DirectX7\Lib\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MP x2 MD Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -562,7 +562,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <ProgramDatabaseFile>$(SolutionDir)PDB\$(TargetName).pdb</ProgramDatabaseFile>
-      <AdditionalDependencies>nvdaControllerClient32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>$(ALLUSERSPROFILE)\Union\SDK\Union\v1.0l\Build\beforebuild.exe $(SolutionDir)</Command>
@@ -866,7 +866,14 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="nvdaController.h" />
+    <ClInclude Include="NPCTracker.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="NPCTracker.cpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="Plugin.cpp" />
     <ClCompile Include="Interface.cpp" />
     <ClCompile Include="ZenGin\Gothic_II_Addon\ClassDeclarators_G2A.cpp" />
@@ -881,14 +888,46 @@
     <ClCompile Include="ZenGin\Gothic_I_Classic\ClassDeclarators_G1.cpp" />
     <ClCompile Include="ZenGin\Gothic_I_Classic\Globals_G1.cpp" />
     <ClCompile Include="ZenGin\Gothic_I_Classic\Statics_G1.cpp" />
+    <ClInclude Include="VobTracker.cpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="zSpeech.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="zSpeech.cpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="zSpeechEngine.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="zSpeechEngineNVDA.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="zSpeechEngineNVDA.cpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="zSpeechEngineZhengdu.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="zSpeechEngineZhengdu.cpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="zSpeechSettings.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Plugin.h" />
     <ClInclude Include="Headers.h" />
-    <ClInclude Include="Radar.cpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
     <ClInclude Include="resource.h" />
     <ClInclude Include="Sources.h" />
     <ClInclude Include="UnionAfx.h" />

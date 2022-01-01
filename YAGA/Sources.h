@@ -6,7 +6,11 @@
 #include "DialogReader.cpp"
 #include "MenuReader.cpp"
 #include "GameReader.cpp"
-#include "Radar.cpp"
+#include "zSpeechEngineZhengdu.cpp"
+#include "zSpeech.cpp"
+#include "zSpeechEngineNVDA.cpp"
+#include "NPCTracker.cpp"
+#include "VobTracker.cpp"
 #include "Plugin.cpp"
 #pragma endregion
 

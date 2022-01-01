@@ -10,6 +10,10 @@ namespace GOTHIC_ENGINE {
   }
   
   void Game_Init() {
+Settings::SpeechEngine();
+Settings::NPCTracker();
+InitializeVobTracker();
+      InitializeSpeech(Settings::zSpeechDefaultEngine);
   }
 
   void Game_Exit() {
@@ -19,8 +23,7 @@ namespace GOTHIC_ENGINE {
   }
 
   void Game_Loop() {
-GameReaderLoop();
-RadarLoop();
+VobTrackerLoop();
   }
 
   void Game_PostLoop() {
@@ -33,19 +36,15 @@ RadarLoop();
   TSaveLoadGameInfo& SaveLoadGameInfo = UnionCore::SaveLoadGameInfo;
 
   void Game_SaveBegin() {
-nvdaController_speakText(L"Saving game...");
   }
 
   void Game_SaveEnd() {
-nvdaController_speakText(L"Game saved successfully.");
   }
 
   void LoadBegin() {
-nvdaController_speakText(L"Loading game...");
   }
 
   void LoadEnd() {
-nvdaController_speakText(L"Game loaded succcessfully");
   }
 
   void Game_LoadBegin_NewGame() {
