@@ -2,4 +2,3 @@
 
 // User API for oCViewDialogInventory
 // Add your methods here
-

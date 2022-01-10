@@ -23,6 +23,6 @@ if (currentNPC) npcTracker->AddNPC(currentNPC);
 void VobTrackerLoop()
 {
 GetNearbyVobs();
-
+npcTracker->SortNPCByDistanceFromPlayer();
 }
 }
