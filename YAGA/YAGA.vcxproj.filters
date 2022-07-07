@@ -2839,6 +2839,9 @@
     <ClInclude Include="VobTracker.cpp">
       <Filter>Plugin\Workspace\Features\Radar</Filter>
     </ClInclude>
+    <ClInclude Include="AudioHelper.h">
+      <Filter>Plugin\Workspace\Helpers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include=".build_settings.inl">

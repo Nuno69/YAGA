@@ -15,7 +15,7 @@ void StopReading();
 int IsReady();
 
 private:
-typedef int (__stdcall *InitTTS)(int channelType, const wchar_t *channelName);
+typedef int (__stdcall *InitTTS)(int type, const wchar_t *channelName, int bKeyDownInterrupt);
 typedef void (__stdcall *Speak)(const wchar_t *text, int bInterrupt);
 typedef void(__stdcall *StopSpeak)();
 

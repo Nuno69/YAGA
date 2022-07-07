@@ -854,6 +854,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp" />
+    <ClInclude Include="AudioHelper.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="DialogReader.cpp">
       <SubType>
       </SubType>

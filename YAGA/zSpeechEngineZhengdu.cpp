@@ -14,11 +14,11 @@ stopSpeak(NULL)
 			{
  wchar_t *channelName;
 Settings::zSpeechZDUseMultiChannel = (Settings::zSpeechZDUseMultiChannel) ? 0 : 1;
-channelName = (Settings::zSpeechZDUseMultiChannel) ? NULL : L"YAGA";
+channelName = (Settings::zSpeechZDUseMultiChannel) ? L"Yaga" : NULL;
 initTTS = (InitTTS)GetProcAddress(zhengdu, "InitTTS");
 speak = (Speak)GetProcAddress(zhengdu, "Speak");
 stopSpeak = (StopSpeak)GetProcAddress(zhengdu, "StopSpeak");
-initTTS(Settings::zSpeechZDUseMultiChannel, channelName);
+initTTS(Settings::zSpeechZDUseMultiChannel, channelName, true);
 			}
 }
 zSpeechEngineZhengdu::~zSpeechEngineZhengdu()

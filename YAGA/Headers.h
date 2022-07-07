@@ -11,6 +11,7 @@
 #include "zSpeechEngineNVDA.h"
 #include "zSpeechSettings.h"
 #include "NPCTracker.h"
+#include "AudioHelper.h"
 #include "Plugin.h"
 #pragma endregion
 // ...
