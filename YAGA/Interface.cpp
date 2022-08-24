@@ -5,6 +5,8 @@
 #pragma comment (lib,"Gdiplus.lib")
 using namespace Gdiplus;
 
+#include <intrin.h>
+#pragma intrinsic(_ReturnAddress)
 
 // Static RTTI DynamicCast pointer
 #if _DLL != 1

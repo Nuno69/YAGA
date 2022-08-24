@@ -13,6 +13,7 @@
 #include "VobTracker.cpp"
 #include "Compass.cpp"
 #include "CompassReader.cpp"
+#include "NpcRoutine.cpp"
 #include "Plugin.cpp"
 #pragma endregion
 
