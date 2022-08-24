@@ -361,3 +361,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/YAGA/MP x2 MT Release
+/YAGA/G1 MT Release

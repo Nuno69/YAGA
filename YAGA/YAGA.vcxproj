@@ -858,6 +858,18 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="Compass.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="Compass.cpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="CompassReader.cpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="DialogReader.cpp">
       <SubType>
       </SubType>

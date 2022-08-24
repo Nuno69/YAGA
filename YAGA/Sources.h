@@ -11,6 +11,8 @@
 #include "zSpeechEngineNVDA.cpp"
 #include "NPCTracker.cpp"
 #include "VobTracker.cpp"
+#include "Compass.cpp"
+#include "CompassReader.cpp"
 #include "Plugin.cpp"
 #pragma endregion
 

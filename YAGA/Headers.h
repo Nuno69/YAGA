@@ -12,6 +12,7 @@
 #include "zSpeechSettings.h"
 #include "NPCTracker.h"
 #include "AudioHelper.h"
+#include "Compass.h"
 #include "Plugin.h"
 #pragma endregion
 // ...
