@@ -2857,6 +2857,9 @@
     <ClInclude Include="DetectChasm.cpp">
       <Filter>Plugin\Workspace\Helpers</Filter>
     </ClInclude>
+    <ClInclude Include="FlyDamage.cpp">
+      <Filter>Plugin\Workspace\Helpers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include=".build_settings.inl">

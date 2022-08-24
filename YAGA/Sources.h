@@ -15,6 +15,7 @@
 #include "CompassReader.cpp"
 #include "NpcRoutine.cpp"
 #include "DetectChasm.cpp"
+#include "FlyDamage.cpp"
 #include "Plugin.cpp"
 #pragma endregion
 
