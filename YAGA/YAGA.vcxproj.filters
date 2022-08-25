@@ -2866,6 +2866,12 @@
     <ClInclude Include="FocusReader.cpp">
       <Filter>Plugin\Workspace\Features\Readers</Filter>
     </ClInclude>
+    <ClInclude Include="WhisperSound.h">
+      <Filter>Plugin\Workspace\Features\Radar</Filter>
+    </ClInclude>
+    <ClInclude Include="WhisperSound.cpp">
+      <Filter>Plugin\Workspace\Features\Radar</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include=".build_settings.inl">

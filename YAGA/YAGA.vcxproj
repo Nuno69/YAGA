@@ -928,6 +928,14 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="WhisperSound.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="WhisperSound.cpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="zSpeech.h">
       <SubType>
       </SubType>
