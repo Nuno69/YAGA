@@ -16,6 +16,7 @@
 #include "NpcRoutine.cpp"
 #include "DetectChasm.cpp"
 #include "FlyDamage.cpp"
+#include "InteractionDistance.cpp"
 #include "Plugin.cpp"
 #pragma endregion
 

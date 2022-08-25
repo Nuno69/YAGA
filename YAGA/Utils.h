@@ -4,37 +4,15 @@
 namespace GOTHIC_ENGINE {
 	string GetCompassName(int angle) {
 		// We compensate the algorithm's inaccuracy by substracting 22 from the angle. This way we will shift our result to the left on the axis.
-		int fixedAngle = angle - 22;
-		switch (fixedAngle)
-		{
-		case -22:
-			return string("North");
-			break;
-		case 23:
-			return string("North-east");
-			break;
-		case 68:
-			return string("East");
-			break;
-		case 113:
-			return string("South-east");
-			break;
-		case 158:
-			return string("South");
-			break;
-		case 203:
-			return string("South-west");
-			break;
-		case 248:
-			return string("West");
-			break;
-		case 293:
-			return string("North-west");
-			break;
-		default:
-			return string::Combine("%i degrees", angle);
-			break;
-		}
+				 if( angle < 45  - 22 ) return string::Combine( "North at %i", angle );
+		else if( angle < 90  - 22 ) return string::Combine( "North-east at %i", angle );
+		else if( angle < 135 - 22 ) return string::Combine( "East at %i", angle );
+		else if( angle < 180 - 22 ) return string::Combine( "South-east at %i", angle );
+		else if( angle < 225 - 22 ) return string::Combine( "South at %i", angle );
+		else if( angle < 270 - 22 ) return string::Combine( "South-west at %i", angle );
+		else if( angle < 315 - 22 ) return string::Combine( "West at %i", angle );
+		else if( angle < 360 - 22 ) return string::Combine( "North-west at %i", angle );
+		else return string::Combine( "North at %i", angle );
 	}
 	 wstring ComposeReading(zCMenuItem *item)
 {
