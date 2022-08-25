@@ -18,6 +18,7 @@
 #include "FlyDamage.cpp"
 #include "InteractionDistance.cpp"
 #include "FocusReader.cpp"
+#include "WhisperSound.cpp"
 #include "Plugin.cpp"
 #pragma endregion
 

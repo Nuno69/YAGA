@@ -13,6 +13,7 @@
 #include "NPCTracker.h"
 #include "AudioHelper.h"
 #include "Compass.h"
+#include "WhisperSound.h"
 #include "Plugin.h"
 #pragma endregion
 // ...
