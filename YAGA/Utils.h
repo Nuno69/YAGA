@@ -3,30 +3,32 @@
 
 namespace GOTHIC_ENGINE {
 	string GetCompassName(int angle) {
-		switch (angle)
+		// We compensate the algorithm's inaccuracy by substracting 22 from the angle. This way we will shift our result to the left on the axis.
+		int fixedAngle = angle - 22;
+		switch (fixedAngle)
 		{
-		case 0:
+		case -22:
 			return string("North");
 			break;
-		case 45:
+		case 23:
 			return string("North-east");
 			break;
-		case 90:
+		case 68:
 			return string("East");
 			break;
-		case 135:
+		case 113:
 			return string("South-east");
 			break;
-		case 180:
+		case 158:
 			return string("South");
 			break;
-		case 225:
+		case 203:
 			return string("South-west");
 			break;
-		case 270:
+		case 248:
 			return string("West");
 			break;
-		case 315:
+		case 293:
 			return string("North-west");
 			break;
 		default:
