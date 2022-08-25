@@ -20,9 +20,9 @@ void UnInitializeSpeech()
 {
 delete(activeEngine);
 }
-int Read(const wchar_t *str)
+int Read(const wchar_t *str, int interrupt=1)
 {
-return activeEngine->Read(str, 1);
+return activeEngine->Read(str, interrupt);
 }
 void SilenceSpeech()
 {
