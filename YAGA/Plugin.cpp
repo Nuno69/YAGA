@@ -26,6 +26,7 @@ InitializeVobTracker();
     VobTrackerLoop();
     CompassReaderLoop();
     FocusReaderLoop();
+    GameReaderLoop();
   }
 
   void Game_PostLoop() {

@@ -7,6 +7,8 @@ namespace GOTHIC_ENGINE {
 
 void GameReaderLoop()
 {
-
+	if (zKeyToggled(KEY_H)) {
+		Read(string::Combine("%i/%i health", player->GetAttribute(0), player->GetAttribute(1)).AToW());
+}
 }
 }
