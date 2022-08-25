@@ -2872,6 +2872,9 @@
     <ClInclude Include="WhisperSound.cpp">
       <Filter>Plugin\Workspace\Features\Radar</Filter>
     </ClInclude>
+    <ClInclude Include="InventoryReader.cpp">
+      <Filter>Plugin\Workspace\Features\Readers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include=".build_settings.inl">
