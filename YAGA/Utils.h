@@ -2,18 +2,43 @@
 // Union HEADER file
 
 namespace GOTHIC_ENGINE {
-	const wchar_t *ConvertToWchar(const char *s)
-{
-const size_t strLength = strlen(s) +1;
-wchar_t *result = new wchar_t [strLength];
-mbstowcs(result, s, strLength);
-return result;
-}
-	 zSTRING ComposeReading(zCMenuItem *item)
+	string GetCompassName(int angle) {
+		switch (angle)
+		{
+		case 0:
+			return string("North");
+			break;
+		case 45:
+			return string("North-east");
+			break;
+		case 90:
+			return string("East");
+			break;
+		case 135:
+			return string("South-east");
+			break;
+		case 180:
+			return string("South");
+			break;
+		case 225:
+			return string("South-west");
+			break;
+		case 270:
+			return string("West");
+			break;
+		case 315:
+			return string("North-west");
+			break;
+		default:
+			return string::Combine("%i degrees", angle);
+			break;
+		}
+	}
+	 wstring ComposeReading(zCMenuItem *item)
 {
 zSTRING itemName = item->GetText(0);
 zSTRING itemLabel = item->GetText(1);
-return itemName+ ":" + itemLabel;
+return string::Combine("%z: %z", itemName, itemLabel).AToW();
 }
 
 int GetAngleRelation(zCVob* source, zCVob* target)
