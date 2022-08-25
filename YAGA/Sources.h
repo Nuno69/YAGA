@@ -17,6 +17,7 @@
 #include "DetectChasm.cpp"
 #include "FlyDamage.cpp"
 #include "InteractionDistance.cpp"
+#include "FocusReader.cpp"
 #include "Plugin.cpp"
 #pragma endregion
 
