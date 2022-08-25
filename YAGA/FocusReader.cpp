@@ -9,9 +9,9 @@ namespace GOTHIC_ENGINE {
 	void FocusReaderLoop() {
 		zCVob* currentVob = player->GetFocusVob();
 		if (currentVob == nullptr) { return; }
-			LastFocusedVob = currentVob;
 			// Maybe the vob is an item? Or an NPC? We'll see!
 			if (currentVob != LastFocusedVob) {
+				LastFocusedVob = currentVob;
 				item = currentVob->CastTo<oCItem>();
 				npc = currentVob->CastTo<oCNpc>();
 				if (item != nullptr) {
