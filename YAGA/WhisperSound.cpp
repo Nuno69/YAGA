@@ -50,12 +50,14 @@ namespace GOTHIC_ENGINE {
 			if( CastTo<oCMobContainer>() ) {
 				BindSound3D( "WhisperingChest.wav", this );
 			}
-
-			// if( CastTo<oCNpc>() ) {
-			// 	int handle = BindSound3D( "WhisperingChest.wav", this );
+			if (CastTo<oCItem>()) {
+				int handle = BindSound3D("WhisperingItem.wav", this);
+			}
+			 if( CastTo<oCNpc>() ) {
+			 	int handle = BindSound3D( "WhisperingNPC.wav", this );
 			// 	if( handle != Invalid )
 			// 		SoundHandles.Insert( handle );
-			// }
+			 }
 		}
 	}
 
