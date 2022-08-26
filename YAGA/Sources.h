@@ -20,6 +20,7 @@
 #include "FocusReader.cpp"
 #include "WhisperSound.cpp"
 #include "InventoryReader.cpp"
+#include "BlindCameraModel.cpp"
 #include "Plugin.cpp"
 #pragma endregion
 

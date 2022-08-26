@@ -858,6 +858,10 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="BlindCameraModel.cpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="Compass.h">
       <SubType>
       </SubType>
