@@ -27,6 +27,9 @@ InitializeVobTracker();
     CompassReaderLoop();
     FocusReaderLoop();
     GameReaderLoop();
+
+    static Timer timer;
+    if( timer[1].Await( 50 ) ) UpdateSoundHandles();
   }
 
   void Game_PostLoop() {
