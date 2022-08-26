@@ -47,8 +47,8 @@ namespace GOTHIC_ENGINE {
 		THISCALL(Hook_oCItemContainer_NextItem)();
 		if (!this->IsActive())
 		{
-			Read(L"Right container");
-			Sleep(1200);
+			Read(L"Right container", 0);
+			//Sleep(1200);
 		}
 	}
 
@@ -59,8 +59,8 @@ namespace GOTHIC_ENGINE {
 		THISCALL(Hook_oCItemContainer_PrevItem)();
 		if (!this->IsActive())
 		{
-			Read(L"Left container");
-			Sleep(1200);
+			Read(L"Left container", 0);
+			//Sleep(1200);
 		}
 	}
 #endif
@@ -75,12 +75,12 @@ namespace GOTHIC_ENGINE {
 		switch (section)
 		{
 		case Gothic_II_Addon::oCViewDialogTrade::TRADE_SECTION_LEFT_INVENTORY:
-			Read(L"Right container");
-			Sleep(1200);
+			Read(L"Right container", 0);
+			//Sleep(1200);
 			break;
 		case Gothic_II_Addon::oCViewDialogTrade::TRADE_SECTION_RIGHT_INVENTORY:
-			Read(L"Left container");
-			Sleep(1200);
+			Read(L"Left container", 0);
+			//Sleep(1200);
 			break;
 		default:
 			break;
@@ -102,17 +102,17 @@ namespace GOTHIC_ENGINE {
 			if ((this_->DlgInventoryPlayer->Inventory->IsActive()) &&
 				(this_->SectionTrade != TRADE_SECTION_RIGHT_INVENTORY))
 			{
-				Read(L"Player's container");
+				Read(L"Player's container", 0);
 				this_->OnSection(TRADE_SECTION_RIGHT_INVENTORY);
-				Sleep(1200);
+				//Sleep(1200);
 			}
 		if (this_->DlgInventoryNpc->StealContainer)
 			if ((this_->DlgInventoryNpc->StealContainer->IsActive()) &&
 				(this_->SectionTrade != TRADE_SECTION_LEFT_INVENTORY))
 			{
-				Read(L"NPC's container");
+				Read(L"NPC's container", 0);
 				this_->OnSection(TRADE_SECTION_LEFT_INVENTORY);
-				Sleep(1200);
+				//Sleep(1200);
 			}
 		return handled;
 	}
@@ -126,10 +126,10 @@ namespace GOTHIC_ENGINE {
 			return;
 	
 		LastActivatedInventory = this;
-		if( right ) Read( L"Right container" );
-		else Read( L"Left container" );
+		if( right ) Read( L"Right container", 0 );
+		else Read( L"Left container", 0 );
 	
-		Sleep( 1200 );
+		//Sleep( 1200 );
 		THISCALL( Hook_oCItemContainer_Activate )();
 	}
 	*/
