@@ -44,11 +44,8 @@ namespace GOTHIC_ENGINE {
 
 	void oCItemContainer::NextItem_U()
 	{
-		oCViewDialogTrade* this_ = oCInformationManager::GetInformationManager().DlgTrade;
-
-		bool active = this_->DlgInventoryPlayer->Inventory->IsActive();
 		THISCALL(Hook_oCItemContainer_NextItem)();
-		if (active != this_->DlgInventoryPlayer->Inventory->IsActive())
+		if (!this->IsActive())
 		{
 			Read(L"Right container");
 			Sleep(1200);
@@ -59,11 +56,8 @@ namespace GOTHIC_ENGINE {
 
 	void oCItemContainer::PrevItem_U()
 	{
-		oCViewDialogTrade* this_ = oCInformationManager::GetInformationManager().DlgTrade;
-
-		bool active = this_->DlgInventoryNpc->StealContainer->IsActive();
 		THISCALL(Hook_oCItemContainer_PrevItem)();
-		if (active != this_->DlgInventoryNpc->StealContainer->IsActive())
+		if (!this->IsActive())
 		{
 			Read(L"Left container");
 			Sleep(1200);
