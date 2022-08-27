@@ -2878,6 +2878,12 @@
     <ClInclude Include="BlindCameraModel.cpp">
       <Filter>Plugin\Workspace\Helpers</Filter>
     </ClInclude>
+    <ClInclude Include="SmartMap.h">
+      <Filter>Plugin\Workspace\Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="SmartMap.cpp">
+      <Filter>Plugin\Workspace\Helpers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include=".build_settings.inl">

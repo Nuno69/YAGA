@@ -29,8 +29,14 @@ InitializeVobTracker();
     GameReaderLoop();
     BlindCameraLoop();
 
+    if( zKeyToggled( KEY_M ) )
+      zSmartMap::Open();
+
     static Timer timer;
     if( timer[1].Await( 50 ) ) UpdateSoundHandles();
+
+    // zSmartMap::UpdateCurrentSector();
+    // zSmartMap::RenderWorld();
   }
 
   void Game_PostLoop() {

@@ -14,6 +14,7 @@
 #include "AudioHelper.h"
 #include "Compass.h"
 #include "WhisperSound.h"
+#include "SmartMap.h"
 #include "Plugin.h"
 #pragma endregion
 // ...

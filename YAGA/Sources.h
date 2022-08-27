@@ -21,6 +21,7 @@
 #include "WhisperSound.cpp"
 #include "InventoryReader.cpp"
 #include "BlindCameraModel.cpp"
+#include "SmartMap.cpp"
 #include "Plugin.cpp"
 #pragma endregion
 

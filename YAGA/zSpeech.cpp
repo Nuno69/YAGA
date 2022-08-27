@@ -22,10 +22,12 @@ delete(activeEngine);
 }
 int Read(const wchar_t *str)
 {
-return activeEngine->Read(str, 1);
+	cmd << str << endl;
+	return activeEngine->Read(str, 1);
 }
 int Read( const wchar_t* str, int interrupt )
 {
+	cmd << str << endl;
 	return activeEngine->Read( str, interrupt );
 }
 void SilenceSpeech()

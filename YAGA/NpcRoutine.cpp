@@ -6,7 +6,9 @@ namespace GOTHIC_ENGINE {
 
 	void oCNpc::Disable_Union() {
 		zVEC3 routPosition = state.GetAIStatePosition();
-		SetPositionWorld( routPosition );
+		if( routPosition != 0.0f )
+			SetPositionWorld( routPosition );
+
 		THISCALL( Hook_oCNpc_Disable_Union )();
 	}
 }

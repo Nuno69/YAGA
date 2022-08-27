@@ -932,6 +932,14 @@
     <ClCompile Include="ZenGin\Gothic_I_Classic\ClassDeclarators_G1.cpp" />
     <ClCompile Include="ZenGin\Gothic_I_Classic\Globals_G1.cpp" />
     <ClCompile Include="ZenGin\Gothic_I_Classic\Statics_G1.cpp" />
+    <ClInclude Include="SmartMap.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="SmartMap.cpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="VobTracker.cpp">
       <SubType>
       </SubType>
