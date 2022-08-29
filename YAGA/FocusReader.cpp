@@ -22,6 +22,9 @@ namespace GOTHIC_ENGINE {
 				}
 				if (npc != nullptr) {
 					Read(string(npc->GetName(0)).AToW());
+					if (npc->IsDead()) {
+						Read(L"Is dead");
+					}
 					return;
 				}
 				if (container != nullptr) {

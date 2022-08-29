@@ -49,9 +49,11 @@ InitializeVobTracker();
   TSaveLoadGameInfo& SaveLoadGameInfo = UnionCore::SaveLoadGameInfo;
 
   void Game_SaveBegin() {
+      Read(L"Saving game...");
   }
 
   void Game_SaveEnd() {
+      Read(string::Combine("Save complete at slot %i!", SaveLoadGameInfo.slotID).AToW());
   }
 
   void LoadBegin() {

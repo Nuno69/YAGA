@@ -2,6 +2,7 @@
 // Union SOURCE file
 namespace GOTHIC_ENGINE {
 	// Add your code here . . .
+	wstring lastRead = Null;
 zSpeechEngine *activeEngine;
 void InitializeSpeech(int engine)
 {
@@ -23,11 +24,13 @@ delete(activeEngine);
 int Read(const wchar_t *str)
 {
 	cmd << str << endl;
+	lastRead = str;
 	return activeEngine->Read(str, 1);
 }
 int Read( const wchar_t* str, int interrupt )
 {
 	cmd << str << endl;
+	lastRead = str;
 	return activeEngine->Read( str, interrupt );
 }
 void SilenceSpeech()
