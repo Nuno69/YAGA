@@ -13,6 +13,9 @@ activeEngine = new zSpeechEngineZhengdu();
 break;
 case 1:
 activeEngine = new zSpeechEngineNVDA();
+break;
+case 2:
+	activeEngine = new zSpeechEngineSAPI();
 			default:
 				break;
 		}

@@ -2884,6 +2884,12 @@
     <ClInclude Include="SmartMap.cpp">
       <Filter>Plugin\Workspace\Helpers</Filter>
     </ClInclude>
+    <ClInclude Include="zSpeechEngineSAPI.h">
+      <Filter>Plugin\Workspace\zSpeech</Filter>
+    </ClInclude>
+    <ClInclude Include="zSpeechEngineSAPI.cpp">
+      <Filter>Plugin\Workspace\zSpeech</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include=".build_settings.inl">

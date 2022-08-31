@@ -15,6 +15,7 @@
 #include "Compass.h"
 #include "WhisperSound.h"
 #include "SmartMap.h"
+#include "zSpeechEngineSAPI.h"
 #include "Plugin.h"
 #pragma endregion
 // ...
