@@ -36,6 +36,8 @@ namespace GOTHIC_ENGINE {
 	{
 		// I hate COM. I always did, now I hate it even more. 
 		CoCreateInstance(CLSID_SpVoice, NULL, CLSCTX_ALL, IID_ISpVoice, (void **)&voice);
+		voice->SetRate(Settings::zSpeechSAPIRate);
+		voice->SetVolume(Settings::zSpeechSAPIVolume);
 		return;
 	}
 	void zSpeechEngineSAPI::UnInit()
