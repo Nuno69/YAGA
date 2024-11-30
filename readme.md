@@ -33,14 +33,17 @@ Controls what speech engine is being used for speech output in YAGA. Possible va
 
 Controls whether the multi channel feature of ZDSR is going to be utilizedby YAGA. If NVDA is used, this option is not even queried by the mod so nothing will be changed. The default value is 1.
 
-## Goals
+## TODO
 
-- Make the game automatically speak in menus and dialogs (partially done)
-- Make an accessible audio radar which will inform the player about their surroundings with both speech and sound (partially done)
-- Make all game screens accessible, namely trading, learning, ETC (not touched yet).
-- Make all game popups accessible (not touched yet).
-- Make the plugin localizable (not touched yet).
-- Make the plugin configurable (Done!)
+- [ ] Perform code clean up. Refactor the code to adhere to single responsibility principle. Put input handling in one place
+- [ ] Make the game automatically speak in menus and dialogs
+- [ ] Make an accessible audio radar which will inform the player about their surroundings with both speech and sound
+- [ ] Create a system which will allow the player to traverse the world from point A to point B (turn by turn navigation)
+- [ ] During combat, report adversary's weapon proficiency.
+- [ ] Make all game screens accessible, namely trading, learning, ETC
+- [ ] Make all game popups accessible
+- [ ] Make the plugin localizable
+- [x] Make the plugin configurable
 
 ## Contributions
 
