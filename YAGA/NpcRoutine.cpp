@@ -2,13 +2,13 @@
 // Union SOURCE file
 
 namespace GOTHIC_ENGINE {
-	HOOK Hook_oCNpc_Disable_Union PATCH( &oCNpc::Disable, &oCNpc::Disable_Union );
+	HOOK Hook_oCNpc_Disable_Union PATCH(&oCNpc::Disable, &oCNpc::Disable_Union);
 
 	void oCNpc::Disable_Union() {
 		zVEC3 routPosition = state.GetAIStatePosition();
-		if( routPosition != 0.0f )
-			SetPositionWorld( routPosition );
+		if (routPosition != 0.0f)
+			SetPositionWorld(routPosition);
 
-		THISCALL( Hook_oCNpc_Disable_Union )();
+		THISCALL(Hook_oCNpc_Disable_Union)();
 	}
 }
