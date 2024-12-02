@@ -33,6 +33,31 @@ bld/
 [Ll]og/
 [Ll]ogs/
 
+# Build platform specific results
+/YAGA/G1 Debug/
+/YAGA/G1 MD Release/
+/YAGA/G1 MT Release/
+
+/YAGA/G1A Debug/
+/YAGA/G1A MD Release/
+/YAGA/G1A MT Release/
+
+/YAGA/G2 Debug/
+/YAGA/G2 MD Release/
+/YAGA/G2 MT Release/
+
+/YAGA/G2A Debug/
+/YAGA/G2A MD Release/
+/YAGA/G2A MT Release/
+
+/YAGA/MP x2 Debug/
+/YAGA/MP x2 MD Release/
+/YAGA/MP x2 MT Release/
+
+/YAGA/MP x4 Debug/
+/YAGA/MP x4 MD Release/
+/YAGA/MP x4 MT Release/
+
 # Visual Studio 2015/2017 cache/options directory
 .vs/
 # Uncomment if you have tasks that create the project's static files in wwwroot
