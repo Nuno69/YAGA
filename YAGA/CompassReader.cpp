@@ -4,7 +4,7 @@
 namespace GOTHIC_ENGINE {
 	void CompassReaderLoop() {
 		if (zKeyToggled(KEY_F1)) {
-			int compassAngle = GetCompassAngle();
+			float compassAngle = GetCompassAngle();
 			Read(GetCompassName(compassAngle).AToW());
 		}
 
@@ -12,14 +12,14 @@ namespace GOTHIC_ENGINE {
 			if (zKeyToggled(KEY_LEFTARROW)) {
 				RotateTowardsCompassAngle(-1);
 
-				int compassAngle = GetCompassAngle();
+				float compassAngle = GetCompassAngle();
 				Read(GetCompassName(compassAngle).AToW());
 			}
 
 			if (zKeyToggled(KEY_RIGHTARROW)) {
 				RotateTowardsCompassAngle(1);
 
-				int compassAngle = GetCompassAngle();
+				float compassAngle = GetCompassAngle();
 				Read(GetCompassName(compassAngle).AToW());
 			}
 		}

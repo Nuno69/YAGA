@@ -15,7 +15,7 @@ namespace GOTHIC_ENGINE {
 		if (direction == 1)
 			remainder = Settings::zCompassAngleOffset - remainder;
 
-		float offsetAngle = remainder != 0 ? remainder * direction : Settings::zCompassAngleOffset * direction;
+		float offsetAngle = remainder != 0 ? static_cast<float>(remainder * direction) : Settings::zCompassAngleOffset * direction;
 		player->RotateLocalY(offsetAngle);
 	}
 }
