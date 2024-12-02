@@ -40,6 +40,11 @@ The default value is `1`.
 Controls whether the multi channel feature of **ZDSR** is going to be utilized by YAGA (works only for **ZDSR** speech engine).  
 The default value is `1`.
 
+### CompassAngleOffset
+
+Controls the global compass offset angle in degrees, when you press `SHIFT+LEFT_ARROW` or `SHIFT+RIGHT_ARROW` your world rotation will be set to next closest angle.  
+The default value is `45`.
+
 ## TODO
 
 - [ ] Perform code clean up. Refactor the code to adhere to single responsibility principle. Put input handling in one place
