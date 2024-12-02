@@ -3,12 +3,12 @@
 
 namespace GOTHIC_ENGINE {
 	void CompassReaderLoop() {
-		if( zKeyToggled( KEY_F1 ) ) {
+		if (zKeyToggled(KEY_F1)) {
 			int compassAngle = GetCompassAngle();
 			Read(GetCompassName(compassAngle).AToW());
 		}
 
-		if (zKeyPressed( KEY_LSHIFT ) || zKeyPressed(KEY_RSHIFT)) {
+		if (zKeyPressed(KEY_LSHIFT) || zKeyPressed(KEY_RSHIFT)) {
 			if (zKeyToggled(KEY_LEFTARROW)) {
 				RotateTowardsCompassAngle(-1);
 

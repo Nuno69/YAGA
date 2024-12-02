@@ -25,10 +25,10 @@ namespace GOTHIC_ENGINE {
 		static void UpdateWorldBounds();
 		static void UpdateCurrentSector();
 		static void Open();
-		static void Move( const POINT& at );
-		static void Move( const int& x, const int& y );
+		static void Move(const POINT& at);
+		static void Move(const int& x, const int& y);
 		static void HandleEvent();
-		static bool IsInCurrentSector( const zVEC3& position );
+		static bool IsInCurrentSector(const zVEC3& position);
 		static void Details();
 		static void RenderWorld();
 	};

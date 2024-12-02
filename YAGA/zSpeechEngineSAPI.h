@@ -3,7 +3,7 @@
 #include <sapi.h>
 namespace GOTHIC_ENGINE {
 	// Add your code here . . .
-	class zSpeechEngineSAPI: public zSpeechEngine
+	class zSpeechEngineSAPI : public zSpeechEngine
 	{
 	public:
 		zSpeechEngineSAPI();

@@ -8,10 +8,12 @@ namespace GOTHIC_ENGINE {
 	{
 		Init();
 	}
+
 	zSpeechEngineSAPI::~zSpeechEngineSAPI()
 	{
 		UnInit();
 	}
+
 	int zSpeechEngineSAPI::Read(const wchar_t* str, int interrupt)
 	{
 		if (!voice) return false;
@@ -21,25 +23,29 @@ namespace GOTHIC_ENGINE {
 		if (interrupt == 1) flags |= SPF_PURGEBEFORESPEAK;
 		return SUCCEEDED(voice->Speak(str, flags, NULL));
 	}
+
 	void zSpeechEngineSAPI::StopReading()
 	{
 		if (!voice) return;
 		const DWORD flags = SPF_ASYNC | SPF_IS_NOT_XML | SPF_PURGEBEFORESPEAK;
 		return;
 	}
+
 	// SAPI is always ready as it is installed on all WIndows versions, hence I return 1 without actual checks.
 	int zSpeechEngineSAPI::IsReady()
 	{
 		return 1;
 	}
+
 	void zSpeechEngineSAPI::Init()
 	{
 		// I hate COM. I always did, now I hate it even more. 
-		CoCreateInstance(CLSID_SpVoice, NULL, CLSCTX_ALL, IID_ISpVoice, (void **)&voice);
+		CoCreateInstance(CLSID_SpVoice, NULL, CLSCTX_ALL, IID_ISpVoice, (void**)&voice);
 		voice->SetRate(Settings::zSpeechSAPIRate);
 		voice->SetVolume(Settings::zSpeechSAPIVolume);
 		return;
 	}
+
 	void zSpeechEngineSAPI::UnInit()
 	{
 		voice->Release();

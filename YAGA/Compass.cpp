@@ -4,7 +4,7 @@
 namespace GOTHIC_ENGINE {
 	float GetCompassAngle() {
 		zVEC3 atVectorWorld3D = player->GetAtVectorWorld();
-		zVEC2 atVectorWorld2D = zVEC2( atVectorWorld3D[VX], atVectorWorld3D[VZ] );
+		zVEC2 atVectorWorld2D = zVEC2(atVectorWorld3D[VX], atVectorWorld3D[VZ]);
 		return atVectorWorld2D.GetAngle() * DEGREE;
 	}
 
