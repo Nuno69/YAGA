@@ -2,5 +2,6 @@
 // Union HEADER file
 
 namespace GOTHIC_ENGINE {
-	int GetCompassAngle();
+	float GetCompassAngle();
+	void RotateTowardsCompassAngle(int direction);
 }
