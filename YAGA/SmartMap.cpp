@@ -127,18 +127,18 @@ namespace GOTHIC_ENGINE {
 	void zSmartMap::UpdateWorldBounds() {
 		zCWorld* world = ogame->GetGameWorld();
 		auto bbox3D = world->GetBspTree()->bspRoot->bbox3D;
-		Min.x = bbox3D.mins[VX] / zMAP_SECTOR_SIZE;
-		Min.y = bbox3D.mins[VZ] / zMAP_SECTOR_SIZE;
-		Max.x = bbox3D.maxs[VX] / zMAP_SECTOR_SIZE + 1;
-		Max.y = bbox3D.maxs[VZ] / zMAP_SECTOR_SIZE + 1;
+		Min.x = static_cast<LONG>(bbox3D.mins[VX]) / zMAP_SECTOR_SIZE;
+		Min.y = static_cast<LONG>(bbox3D.mins[VZ]) / zMAP_SECTOR_SIZE;
+		Max.x = static_cast<LONG>(bbox3D.maxs[VX]) / zMAP_SECTOR_SIZE + 1;
+		Max.y = static_cast<LONG>(bbox3D.maxs[VZ]) / zMAP_SECTOR_SIZE + 1;
 		UpdateCurrentSector();
 	}
 
 
 	void zSmartMap::UpdateCurrentSector() {
 		zVEC3 position = player->GetPositionWorld();
-		CurrentSector.x = position[VX] / zMAP_SECTOR_SIZE;
-		CurrentSector.y = position[VZ] / zMAP_SECTOR_SIZE;
+		CurrentSector.x = static_cast<LONG>(position[VX]) / zMAP_SECTOR_SIZE;
+		CurrentSector.y = static_cast<LONG>(position[VZ]) / zMAP_SECTOR_SIZE;
 	}
 
 
@@ -309,7 +309,7 @@ namespace GOTHIC_ENGINE {
 		if (GlobalVobList.IsEmpty())
 			InitVobList();
 
-		zVEC3 a((CurrentSector.x - 0) * zMAP_SECTOR_SIZE, +6000.0f, (CurrentSector.y - 0) * zMAP_SECTOR_SIZE);
+		zVEC3 a(static_cast<float>(CurrentSector.x * zMAP_SECTOR_SIZE), +6000.0f, static_cast<float>(CurrentSector.y * zMAP_SECTOR_SIZE));
 		zVEC3 b(a[VX] + zMAP_SECTOR_SIZE, -4000.0f, a[VZ] + zMAP_SECTOR_SIZE);
 
 		ogame->GetCameraVob()->SetSleeping(True);
