@@ -42,11 +42,13 @@ The default value is `1`.
 
 ### SAPIRate
 
-Controls the rate of the **SAPI5 ** speech engine. Default value is 5, minimum 1, maximum 10.
+Controls the rate of the **SAPI5** speech engine.  
+The default value value is `5`, minimum is `1` and maximum is `10`.
 
 ### SAPIVolume
 
-Controls the volume of the **SAPI5** speech engine. Default is 5, minimum 1, maximum 10.
+Controls the volume of the **SAPI5** speech engine.  
+The default value is `100`, minimum is `1` and maximum is `100`.
 
 ### CompassAngleOffset
 
