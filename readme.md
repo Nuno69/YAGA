@@ -40,6 +40,14 @@ The default value is `1`.
 Controls whether the multi channel feature of **ZDSR** is going to be utilized by YAGA (works only for **ZDSR** speech engine).  
 The default value is `1`.
 
+### SAPIRate
+
+Controls the rate of the **SAPI5 ** speech engine. Default value is 5, minimum 1, maximum 10.
+
+### SAPIVolume
+
+Controls the volume of the **SAPI5** speech engine. Default is 5, minimum 1, maximum 10.
+
 ### CompassAngleOffset
 
 Controls the global compass offset angle in degrees, when you press `SHIFT+LEFT_ARROW` or `SHIFT+RIGHT_ARROW` your world rotation will be set to next closest angle.  
