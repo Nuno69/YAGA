@@ -316,7 +316,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MP x2 MT Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>%userprofile%\documents\YAGA</OutDir>
+    <OutDir>$(SolutionDir)Bin\</OutDir>
     <IncludePath>$(ProjectDir)\;$(ProjectDir)\ZenGin\Gothic_UserAPI\;$(ProjectDir)\Union\v1.0m\Include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)\lib\;$(ProjectDir)\Union\v1.0m\Lib\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
