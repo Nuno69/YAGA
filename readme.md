@@ -1,4 +1,4 @@
-# Yaga: Yet Another Gothic Accessibility Attempt
+# YAGA: Yet Another Gothic Accessibility Attempt
 
 ## What is YAGA?
 
@@ -12,7 +12,7 @@
 Other versions of the game should work however that has not been tested and so is not recommended.
 - [Union](https://www.worldofgothic.de/dl/download_651.htm)
 - The **NVDA screenreader** or the **Zhengdu Screenreader**
-- The plugin itself (not available for pre-build download yet)
+- [yaga.vdf](https://github.com/Nuno69/YAGA/releases)
 
 ### For developers
 
@@ -20,7 +20,6 @@ Everything outlined above plus the following:
 
 - [git lfs](https://git-lfs.com/) (required for fetching lfs files from repo)
 - [Visual Studio](https://visualstudio.microsoft.com/pl/downloads/) (2022 or higher)
-- [Gothic VDFS](http://bendlins.de/nico/gothic2/GothicVDFS.zip) (optional if you want to pack the plugin to the VDF file).
 
 ## Settings
 
