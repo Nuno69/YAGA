@@ -28,7 +28,7 @@ jobs:
         run: |
           ls
           ./vdfsbuilder build.vm
-        working_directory: ./VDF
+        working-directory: ./VDF
 
       - name: Upload yaga.vdf
         uses: softprops/action-gh-release@v2
