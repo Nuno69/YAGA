@@ -2,12 +2,14 @@
 // Union SOURCE file
 
 namespace GOTHIC_ENGINE {
+	// This hook allows reading of the selected dialog choice.
 	HOOK Ivk_HighlightSelected_Union PATCH(&zCViewDialogChoice::HighlightSelected, &zCViewDialogChoice::HighlightSelected_Union);
 	void zCViewDialogChoice::HighlightSelected_Union()
 	{
 		THISCALL(Ivk_HighlightSelected_Union)();
 		Read(string(zCViewDialogChoice::GetSelectedText()).AToW());
 	}
+	// This hook reads the default dialog choice when a dialog box is presented.
 	HOOK Ivk_StartSelection_Union PATCH(&zCViewDialogChoice::StartSelection, &zCViewDialogChoice::StartSelection_Union);
 	void zCViewDialogChoice::StartSelection_Union()
 	{

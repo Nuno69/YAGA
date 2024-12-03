@@ -2,6 +2,7 @@
 // Union SOURCE file
 
 namespace GOTHIC_ENGINE {
+	// This hook disables NPC removal from world, will be used in navigation.
 	HOOK Hook_oCNpc_Disable_Union PATCH(&oCNpc::Disable, &oCNpc::Disable_Union);
 
 	void oCNpc::Disable_Union() {

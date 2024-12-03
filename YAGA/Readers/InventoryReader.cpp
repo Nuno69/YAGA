@@ -24,14 +24,14 @@ namespace GOTHIC_ENGINE {
 			}
 		}
 	}
-
+// This hook reads an item once it is drawn.
 	HOOK Hook_oCItemContainer_DrawItemInfo PATCH(&oCItemContainer::DrawItemInfo, &oCItemContainer::DrawItemInfo_Union);
 
 	void oCItemContainer::DrawItemInfo_Union(oCItem* item, zCWorld* renderWorld) {
 		ReadInventoryItem(item);
 		THISCALL(Hook_oCItemContainer_DrawItemInfo)(item, renderWorld);
 	}
-
+	// This hook resets all previously read items to null so to read them properly next time.
 	HOOK Hook_oCItemContainer_Close PATCH(&oCItemContainer::Close, &oCItemContainer::Close_Union);
 
 	void oCItemContainer::Close_Union() {
@@ -40,6 +40,7 @@ namespace GOTHIC_ENGINE {
 		THISCALL(Hook_oCItemContainer_Close)();
 	}
 #if ENGINE == Engine_G2A
+	// This hook reads container change to the right container.
 	HOOK Hook_oCItemContainer_NextItem AS(&oCItemContainer::NextItem, &oCItemContainer::NextItem_U);
 
 	void oCItemContainer::NextItem_U()
@@ -51,7 +52,7 @@ namespace GOTHIC_ENGINE {
 			//Sleep(1200);
 		}
 	}
-
+	// This hook reads container change to the left container.
 	HOOK Hook_oCItemContainer_PrevItem AS(&oCItemContainer::PrevItem, &oCItemContainer::PrevItem_U);
 
 	void oCItemContainer::PrevItem_U()

@@ -2,6 +2,7 @@
 // Union SOURCE file
 
 namespace GOTHIC_ENGINE {
+	// This hook makes the game more benevolent to interaction accuracy, e.g. allows to interact with an NPC even if the character is not facing it.
 	HOOK Hook_oCMobInter_SearchFreePosition PATCH(&oCMobInter::SearchFreePosition, &oCMobInter::SearchFreePosition_Union);
 
 #if ENGINE >= Engine_G2
@@ -25,7 +26,7 @@ namespace GOTHIC_ENGINE {
 		return bestPos;
 	}
 
-
+	// The hook that removes line of sight obstruction.
 	HOOK Hook_oCNpc_FreeLineOfSight PATCH(&oCNpc::FreeLineOfSight, &oCNpc::FreeLineOfSight_Union);
 
 	int oCNpc::FreeLineOfSight_Union(zVEC3& pos, zCVob* vob) {

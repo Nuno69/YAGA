@@ -2,6 +2,7 @@
 // Union SOURCE file
 
 namespace GOTHIC_ENGINE {
+	// This hook prevents knockback damage dealt by dragons. The damage is still taken but the character doesn't start flying.
 	HOOK Hook_oCAIHuman_StartFlyDamage PATCH(&oCAIHuman::StartFlyDamage, &oCAIHuman::StartFlyDamage_Union);
 
 	void oCAIHuman::StartFlyDamage_Union(float damage, zVEC3& flyDir) {

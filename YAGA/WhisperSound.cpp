@@ -41,7 +41,7 @@ namespace GOTHIC_ENGINE {
 
 		return handle;
 	}
-
+	// This hook binds sounds to objects that are spawned in the game world.
 	HOOK Hook_zCVob_ThisVobAddedToWorld PATCH(&zCVob::ThisVobAddedToWorld, &zCVob::ThisVobAddedToWorld_Union);
 
 	void zCVob::ThisVobAddedToWorld_Union(zCWorld* world) {
@@ -62,7 +62,7 @@ namespace GOTHIC_ENGINE {
 	}
 
 	HOOK Hook_zCVob_ThisVobRemovedFromWorld PATCH(&zCVob::ThisVobRemovedFromWorld, &zCVob::ThisVobRemovedFromWorld_Union);
-
+	// This hook removes the sound associated with the given vob that is deleted from world.
 	void zCVob::ThisVobRemovedFromWorld_Union(zCWorld* world) {
 		// TODO
 		THISCALL(Hook_zCVob_ThisVobRemovedFromWorld)(world);
