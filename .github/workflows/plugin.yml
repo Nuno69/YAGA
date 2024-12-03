@@ -1,11 +1,11 @@
-name: "YAGA Plugin"
+name: "YAGA CI/CD"
 
 on:
   release:
     types: [created]
     
 jobs:
-  plugin:
+  yaga:
     runs-on: windows-latest
 
     steps:
@@ -20,13 +20,14 @@ jobs:
         with:
           arch: x86
  
-      - name: Compile plugin
+      - name: Compile yaga.dll
         run: msbuild /p:Configuration="MP x2 MT Release"
 
-      - name: Upload plugin
-        uses: actions/upload-artifact@v4
+      - name: Build yaga.vdf
+        run: ./vdfsbuilder.exe build.vm
+        working-directory: ./VDF
+
+      - name: Upload yaga.vdf
+        uses: softprops/action-gh-release@v2
         with:
-          name: yaga-dll
-          path: "Bin/YAGA.dll"
-          compression-level: 0
-          overwrite: true
+          files: "VDF/yaga.vdf"
