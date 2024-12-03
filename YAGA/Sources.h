@@ -6,9 +6,9 @@
 #include "Readers/DialogReader.cpp"
 #include "Readers/MenuReader.cpp"
 #include "Readers/GameReader.cpp"
-#include "zSpeech/Engines/zSpeechEngineZhengdu.cpp"
+#include "zSpeech/zSpeechEngineZhengdu.cpp"
 #include "zSpeech/zSpeech.cpp"
-#include "zSpeech/Engines/zSpeechEngineNVDA.cpp"
+#include "zSpeech/zSpeechEngineNVDA.cpp"
 #include "NPCTracker.cpp"
 #include "VobTracker.cpp"
 #include "Compass.cpp"
@@ -22,7 +22,7 @@
 #include "Readers/InventoryReader.cpp"
 #include "BlindCameraModel.cpp"
 #include "SmartMap.cpp"
-#include "zSpeech/Engines/zSpeechEngineSAPI.cpp"
+#include "zSpeech/zSpeechEngineSAPI.cpp"
 #include "Plugin.cpp"
 #pragma endregion
 

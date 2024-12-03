@@ -2800,10 +2800,10 @@
     <ClInclude Include="zSpeech\zSpeechEngine.h">
       <Filter>Plugin\Workspace\zSpeech</Filter>
     </ClInclude>
-    <ClInclude Include="zSpeech\Engines\zSpeechEngineZhengdu.h">
+    <ClInclude Include="zSpeech\zSpeechEngineZhengdu.h">
       <Filter>Plugin\Workspace\zSpeech</Filter>
     </ClInclude>
-    <ClInclude Include="zSpeech\Engines\zSpeechEngineZhengdu.cpp">
+    <ClInclude Include="zSpeech\zSpeechEngineZhengdu.cpp">
       <Filter>Plugin\Workspace\zSpeech</Filter>
     </ClInclude>
     <ClInclude Include="zSpeech\zSpeech.h">
@@ -2812,10 +2812,10 @@
     <ClInclude Include="zSpeech\zSpeech.cpp">
       <Filter>Plugin\Workspace\zSpeech</Filter>
     </ClInclude>
-    <ClInclude Include="zSpeech\Engines\zSpeechEngineNVDA.h">
+    <ClInclude Include="zSpeech\zSpeechEngineNVDA.h">
       <Filter>Plugin\Workspace\zSpeech</Filter>
     </ClInclude>
-    <ClInclude Include="zSpeech\Engines\zSpeechEngineNVDA.cpp">
+    <ClInclude Include="zSpeech\zSpeechEngineNVDA.cpp">
       <Filter>Plugin\Workspace\zSpeech</Filter>
     </ClInclude>
     <ClInclude Include="Readers\DialogReader.cpp">
@@ -2884,10 +2884,10 @@
     <ClInclude Include="SmartMap.cpp">
       <Filter>Plugin\Workspace\Helpers</Filter>
     </ClInclude>
-    <ClInclude Include="zSpeech\Engines\zSpeechEngineSAPI.h">
+    <ClInclude Include="zSpeech\zSpeechEngineSAPI.h">
       <Filter>Plugin\Workspace\zSpeech</Filter>
     </ClInclude>
-    <ClInclude Include="zSpeech\Engines\zSpeechEngineSAPI.cpp">
+    <ClInclude Include="zSpeech\zSpeechEngineSAPI.cpp">
       <Filter>Plugin\Workspace\zSpeech</Filter>
     </ClInclude>
   </ItemGroup>

@@ -983,27 +983,27 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="zSpeech\Engines\zSpeechEngineNVDA.h">
+    <ClInclude Include="zSpeech\zSpeechEngineNVDA.h">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="zSpeech\Engines\zSpeechEngineNVDA.cpp">
+    <ClInclude Include="zSpeech\zSpeechEngineNVDA.cpp">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="zSpeech\Engines\zSpeechEngineSAPI.h">
+    <ClInclude Include="zSpeech\zSpeechEngineSAPI.h">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="zSpeech\Engines\zSpeechEngineSAPI.cpp">
+    <ClInclude Include="zSpeech\zSpeechEngineSAPI.cpp">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="zSpeech\Engines\zSpeechEngineZhengdu.h">
+    <ClInclude Include="zSpeech\zSpeechEngineZhengdu.h">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="zSpeech\Engines\zSpeechEngineZhengdu.cpp">
+    <ClInclude Include="zSpeech\zSpeechEngineZhengdu.cpp">
       <SubType>
       </SubType>
     </ClInclude>
