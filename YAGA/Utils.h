@@ -2,7 +2,9 @@
 // Union HEADER file
 
 namespace GOTHIC_ENGINE {
-	string GetCompassName(float angle) {
+	string GetCompassName(float _angle) {
+		int angle = static_cast<int>(_angle);
+
 		// We compensate the algorithm's inaccuracy by substracting 22 from the angle. This way we will shift our result to the left on the axis.
 		if (angle < 45 - 22) return string::Combine("North at %i", angle);
 		else if (angle < 90 - 22) return string::Combine("North-east at %i", angle);
@@ -23,6 +25,7 @@ namespace GOTHIC_ENGINE {
 
 	float GetAngleRelation(zCVob* source, zCVob* target)
 	{
+
 		zVEC3 position = (source->GetPositionWorld() - target->GetPositionWorld().Normalize());
 		zVEC3 at = source->GetAtVectorWorld();
 		float radian = Alg_AngleUnitRad(position, at);
