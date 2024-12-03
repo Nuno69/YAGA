@@ -889,7 +889,7 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="CompassReader.cpp">
+    <ClInclude Include="Readers\CompassReader.cpp">
       <SubType>
       </SubType>
     </ClInclude>
@@ -897,7 +897,7 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="DialogReader.cpp">
+    <ClInclude Include="Readers\DialogReader.cpp">
       <SubType>
       </SubType>
     </ClInclude>
@@ -905,11 +905,11 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="FocusReader.cpp">
+    <ClInclude Include="Readers\FocusReader.cpp">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="GameReader.cpp">
+    <ClInclude Include="Readers\GameReader.cpp">
       <SubType>
       </SubType>
     </ClInclude>
@@ -917,11 +917,11 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="InventoryReader.cpp">
+    <ClInclude Include="Readers\InventoryReader.cpp">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="MenuReader.cpp">
+    <ClInclude Include="Readers\MenuReader.cpp">
       <SubType>
       </SubType>
     </ClInclude>
@@ -971,39 +971,39 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="zSpeech.h">
+    <ClInclude Include="zSpeech\zSpeech.h">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="zSpeech.cpp">
+    <ClInclude Include="zSpeech\zSpeech.cpp">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="zSpeechEngine.h">
+    <ClInclude Include="zSpeech\zSpeechEngine.h">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="zSpeechEngineNVDA.h">
+    <ClInclude Include="zSpeech\zSpeechEngineNVDA.h">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="zSpeechEngineNVDA.cpp">
+    <ClInclude Include="zSpeech\zSpeechEngineNVDA.cpp">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="zSpeechEngineSAPI.h">
+    <ClInclude Include="zSpeech\zSpeechEngineSAPI.h">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="zSpeechEngineSAPI.cpp">
+    <ClInclude Include="zSpeech\zSpeechEngineSAPI.cpp">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="zSpeechEngineZhengdu.h">
+    <ClInclude Include="zSpeech\zSpeechEngineZhengdu.h">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="zSpeechEngineZhengdu.cpp">
+    <ClInclude Include="zSpeech\zSpeechEngineZhengdu.cpp">
       <SubType>
       </SubType>
     </ClInclude>
