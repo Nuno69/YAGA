@@ -1,0 +1,29 @@
+name: "YAGA Plugin"
+
+on:
+  release:
+    types: [created]
+    
+jobs:
+  plugin:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up MSVC
+        uses: ilammy/msvc-dev-cmd@v1.13.0
+        with:
+            arch: x86
+ 
+      - name: Compile plugin
+        run: |
+          msbuild /p:Configuration="MP x2 MT Release"
+
+      - name: Upload plugin
+        uses: softprops/action-gh-release@v2
+        with:
+          files: "Bin/YAGA.dll"
