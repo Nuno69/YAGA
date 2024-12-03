@@ -18,8 +18,7 @@ Other versions of the game should work however that has not been tested and so i
 
 Everything outlined above plus the following:
 
-- [Visual Studio](https://visualstudio.microsoft.com/pl/downloads/) (2010 or higher)
-- [Union SDK](https://worldofplayers.ru/resources/136/download)
+- [Visual Studio](https://visualstudio.microsoft.com/pl/downloads/) (2022 or higher)
 - [Gothic VDFS](http://bendlins.de/nico/gothic2/GothicVDFS.zip) (optional if you want to pack the plugin to the VDF file).
 
 ## Settings
