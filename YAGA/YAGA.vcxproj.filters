@@ -2797,34 +2797,34 @@
     <ClInclude Include="Utils.h">
       <Filter>Plugin\Workspace\Helpers</Filter>
     </ClInclude>
-    <ClInclude Include="zSpeechEngine.h">
+    <ClInclude Include="zSpeech\zSpeechEngine.h">
       <Filter>Plugin\Workspace\zSpeech</Filter>
     </ClInclude>
-    <ClInclude Include="zSpeechEngineZhengdu.h">
+    <ClInclude Include="zSpeech\Engines\zSpeechEngineZhengdu.h">
       <Filter>Plugin\Workspace\zSpeech</Filter>
     </ClInclude>
-    <ClInclude Include="zSpeechEngineZhengdu.cpp">
+    <ClInclude Include="zSpeech\Engines\zSpeechEngineZhengdu.cpp">
       <Filter>Plugin\Workspace\zSpeech</Filter>
     </ClInclude>
-    <ClInclude Include="zSpeech.h">
+    <ClInclude Include="zSpeech\zSpeech.h">
       <Filter>Plugin\Workspace\zSpeech</Filter>
     </ClInclude>
-    <ClInclude Include="zSpeech.cpp">
+    <ClInclude Include="zSpeech\zSpeech.cpp">
       <Filter>Plugin\Workspace\zSpeech</Filter>
     </ClInclude>
-    <ClInclude Include="zSpeechEngineNVDA.h">
+    <ClInclude Include="zSpeech\Engines\zSpeechEngineNVDA.h">
       <Filter>Plugin\Workspace\zSpeech</Filter>
     </ClInclude>
-    <ClInclude Include="zSpeechEngineNVDA.cpp">
+    <ClInclude Include="zSpeech\Engines\zSpeechEngineNVDA.cpp">
       <Filter>Plugin\Workspace\zSpeech</Filter>
     </ClInclude>
-    <ClInclude Include="DialogReader.cpp">
+    <ClInclude Include="Readers\DialogReader.cpp">
       <Filter>Plugin\Workspace\Features\Readers</Filter>
     </ClInclude>
-    <ClInclude Include="GameReader.cpp">
+    <ClInclude Include="Readers\GameReader.cpp">
       <Filter>Plugin\Workspace\Features\Readers</Filter>
     </ClInclude>
-    <ClInclude Include="MenuReader.cpp">
+    <ClInclude Include="Readers\MenuReader.cpp">
       <Filter>Plugin\Workspace\Features\Readers</Filter>
     </ClInclude>
     <ClInclude Include="zSpeechSettings.h">
@@ -2848,7 +2848,7 @@
     <ClInclude Include="Compass.cpp">
       <Filter>Plugin\Workspace\Features\Radar</Filter>
     </ClInclude>
-    <ClInclude Include="CompassReader.cpp">
+    <ClInclude Include="Readers\CompassReader.cpp">
       <Filter>Plugin\Workspace\Features\Readers</Filter>
     </ClInclude>
     <ClInclude Include="NpcRoutine.cpp">
@@ -2863,7 +2863,7 @@
     <ClInclude Include="InteractionDistance.cpp">
       <Filter>Plugin\Workspace\Helpers</Filter>
     </ClInclude>
-    <ClInclude Include="FocusReader.cpp">
+    <ClInclude Include="Readers\FocusReader.cpp">
       <Filter>Plugin\Workspace\Features\Readers</Filter>
     </ClInclude>
     <ClInclude Include="WhisperSound.h">
@@ -2872,7 +2872,7 @@
     <ClInclude Include="WhisperSound.cpp">
       <Filter>Plugin\Workspace\Features\Radar</Filter>
     </ClInclude>
-    <ClInclude Include="InventoryReader.cpp">
+    <ClInclude Include="Readers\InventoryReader.cpp">
       <Filter>Plugin\Workspace\Features\Readers</Filter>
     </ClInclude>
     <ClInclude Include="BlindCameraModel.cpp">
@@ -2884,10 +2884,10 @@
     <ClInclude Include="SmartMap.cpp">
       <Filter>Plugin\Workspace\Helpers</Filter>
     </ClInclude>
-    <ClInclude Include="zSpeechEngineSAPI.h">
+    <ClInclude Include="zSpeech\Engines\zSpeechEngineSAPI.h">
       <Filter>Plugin\Workspace\zSpeech</Filter>
     </ClInclude>
-    <ClInclude Include="zSpeechEngineSAPI.cpp">
+    <ClInclude Include="zSpeech\Engines\zSpeechEngineSAPI.cpp">
       <Filter>Plugin\Workspace\zSpeech</Filter>
     </ClInclude>
   </ItemGroup>
