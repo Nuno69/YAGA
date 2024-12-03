@@ -18,6 +18,7 @@ Other versions of the game should work however that has not been tested and so i
 
 Everything outlined above plus the following:
 
+- [git lfs](https://git-lfs.com/) (required for fetching lfs files from repo)
 - [Visual Studio](https://visualstudio.microsoft.com/pl/downloads/) (2022 or higher)
 - [Gothic VDFS](http://bendlins.de/nico/gothic2/GothicVDFS.zip) (optional if you want to pack the plugin to the VDF file).
 
