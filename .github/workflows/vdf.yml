@@ -25,9 +25,7 @@ jobs:
           run-id: ${{ github.event.workflow_run.id }}
 
       - name: Build VDF
-        run: |
-          ls
-          ./vdfsbuilder build.vm
+        run: ./vdfsbuilder.exe build.vm
         working-directory: ./VDF
 
       - name: Upload yaga.vdf
