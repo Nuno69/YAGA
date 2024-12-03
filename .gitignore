@@ -61,6 +61,9 @@ bld/
 # Don't track YAGA.dll in VDF structure
 VDF/System/Autorun/YAGA.dll
 
+# Don't track the result of invoking VDFSBuilder
+VDF/yaga.vdf
+
 # Visual Studio 2015/2017 cache/options directory
 .vs/
 # Uncomment if you have tasks that create the project's static files in wwwroot
