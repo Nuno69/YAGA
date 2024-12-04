@@ -9,4 +9,4 @@ To generate **yaga.vdf** archive, open up the **powershell** command line in thi
 ```
 ./vdfsbuilder build.vm
 ```
-Copy the produced **yaga.vdf** archive from **YOUR_REPO_PATH/VDF/yaga.vdf** into **YOUR_GAME_PATH/Data/yaga.vdf**
+Copy the produced archive from **YOUR_REPO_PATH/VDF/yaga.vdf** into **YOUR_GAME_PATH/Data/yaga.vdf**
