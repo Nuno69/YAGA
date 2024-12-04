@@ -16,13 +16,10 @@
 #include "NPCTracker.cpp"
 #include "VobTracker.cpp"
 #include "Compass.cpp"
-#include "NpcRoutine.cpp"
-#include "DetectChasm.cpp"
-#include "FlyDamage.cpp"
-#include "InteractionDistance.cpp"
 #include "WhisperSound.cpp"
 #include "BlindCameraModel.cpp"
 #include "SmartMap.cpp"
+#include "Hooks.cpp"
 #include "Plugin.cpp"
 #pragma endregion
 
