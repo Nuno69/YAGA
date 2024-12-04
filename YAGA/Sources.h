@@ -19,7 +19,13 @@
 #include "WhisperSound.cpp"
 #include "BlindCameraModel.cpp"
 #include "SmartMap.cpp"
-#include "Hooks.cpp"
+#include "Hooks/oCAIHuman.cpp"
+#include "Hooks/oCItemContainer.cpp"
+#include "Hooks/oCMobInter.cpp"
+#include "Hooks/oCNpc.cpp"
+#include "Hooks/zCMenu.cpp"
+#include "Hooks/zCViewDialogChoice.cpp"
+#include "Hooks/zCVob.cpp"
 #include "Plugin.cpp"
 #pragma endregion
 
