@@ -1,6 +1,12 @@
+# Compiling the Plugin
+
+Before you proceed, make sure to compile the project in [Visual Studio](https://visualstudio.microsoft.com/pl/downloads/).  
+It's recommended to use **MP x2 MT Release** configuration.
+
 # Building the VDF archive
-In order to generate a complete archive with all of the necessary files to use **YAGA**, open up the powershell command line in this directory and run this command:
+
+To generate **yaga.vdf** archive, open up the **powershell** command line in this directory and run this command:
 ```
 ./vdfsbuilder.exe build.vm
 ```
-This will produce the `yaga.vdf` file that you can later copy to **YOUR_GAME_PATH/Data**.
+Copy the produced **yaga.vdf** archive from **YOUR_REPO_PATH/VDF/yaga.vdf** into **YOUR_GAME_PATH/Data/yaga.vdf**
