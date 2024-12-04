@@ -7,6 +7,6 @@ It's recommended to use **MP x2 MT Release** configuration.
 
 To generate **yaga.vdf** archive, open up the **powershell** command line in this directory and run this command:
 ```
-./vdfsbuilder.exe build.vm
+./vdfsbuilder build.vm
 ```
 Copy the produced **yaga.vdf** archive from **YOUR_REPO_PATH/VDF/yaga.vdf** into **YOUR_GAME_PATH/Data/yaga.vdf**

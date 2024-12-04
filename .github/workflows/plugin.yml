@@ -24,7 +24,7 @@ jobs:
         run: msbuild /p:Configuration="MP x2 MT Release"
 
       - name: Build yaga.vdf
-        run: ./vdfsbuilder.exe build.vm
+        run: ./vdfsbuilder build.vm
         working-directory: ./VDF
 
       - name: Upload yaga.vdf
