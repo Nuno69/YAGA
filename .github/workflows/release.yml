@@ -21,7 +21,7 @@ jobs:
           arch: x86
  
       - name: Compile yaga.dll
-        run: msbuild /p:Configuration="MP x2 MT Release"
+        run: msbuild -target:YAGA -p:Configuration="MP x2 MT Release"
 
       - name: Build yaga.vdf
         run: ./vdfsbuilder build.vm
