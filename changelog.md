@@ -1,0 +1,1 @@
+- Fixed crashes while strafing (running left or right via A or D keys)
