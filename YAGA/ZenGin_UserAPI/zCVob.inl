@@ -1,2 +1,2 @@
-void ThisVobAddedToWorld_Union( zCWorld* world );
-void ThisVobRemovedFromWorld_Union( zCWorld* world );
+void Hook_ThisVobAddedToWorld(zCWorld* world);
+void Hook_ThisVobRemovedFromWorld(zCWorld* world);
