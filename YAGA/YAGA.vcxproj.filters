@@ -229,6 +229,9 @@
     <Filter Include="Plugin\Workspace\Features\Radar">
       <UniqueIdentifier>{490bff19-34e8-4d78-9aca-cd452fb28a66}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Plugin\Workspace\Hooks">
+      <UniqueIdentifier>{89c2978b-4297-47db-84b6-0ed24a6f36cb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Interface.cpp">
@@ -2889,6 +2892,27 @@
     </ClInclude>
     <ClInclude Include="zSpeech\zSpeechEngineSAPI.cpp">
       <Filter>Plugin\Workspace\zSpeech</Filter>
+    </ClInclude>
+    <ClInclude Include="Hooks\oCAIHuman.cpp">
+      <Filter>Plugin\Workspace\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="Hooks\oCItemContainer.cpp">
+      <Filter>Plugin\Workspace\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="Hooks\oCMobInter.cpp">
+      <Filter>Plugin\Workspace\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="Hooks\oCNpc.cpp">
+      <Filter>Plugin\Workspace\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="Hooks\zCMenu.cpp">
+      <Filter>Plugin\Workspace\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="Hooks\zCViewDialogChoice.cpp">
+      <Filter>Plugin\Workspace\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="Hooks\zCVob.cpp">
+      <Filter>Plugin\Workspace\Hooks</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

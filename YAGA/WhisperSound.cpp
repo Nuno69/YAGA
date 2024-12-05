@@ -4,10 +4,13 @@
 namespace GOTHIC_ENGINE {
 	Array<int> SoundHandles;
 
-	void UpdateSoundHandles() {
-		for each (int handle in SoundHandles) {
+	void UpdateSoundHandles()
+	{
+		for each (int handle in SoundHandles)
+		{
 			zCActiveSnd* snd = zCActiveSnd::GetHandleSound(handle);
-			if (!snd) {
+			if (!snd)
+			{
 				zsound->UpdateSound3D(handle, Null);
 				continue;
 			}
@@ -28,7 +31,8 @@ namespace GOTHIC_ENGINE {
 		}
 	}
 
-	int BindSound3D(const string& fileName, zCVob* vob) {
+	int BindSound3D(const string& fileName, zCVob* vob)
+	{
 		zCSoundFX* sfx = zsound->LoadSoundFX(fileName);
 		if (!sfx)
 			return Invalid;
@@ -40,31 +44,5 @@ namespace GOTHIC_ENGINE {
 			SoundHandles.Insert(handle);
 
 		return handle;
-	}
-	// This hook binds sounds to objects that are spawned in the game world.
-	HOOK Hook_zCVob_ThisVobAddedToWorld PATCH(&zCVob::ThisVobAddedToWorld, &zCVob::ThisVobAddedToWorld_Union);
-
-	void zCVob::ThisVobAddedToWorld_Union(zCWorld* world) {
-		THISCALL(Hook_zCVob_ThisVobAddedToWorld)(world);
-		if (this != player) {
-			if (CastTo<oCMobContainer>()) {
-				BindSound3D("WhisperingChest.wav", this);
-			}
-			if (CastTo<oCItem>()) {
-				int handle = BindSound3D("WhisperingItem.wav", this);
-			}
-			if (CastTo<oCNpc>()) {
-				int handle = BindSound3D("WhisperingNPC.wav", this);
-				// 	if( handle != Invalid )
-				// 		SoundHandles.Insert( handle );
-			}
-		}
-	}
-
-	HOOK Hook_zCVob_ThisVobRemovedFromWorld PATCH(&zCVob::ThisVobRemovedFromWorld, &zCVob::ThisVobRemovedFromWorld_Union);
-	// This hook removes the sound associated with the given vob that is deleted from world.
-	void zCVob::ThisVobRemovedFromWorld_Union(zCWorld* world) {
-		// TODO
-		THISCALL(Hook_zCVob_ThisVobRemovedFromWorld)(world);
 	}
 }
