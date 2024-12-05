@@ -3,26 +3,22 @@
 
 namespace GOTHIC_ENGINE {
 	// Prevents the playable character from falling from ledges.
-	HOOK Hook_oCNpc_EV_Strafe PATCH(&oCNpc::EV_Strafe, &oCNpc::EV_Strafe_Union);
-	int oCNpc::EV_Strafe_Union(oCMsgMovement* msg)
+	HOOK Hook_oCNpc_SetWalkStopChasm AS(&oCNpc::SetWalkStopChasm, &oCNpc::Hook_SetWalkStopChasm);
+	void oCNpc::Hook_SetWalkStopChasm(int stop)
 	{
-		int ok = THISCALL(Hook_oCNpc_EV_Strafe)(msg);
-		if (this == player && anictrl->walkmode == ANI_WALKMODE_RUN)
-			SetWalkStopChasm(!ok);
-
-		return ok;
+		THISCALL(Hook_oCNpc_SetWalkStopChasm)(this == player ? TRUE : stop);
 	}
 
 	// Removes the line of sight obstruction.
-	HOOK Hook_oCNpc_FreeLineOfSight PATCH(&oCNpc::FreeLineOfSight, &oCNpc::FreeLineOfSight_Union);
-	int oCNpc::FreeLineOfSight_Union(zVEC3& pos, zCVob* vob)
+	HOOK Patch_oCNpc_FreeLineOfSight PATCH(&oCNpc::FreeLineOfSight, &oCNpc::Patch_FreeLineOfSight);
+	int oCNpc::Patch_FreeLineOfSight(zVEC3& pos, zCVob* vob)
 	{
 		return TRUE;
 	}
 
 	// Disables NPC removal from world, will be used in navigation.
-	HOOK Hook_oCNpc_Disable_Union PATCH(&oCNpc::Disable, &oCNpc::Disable_Union);
-	void oCNpc::Disable_Union()
+	HOOK Hook_oCNpc_Disable_Union AS(&oCNpc::Disable, &oCNpc::Hook_Disable);
+	void oCNpc::Hook_Disable()
 	{
 		zVEC3 routPosition = state.GetAIStatePosition();
 		if (routPosition != 0.0f)
