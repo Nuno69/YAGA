@@ -232,6 +232,9 @@
     <Filter Include="Plugin\Workspace\Hooks">
       <UniqueIdentifier>{89c2978b-4297-47db-84b6-0ed24a6f36cb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Plugin\Workspace\UserAPI">
+      <UniqueIdentifier>{c8497960-9c01-40b5-b413-5c920c05a908}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Interface.cpp">
@@ -4793,6 +4796,36 @@
     </None>
     <None Include="Plugin.patch">
       <Filter>Plugin\Workspace\Plugin</Filter>
+    </None>
+    <None Include="ZenGin_UserAPI\oCAIHuman.inl">
+      <Filter>Plugin\Workspace\UserAPI</Filter>
+    </None>
+    <None Include="ZenGin_UserAPI\oCItemContainer.inl">
+      <Filter>Plugin\Workspace\UserAPI</Filter>
+    </None>
+    <None Include="ZenGin_UserAPI\oCMobInter.inl">
+      <Filter>Plugin\Workspace\UserAPI</Filter>
+    </None>
+    <None Include="ZenGin_UserAPI\oCNpc.inl">
+      <Filter>Plugin\Workspace\UserAPI</Filter>
+    </None>
+    <None Include="ZenGin_UserAPI\oCViewDialogTrade.inl">
+      <Filter>Plugin\Workspace\UserAPI</Filter>
+    </None>
+    <None Include="ZenGin_UserAPI\zCMenu.inl">
+      <Filter>Plugin\Workspace\UserAPI</Filter>
+    </None>
+    <None Include="ZenGin_UserAPI\zCRenderer.inl">
+      <Filter>Plugin\Workspace\UserAPI</Filter>
+    </None>
+    <None Include="ZenGin_UserAPI\zCTextureConvert.inl">
+      <Filter>Plugin\Workspace\UserAPI</Filter>
+    </None>
+    <None Include="ZenGin_UserAPI\zCViewDialogChoice.inl">
+      <Filter>Plugin\Workspace\UserAPI</Filter>
+    </None>
+    <None Include="ZenGin_UserAPI\zCVob.inl">
+      <Filter>Plugin\Workspace\UserAPI</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
