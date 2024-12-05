@@ -21,6 +21,12 @@ Everything outlined above plus the following:
 - [git lfs](https://git-lfs.com/) (required for fetching lfs files from repo)
 - [Visual Studio](https://visualstudio.microsoft.com/pl/downloads/) (2022 or higher)
 
+### Building
+
+To build the project, open up the **YAGA.sln** in [Visual Studio](https://visualstudio.microsoft.com/pl/downloads/) and hit **Build Solution**.  
+This will produce the **Bin/yaga.dll** and **VDF/yaga.vdf** files.  
+You can also build **YAGA** project, to produce only the plugin without generating **yaga.vdf**.
+
 ## Settings
 
 Here all the settings of the mod are going to be described. All settings are located in the **gothic.ini** file, in the `[YAGA]` section. If the setting is not in the file, its default value will be restored and written to the file.
