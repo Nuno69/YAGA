@@ -403,7 +403,7 @@
       <ProgramDatabaseFile>$(SolutionDir)PDB\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
@@ -427,7 +427,7 @@
       <ProgramDatabaseFile>$(SolutionDir)PDB\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
@@ -451,7 +451,7 @@
       <ProgramDatabaseFile>$(SolutionDir)PDB\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
@@ -475,7 +475,7 @@
       <ProgramDatabaseFile>$(SolutionDir)PDB\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
@@ -499,7 +499,7 @@
       <ProgramDatabaseFile>$(SolutionDir)PDB\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
@@ -523,7 +523,7 @@
       <ProgramDatabaseFile>$(SolutionDir)PDB\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
@@ -552,7 +552,7 @@
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
@@ -581,7 +581,7 @@
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
@@ -609,7 +609,7 @@
       <ProgramDatabaseFile>$(SolutionDir)PDB\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
@@ -638,7 +638,7 @@
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;sapi.lib</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
@@ -666,7 +666,7 @@
       <ProgramDatabaseFile>$(SolutionDir)PDB\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
@@ -694,7 +694,7 @@
       <ProgramDatabaseFile>$(SolutionDir)PDB\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
@@ -722,7 +722,7 @@
       <ProgramDatabaseFile>$(SolutionDir)PDB\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
@@ -750,7 +750,7 @@
       <ProgramDatabaseFile>$(SolutionDir)PDB\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
@@ -778,7 +778,7 @@
       <ProgramDatabaseFile>$(SolutionDir)PDB\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
@@ -806,7 +806,7 @@
       <ProgramDatabaseFile>$(SolutionDir)PDB\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
@@ -834,7 +834,7 @@
       <ProgramDatabaseFile>$(SolutionDir)PDB\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
@@ -862,7 +862,7 @@
       <ProgramDatabaseFile>$(SolutionDir)PDB\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
