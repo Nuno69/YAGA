@@ -264,13 +264,11 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='G2A MD Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)</TargetName>
     <OutDir>$(SolutionDir)Bin\</OutDir>
     <IntDir>$(SolutionDir)Obj\$(ProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='G2A MT Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)</TargetName>
     <OutDir>$(SolutionDir)Bin\</OutDir>
     <IntDir>$(SolutionDir)Obj\$(ProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
@@ -325,7 +323,9 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MP x2 Debug|Win32'">
@@ -349,7 +349,9 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='G2A Debug|Win32'">
@@ -373,7 +375,9 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='G2 Debug|Win32'">
@@ -397,7 +401,9 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='G1A Debug|Win32'">
@@ -421,7 +427,9 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='G1 Debug|Win32'">
@@ -445,7 +453,9 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MP x4 MD Release|Win32'">
@@ -474,7 +484,9 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MP x4 MT Release|Win32'">
@@ -503,7 +515,9 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MP x2 MD Release|Win32'">
@@ -531,7 +545,9 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MP x2 MT Release|Win32'">
@@ -560,7 +576,9 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='G2A MD Release|Win32'">
@@ -588,7 +606,9 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='G2A MT Release|Win32'">
@@ -616,7 +636,9 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='G2 MD Release|Win32'">
@@ -644,7 +666,9 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='G2 MT Release|Win32'">
@@ -672,7 +696,9 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='G1A MD Release|Win32'">
@@ -700,7 +726,9 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='G1A MT Release|Win32'">
@@ -728,7 +756,9 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='G1 MD Release|Win32'">
@@ -756,7 +786,9 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='G1 MT Release|Win32'">
@@ -784,7 +816,9 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
