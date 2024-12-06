@@ -29,17 +29,7 @@ namespace GOTHIC_ENGINE {
 	void Game_Loop()
 	{
 		Raycast();
-		// UpdateBeepSounds();
 		zSound3D::UpdateAllSounds();
-		zVEC3 playerPos = player->GetPositionWorld();
-		zVEC3 npcPos = npc->GetPositionWorld();
-		zVEC3 lookAtVector = player->GetAtVectorWorld();
-		zVEC3 npcDirection = npcPos - playerPos;
-		lookAtVector[VY] = 0.0f;
-		lookAtVector.Normalize();
-		npcDirection[VY] = 0.0f;
-		npcDirection.Normalize();
-		// Alg_AngleUnitRad(lookAtVector, npcDirection);
 		VobTrackerLoop();
 		CompassReaderLoop();
 		FocusReaderLoop();
@@ -83,7 +73,6 @@ namespace GOTHIC_ENGINE {
 
 	void LoadEnd()
 	{
-		//zWallSound::GetInstance( true );
 	}
 
 	void Game_LoadBegin_NewGame()
