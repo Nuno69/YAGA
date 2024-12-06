@@ -28,6 +28,8 @@ namespace GOTHIC_ENGINE {
 
 	void Game_Loop()
 	{
+		Raycast();
+		zSound3D::UpdateAllSounds();
 		VobTrackerLoop();
 		CompassReaderLoop();
 		FocusReaderLoop();

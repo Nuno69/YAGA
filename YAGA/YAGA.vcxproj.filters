@@ -2917,6 +2917,19 @@
     <ClInclude Include="VobSoundEmitter.cpp">
       <Filter>Plugin\Workspace\Features\Radar</Filter>
     </ClInclude>
+    <ClInclude Include="WallDetection\Controls.cpp" />
+    <ClInclude Include="WallDetection\Raycast.cpp" />
+    <ClInclude Include="WallDetection\Navmesh.cpp" />
+    <ClInclude Include="WallDetection\Navmesh.h" />
+    <ClInclude Include="Hooks\zCAIPlayer.cpp">
+      <Filter>Plugin\Workspace\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="Hooks\zCModel.cpp">
+      <Filter>Plugin\Workspace\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="Hooks\zCVob.cpp">
+      <Filter>Plugin\Workspace\Hooks</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include=".build_settings.inl">
@@ -4797,7 +4810,31 @@
     <None Include="Plugin.patch">
       <Filter>Plugin\Workspace\Plugin</Filter>
     </None>
+    <None Include="ZenGin_UserAPI\zCAIPlayer.inl">
+      <Filter>Plugin\Workspace\UserAPI</Filter>
+    </None>
+    <None Include="ZenGin_UserAPI\zCMenu.inl">
+      <Filter>Plugin\Workspace\UserAPI</Filter>
+    </None>
+    <None Include="ZenGin_UserAPI\zCModel.inl">
+      <Filter>Plugin\Workspace\UserAPI</Filter>
+    </None>
+    <None Include="ZenGin_UserAPI\zCRenderer.inl">
+      <Filter>Plugin\Workspace\UserAPI</Filter>
+    </None>
+    <None Include="ZenGin_UserAPI\zCTextureConvert.inl">
+      <Filter>Plugin\Workspace\UserAPI</Filter>
+    </None>
+    <None Include="ZenGin_UserAPI\zCViewDialogChoice.inl">
+      <Filter>Plugin\Workspace\UserAPI</Filter>
+    </None>
+    <None Include="ZenGin_UserAPI\zCVob.inl">
+      <Filter>Plugin\Workspace\UserAPI</Filter>
+    </None>
     <None Include="ZenGin_UserAPI\oCAIHuman.inl">
+      <Filter>Plugin\Workspace\UserAPI</Filter>
+    </None>
+    <None Include="ZenGin_UserAPI\oCGame.inl">
       <Filter>Plugin\Workspace\UserAPI</Filter>
     </None>
     <None Include="ZenGin_UserAPI\oCItemContainer.inl">
@@ -4812,16 +4849,7 @@
     <None Include="ZenGin_UserAPI\oCViewDialogTrade.inl">
       <Filter>Plugin\Workspace\UserAPI</Filter>
     </None>
-    <None Include="ZenGin_UserAPI\zCMenu.inl">
-      <Filter>Plugin\Workspace\UserAPI</Filter>
-    </None>
-    <None Include="ZenGin_UserAPI\zCRenderer.inl">
-      <Filter>Plugin\Workspace\UserAPI</Filter>
-    </None>
-    <None Include="ZenGin_UserAPI\zCTextureConvert.inl">
-      <Filter>Plugin\Workspace\UserAPI</Filter>
-    </None>
-    <None Include="ZenGin_UserAPI\zCViewDialogChoice.inl">
+    <None Include="ZenGin_UserAPI\oCWorld.inl">
       <Filter>Plugin\Workspace\UserAPI</Filter>
     </None>
   </ItemGroup>

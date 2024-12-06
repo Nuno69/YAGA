@@ -15,6 +15,8 @@
 #include "AudioHelper.h"
 #include "Compass.h"
 #include "SmartMap.h"
+#include "WallDetection/Navmesh.h"
+#include "WallDetection/Sound3D.h"
 #include "Plugin.h"
 #pragma endregion
 // ...
