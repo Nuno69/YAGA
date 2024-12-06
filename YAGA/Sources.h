@@ -27,7 +27,6 @@
 #include "Hooks/oCNpc.cpp"
 #include "Hooks/zCMenu.cpp"
 #include "Hooks/zCViewDialogChoice.cpp"
-#include "Hooks/zCVob.cpp"
 #include "Plugin.cpp"
 #pragma endregion
 

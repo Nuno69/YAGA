@@ -2914,9 +2914,6 @@
     <ClInclude Include="Hooks\zCViewDialogChoice.cpp">
       <Filter>Plugin\Workspace\Hooks</Filter>
     </ClInclude>
-    <ClInclude Include="Hooks\zCVob.cpp">
-      <Filter>Plugin\Workspace\Hooks</Filter>
-    </ClInclude>
     <ClInclude Include="Hooks\oCGame.cpp">
       <Filter>Plugin\Workspace\Hooks</Filter>
     </ClInclude>
@@ -4828,9 +4825,6 @@
       <Filter>Plugin\Workspace\UserAPI</Filter>
     </None>
     <None Include="ZenGin_UserAPI\zCViewDialogChoice.inl">
-      <Filter>Plugin\Workspace\UserAPI</Filter>
-    </None>
-    <None Include="ZenGin_UserAPI\zCVob.inl">
       <Filter>Plugin\Workspace\UserAPI</Filter>
     </None>
   </ItemGroup>
