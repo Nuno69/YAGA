@@ -946,15 +946,14 @@
     <ClInclude Include="Hooks\oCWorld.cpp" />
     <ClInclude Include="Hooks\zCPolygon.cpp" />
     <ClInclude Include="Hooks\zCVob.cpp" />
+    <ClInclude Include="Hooks\zCAIPlayer.cpp" />
+    <ClInclude Include="Hooks\zCModel.cpp" />
     <ClCompile Include="Interface.cpp" />
     <ClInclude Include="VobSoundEmitter.cpp" />
     <ClInclude Include="WallDetection\Controls.cpp" />
-    <ClInclude Include="WallDetection\Detector.cpp" />
     <ClInclude Include="WallDetection\Navmesh.cpp" />
     <ClInclude Include="WallDetection\Navmesh.h" />
     <ClInclude Include="WallDetection\Raycast.cpp" />
-    <ClInclude Include="WallDetection\Sound3D.cpp" />
-    <ClInclude Include="WallDetection\Sound3D.h" />
     <ClCompile Include="ZenGin\Gothic_II_Addon\ClassDeclarators_G2A.cpp" />
     <ClCompile Include="ZenGin\Gothic_II_Addon\Globals_G2A.cpp" />
     <ClCompile Include="ZenGin\Gothic_II_Addon\Statics_G2A.cpp" />
@@ -979,7 +978,6 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="WallDetection\Detector.h" />
     <ClInclude Include="zSpeech\zSpeech.h">
       <SubType>
       </SubType>
@@ -2498,11 +2496,15 @@
     <None Include="ZenGin\Gothic_UserAPI\zVEC3.inl" />
     <None Include="ZenGin\Gothic_UserAPI\zVEC4.inl" />
     <None Include="ZenGin_UserAPI\oCAIHuman.inl" />
+    <None Include="ZenGin_UserAPI\oCGame.inl" />
     <None Include="ZenGin_UserAPI\oCItemContainer.inl" />
     <None Include="ZenGin_UserAPI\oCMobInter.inl" />
     <None Include="ZenGin_UserAPI\oCNpc.inl" />
     <None Include="ZenGin_UserAPI\oCViewDialogTrade.inl" />
+    <None Include="ZenGin_UserAPI\oCWorld.inl" />
+    <None Include="ZenGin_UserAPI\zCAIPlayer.inl" />
     <None Include="ZenGin_UserAPI\zCMenu.inl" />
+    <None Include="ZenGin_UserAPI\zCModel.inl" />
     <None Include="ZenGin_UserAPI\zCPolygon.inl" />
     <None Include="ZenGin_UserAPI\zCRenderer.inl" />
     <None Include="ZenGin_UserAPI\zCTextureConvert.inl" />

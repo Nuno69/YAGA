@@ -1,3 +1,1 @@
-
-int TraceRay_Union( zVEC3 const&, zVEC3 const&, int, zTTraceRayReport& );
-void ThisVobAddedToWorld_Union( zCWorld* world );
+int Hook_TraceRay(const zVEC3& origin, const zVEC3& ray, int flags, zTTraceRayReport& report);

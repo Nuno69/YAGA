@@ -1,1 +1,1 @@
-int RenderPoly_Union( int );
+int Hook_RenderPoly(int flags);
