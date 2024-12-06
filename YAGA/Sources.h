@@ -15,8 +15,8 @@
 #include "Readers/InventoryReader.cpp"
 #include "NPCTracker.cpp"
 #include "VobTracker.cpp"
+#include "VobSoundEmitter.cpp"
 #include "Compass.cpp"
-#include "WhisperSound.cpp"
 #include "BlindCameraModel.cpp"
 #include "SmartMap.cpp"
 #include "Hooks/oCAIHuman.cpp"
@@ -27,7 +27,6 @@
 #include "Hooks/oCNpc.cpp"
 #include "Hooks/zCMenu.cpp"
 #include "Hooks/zCViewDialogChoice.cpp"
-#include "Hooks/zCVob.cpp"
 #include "Plugin.cpp"
 #pragma endregion
 

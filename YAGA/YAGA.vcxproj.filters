@@ -2872,12 +2872,6 @@
     <ClInclude Include="Readers\FocusReader.cpp">
       <Filter>Plugin\Workspace\Features\Readers</Filter>
     </ClInclude>
-    <ClInclude Include="WhisperSound.h">
-      <Filter>Plugin\Workspace\Features\Radar</Filter>
-    </ClInclude>
-    <ClInclude Include="WhisperSound.cpp">
-      <Filter>Plugin\Workspace\Features\Radar</Filter>
-    </ClInclude>
     <ClInclude Include="Readers\InventoryReader.cpp">
       <Filter>Plugin\Workspace\Features\Readers</Filter>
     </ClInclude>
@@ -2914,14 +2908,14 @@
     <ClInclude Include="Hooks\zCViewDialogChoice.cpp">
       <Filter>Plugin\Workspace\Hooks</Filter>
     </ClInclude>
-    <ClInclude Include="Hooks\zCVob.cpp">
-      <Filter>Plugin\Workspace\Hooks</Filter>
-    </ClInclude>
     <ClInclude Include="Hooks\oCGame.cpp">
       <Filter>Plugin\Workspace\Hooks</Filter>
     </ClInclude>
     <ClInclude Include="Hooks\oCWorld.cpp">
       <Filter>Plugin\Workspace\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="VobSoundEmitter.cpp">
+      <Filter>Plugin\Workspace\Features\Radar</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -4828,9 +4822,6 @@
       <Filter>Plugin\Workspace\UserAPI</Filter>
     </None>
     <None Include="ZenGin_UserAPI\zCViewDialogChoice.inl">
-      <Filter>Plugin\Workspace\UserAPI</Filter>
-    </None>
-    <None Include="ZenGin_UserAPI\zCVob.inl">
       <Filter>Plugin\Workspace\UserAPI</Filter>
     </None>
   </ItemGroup>
