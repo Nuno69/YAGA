@@ -403,11 +403,10 @@
       <ProgramDatabaseFile>$(SolutionDir)PDB\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt;nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
-</Command>
+      <Command>xcopy /y "$(OutputPath)$(TargetFileName)" "$(SolutionDir)VDF\System\Autorun\" &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.dll copied to VDF\System\Autorun\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MP x2 Debug|Win32'">
@@ -427,11 +426,10 @@
       <ProgramDatabaseFile>$(SolutionDir)PDB\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt;nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
-</Command>
+      <Command>xcopy /y "$(OutputPath)$(TargetFileName)" "$(SolutionDir)VDF\System\Autorun\" &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.dll copied to VDF\System\Autorun\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='G2A Debug|Win32'">
@@ -451,11 +449,10 @@
       <ProgramDatabaseFile>$(SolutionDir)PDB\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt;nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
-</Command>
+      <Command>xcopy /y "$(OutputPath)$(TargetFileName)" "$(SolutionDir)VDF\System\Autorun\" &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.dll copied to VDF\System\Autorun\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='G2 Debug|Win32'">
@@ -475,11 +472,10 @@
       <ProgramDatabaseFile>$(SolutionDir)PDB\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt;nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
-</Command>
+      <Command>xcopy /y "$(OutputPath)$(TargetFileName)" "$(SolutionDir)VDF\System\Autorun\" &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.dll copied to VDF\System\Autorun\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='G1A Debug|Win32'">
@@ -499,11 +495,10 @@
       <ProgramDatabaseFile>$(SolutionDir)PDB\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt;nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
-</Command>
+      <Command>xcopy /y "$(OutputPath)$(TargetFileName)" "$(SolutionDir)VDF\System\Autorun\" &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.dll copied to VDF\System\Autorun\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='G1 Debug|Win32'">
@@ -523,11 +518,10 @@
       <ProgramDatabaseFile>$(SolutionDir)PDB\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt;nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
-</Command>
+      <Command>xcopy /y "$(OutputPath)$(TargetFileName)" "$(SolutionDir)VDF\System\Autorun\" &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.dll copied to VDF\System\Autorun\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MP x4 MD Release|Win32'">
@@ -552,11 +546,10 @@
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt;nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
-</Command>
+      <Command>xcopy /y "$(OutputPath)$(TargetFileName)" "$(SolutionDir)VDF\System\Autorun\" &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.dll copied to VDF\System\Autorun\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MP x4 MT Release|Win32'">
@@ -581,11 +574,10 @@
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt;nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
-</Command>
+      <Command>xcopy /y "$(OutputPath)$(TargetFileName)" "$(SolutionDir)VDF\System\Autorun\" &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.dll copied to VDF\System\Autorun\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MP x2 MD Release|Win32'">
@@ -609,11 +601,10 @@
       <ProgramDatabaseFile>$(SolutionDir)PDB\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt;nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
-</Command>
+      <Command>xcopy /y "$(OutputPath)$(TargetFileName)" "$(SolutionDir)VDF\System\Autorun\" &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.dll copied to VDF\System\Autorun\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MP x2 MT Release|Win32'">
@@ -638,11 +629,10 @@
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;sapi.lib</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt;nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
-</Command>
+      <Command>xcopy /y "$(OutputPath)$(TargetFileName)" "$(SolutionDir)VDF\System\Autorun\" &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.dll copied to VDF\System\Autorun\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='G2A MD Release|Win32'">
@@ -666,11 +656,10 @@
       <ProgramDatabaseFile>$(SolutionDir)PDB\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt;nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
-</Command>
+      <Command>xcopy /y "$(OutputPath)$(TargetFileName)" "$(SolutionDir)VDF\System\Autorun\" &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.dll copied to VDF\System\Autorun\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='G2A MT Release|Win32'">
@@ -694,11 +683,10 @@
       <ProgramDatabaseFile>$(SolutionDir)PDB\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt;nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
-</Command>
+      <Command>xcopy /y "$(OutputPath)$(TargetFileName)" "$(SolutionDir)VDF\System\Autorun\" &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.dll copied to VDF\System\Autorun\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='G2 MD Release|Win32'">
@@ -722,11 +710,10 @@
       <ProgramDatabaseFile>$(SolutionDir)PDB\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt;nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
-</Command>
+      <Command>xcopy /y "$(OutputPath)$(TargetFileName)" "$(SolutionDir)VDF\System\Autorun\" &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.dll copied to VDF\System\Autorun\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='G2 MT Release|Win32'">
@@ -750,11 +737,10 @@
       <ProgramDatabaseFile>$(SolutionDir)PDB\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt;nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
-</Command>
+      <Command>xcopy /y "$(OutputPath)$(TargetFileName)" "$(SolutionDir)VDF\System\Autorun\" &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.dll copied to VDF\System\Autorun\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='G1A MD Release|Win32'">
@@ -778,11 +764,10 @@
       <ProgramDatabaseFile>$(SolutionDir)PDB\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt;nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
-</Command>
+      <Command>xcopy /y "$(OutputPath)$(TargetFileName)" "$(SolutionDir)VDF\System\Autorun\" &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.dll copied to VDF\System\Autorun\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='G1A MT Release|Win32'">
@@ -806,11 +791,10 @@
       <ProgramDatabaseFile>$(SolutionDir)PDB\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt;nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
-</Command>
+      <Command>xcopy /y "$(OutputPath)$(TargetFileName)" "$(SolutionDir)VDF\System\Autorun\" &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.dll copied to VDF\System\Autorun\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='G1 MD Release|Win32'">
@@ -834,11 +818,10 @@
       <ProgramDatabaseFile>$(SolutionDir)PDB\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt;nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
-</Command>
+      <Command>xcopy /y "$(OutputPath)$(TargetFileName)" "$(SolutionDir)VDF\System\Autorun\" &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.dll copied to VDF\System\Autorun\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='G1 MT Release|Win32'">
@@ -862,11 +845,10 @@
       <ProgramDatabaseFile>$(SolutionDir)PDB\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
     <PreBuildEvent>
-      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt; nul 2&gt;&amp;1</Command>
+      <Command>rmdir /s /q "$(SolutionDir)Obj\VDF\$(Configuration)\VDF.tlog\"  &gt;nul 2&gt;&amp;1</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>xcopy /y $(OutputPath)$(TargetFileName) $(SolutionDir)VDF\System\Autorun\
-</Command>
+      <Command>xcopy /y "$(OutputPath)$(TargetFileName)" "$(SolutionDir)VDF\System\Autorun\" &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.dll copied to VDF\System\Autorun\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

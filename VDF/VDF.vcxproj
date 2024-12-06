@@ -323,7 +323,7 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
       <Message>
       </Message>
     </PostBuildEvent>
@@ -349,7 +349,7 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
       <Message>
       </Message>
     </PostBuildEvent>
@@ -375,7 +375,7 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
       <Message>
       </Message>
     </PostBuildEvent>
@@ -401,7 +401,7 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
       <Message>
       </Message>
     </PostBuildEvent>
@@ -427,7 +427,7 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
       <Message>
       </Message>
     </PostBuildEvent>
@@ -453,7 +453,7 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
       <Message>
       </Message>
     </PostBuildEvent>
@@ -484,7 +484,7 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
       <Message>
       </Message>
     </PostBuildEvent>
@@ -515,7 +515,7 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
       <Message>
       </Message>
     </PostBuildEvent>
@@ -545,7 +545,7 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
       <Message>
       </Message>
     </PostBuildEvent>
@@ -576,7 +576,7 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
       <Message>
       </Message>
     </PostBuildEvent>
@@ -606,7 +606,7 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
       <Message>
       </Message>
     </PostBuildEvent>
@@ -636,7 +636,7 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
       <Message>
       </Message>
     </PostBuildEvent>
@@ -666,7 +666,7 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
       <Message>
       </Message>
     </PostBuildEvent>
@@ -696,7 +696,7 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
       <Message>
       </Message>
     </PostBuildEvent>
@@ -726,7 +726,7 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
       <Message>
       </Message>
     </PostBuildEvent>
@@ -756,7 +756,7 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
       <Message>
       </Message>
     </PostBuildEvent>
@@ -786,7 +786,7 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
       <Message>
       </Message>
     </PostBuildEvent>
@@ -816,7 +816,7 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt; nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
+      <Command>cd /d "$(SolutionDir)VDF" &amp;&amp; vdfsbuilder.exe build.vm &gt;nul 2&gt;&amp;1 &amp;&amp; echo yaga.vdf generated</Command>
       <Message>
       </Message>
     </PostBuildEvent>
