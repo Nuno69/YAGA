@@ -5,13 +5,13 @@
 #include <unordered_map>
 
 namespace GOTHIC_ENGINE {
-	std::unordered_map<zCVob*, int> vob_soundHandle;
+	std::unordered_map<zCVob*, int> vobSoundEmitters;
 	std::unordered_set<zCVob*> collectedVobSoundEmitters;
 
 	bool BindSound3D(const string& fileName, zCVob* vob)
 	{
-		auto it = vob_soundHandle.find(vob);
-		if (it != vob_soundHandle.end())
+		auto it = vobSoundEmitters.find(vob);
+		if (it != vobSoundEmitters.end())
 		{
 			collectedVobSoundEmitters.insert(vob);
 			return true;
@@ -27,7 +27,7 @@ namespace GOTHIC_ENGINE {
 			sfx->SetLooping(True);
 
 			collectedVobSoundEmitters.insert(vob);
-			vob_soundHandle.insert({ vob, handle });
+			vobSoundEmitters.insert({ vob, handle });
 		}
 
 		sfx->Release();
@@ -37,7 +37,7 @@ namespace GOTHIC_ENGINE {
 	std::unordered_map<zCVob*, int>::iterator UnbindSound3D(std::unordered_map<zCVob*, int>::iterator it, zCVob* vob)
 	{
 		zsound->StopSound(it->second);
-		return vob_soundHandle.erase(it);
+		return vobSoundEmitters.erase(it);
 	}
 
 	void UpdateSoundHandles()
@@ -53,7 +53,7 @@ namespace GOTHIC_ENGINE {
 			else if (zDYNAMIC_CAST<oCNpc>(vob)) BindSound3D("WhisperingNPC.wav", vob);
 		}
 
-		for (auto it = vob_soundHandle.begin(); it != vob_soundHandle.end(); )
+		for (auto it = vobSoundEmitters.begin(); it != vobSoundEmitters.end(); )
 		{
 			zCVob* vob = it->first;
 			int soundHandle = it->second;

@@ -2872,12 +2872,6 @@
     <ClInclude Include="Readers\FocusReader.cpp">
       <Filter>Plugin\Workspace\Features\Readers</Filter>
     </ClInclude>
-    <ClInclude Include="WhisperSound.h">
-      <Filter>Plugin\Workspace\Features\Radar</Filter>
-    </ClInclude>
-    <ClInclude Include="WhisperSound.cpp">
-      <Filter>Plugin\Workspace\Features\Radar</Filter>
-    </ClInclude>
     <ClInclude Include="Readers\InventoryReader.cpp">
       <Filter>Plugin\Workspace\Features\Readers</Filter>
     </ClInclude>
@@ -2919,6 +2913,9 @@
     </ClInclude>
     <ClInclude Include="Hooks\oCWorld.cpp">
       <Filter>Plugin\Workspace\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="VobSoundEmitter.cpp">
+      <Filter>Plugin\Workspace\Features\Radar</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
