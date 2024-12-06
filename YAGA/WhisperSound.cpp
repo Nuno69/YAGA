@@ -41,14 +41,14 @@ namespace GOTHIC_ENGINE {
 			return false;
 
 		int handle = zsound->PlaySound3D(sfx, vob, 0, 0);
-		if (handle != Invalid)
+		if (handle != 0)
 		{
 			sfx->SetLooping(True);
 			SoundHandles.insert({ vob, handle });
 		}
 
 		sfx->Release();
-		return handle != Invalid;
+		return handle != 0;
 	}
 
 	bool UnbindSound3D(zCVob* vob)
