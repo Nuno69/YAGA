@@ -1,33 +1,30 @@
 // Supported with union (c) 2020 Union team
 // Union SOURCE file
+#include <memory>
+
 namespace GOTHIC_ENGINE {
 	wstring lastRead = Null;
-	zSpeechEngine *activeEngine;
+	std::unique_ptr<zSpeechEngine> activeEngine;
 
 	void InitializeSpeech(int engine)
 	{
 		switch (engine)
 		{
 			case 0:
-				activeEngine = new zSpeechEngineZhengdu();
+				activeEngine = std::make_unique<zSpeechEngineZhengdu>();
 				break;
 
 			case 1:
-				activeEngine = new zSpeechEngineNVDA();
+				activeEngine = std::make_unique<zSpeechEngineNVDA>();
 				break;
 
 			case 2:
-				activeEngine = new zSpeechEngineSAPI();
+				activeEngine = std::make_unique<zSpeechEngineSAPI>();
 				break;
 
 			default:
 				break;
 		}
-	}
-
-	void UnInitializeSpeech()
-	{
-		delete activeEngine;
 	}
 
 	int Read(const wchar_t *str)

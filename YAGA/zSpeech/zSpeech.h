@@ -3,7 +3,6 @@
 
 namespace GOTHIC_ENGINE {
 	void InitializeSpeech(int engine);
-	void UnInitializeSpeech();
 	int Read(const wchar_t* str);
 	void SilenceSpeech();
 }
