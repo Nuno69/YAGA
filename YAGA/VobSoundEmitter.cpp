@@ -42,8 +42,10 @@ namespace GOTHIC_ENGINE {
 
 	void UpdateSoundHandles()
 	{
+		// clear the collected vob sound emitters, so that they can be populated again in this frame
 		collectedVobSoundEmitters.clear();
 
+		// iterate over every collected vob by the player and populate those that should emit the sound
 		for (int i = 0; i < player->vobList.GetNumInList(); ++i)
 		{
 			zCVob* vob = player->vobList[i];
@@ -53,6 +55,7 @@ namespace GOTHIC_ENGINE {
 			else if (zDYNAMIC_CAST<oCNpc>(vob)) BindSound3D("WhisperingNPC.wav", vob);
 		}
 
+		// try to update the sound 3d if vob is still present in collectedVobSoundEmitters, if not, remove the tracked vob sound
 		for (auto it = vobSoundEmitters.begin(); it != vobSoundEmitters.end(); )
 		{
 			zCVob* vob = it->first;
