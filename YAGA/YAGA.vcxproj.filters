@@ -279,13 +279,6 @@
     <ClCompile Include="ZenGin\Gothic_II_Addon\Statics_G2A.cpp">
       <Filter>Engine SDK\4. Gothic II NoTR\Overloads</Filter>
     </ClCompile>
-    <ClCompile Include="WallDetection\Detector.cpp" />
-    <ClCompile Include="Hooks\zCPolygon.cpp" />
-    <ClCompile Include="WallDetection\Navmesh.h" />
-    <ClCompile Include="WallDetection\Sound3D.h" />
-    <ClCompile Include="WallDetection\Controls.cpp" />
-    <ClCompile Include="WallDetection\Sound3D.cpp" />
-    <ClCompile Include="WallDetection\Navmesh.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ZenGin\zGothicAPI.h">
@@ -2925,6 +2918,15 @@
       <Filter>Plugin\Workspace\Features\Radar</Filter>
     </ClInclude>
     <ClInclude Include="WallDetection\Detector.h" />
+    <ClInclude Include="WallDetection\Controls.cpp" />
+    <ClInclude Include="WallDetection\Sound3D.h" />
+    <ClInclude Include="WallDetection\Raycast.cpp" />
+    <ClInclude Include="Hooks\zCPolygon.cpp" />
+    <ClInclude Include="Hooks\zCVob.cpp" />
+    <ClInclude Include="WallDetection\Sound3D.cpp" />
+    <ClInclude Include="WallDetection\Navmesh.cpp" />
+    <ClInclude Include="WallDetection\Navmesh.h" />
+    <ClInclude Include="WallDetection\Detector.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".build_settings.inl">
@@ -4833,6 +4835,7 @@
       <Filter>Plugin\Workspace\UserAPI</Filter>
     </None>
     <None Include="ZenGin_UserAPI\zCPolygon.inl" />
+    <None Include="ZenGin_UserAPI\zCVob.inl" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

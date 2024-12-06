@@ -944,15 +944,17 @@
     <ClInclude Include="Hooks\zCViewDialogChoice.cpp" />
     <ClInclude Include="Hooks\oCGame.cpp" />
     <ClInclude Include="Hooks\oCWorld.cpp" />
-    <ClCompile Include="Hooks\zCPolygon.cpp" />
+    <ClInclude Include="Hooks\zCPolygon.cpp" />
+    <ClInclude Include="Hooks\zCVob.cpp" />
     <ClCompile Include="Interface.cpp" />
     <ClInclude Include="VobSoundEmitter.cpp" />
-    <ClCompile Include="WallDetection\Controls.cpp" />
-    <ClCompile Include="WallDetection\Detector.cpp" />
-    <ClCompile Include="WallDetection\Navmesh.cpp" />
-    <ClCompile Include="WallDetection\Navmesh.h" />
-    <ClCompile Include="WallDetection\Sound3D.cpp" />
-    <ClCompile Include="WallDetection\Sound3D.h" />
+    <ClInclude Include="WallDetection\Controls.cpp" />
+    <ClInclude Include="WallDetection\Detector.cpp" />
+    <ClInclude Include="WallDetection\Navmesh.cpp" />
+    <ClInclude Include="WallDetection\Navmesh.h" />
+    <ClInclude Include="WallDetection\Raycast.cpp" />
+    <ClInclude Include="WallDetection\Sound3D.cpp" />
+    <ClInclude Include="WallDetection\Sound3D.h" />
     <ClCompile Include="ZenGin\Gothic_II_Addon\ClassDeclarators_G2A.cpp" />
     <ClCompile Include="ZenGin\Gothic_II_Addon\Globals_G2A.cpp" />
     <ClCompile Include="ZenGin\Gothic_II_Addon\Statics_G2A.cpp" />
@@ -2505,6 +2507,7 @@
     <None Include="ZenGin_UserAPI\zCRenderer.inl" />
     <None Include="ZenGin_UserAPI\zCTextureConvert.inl" />
     <None Include="ZenGin_UserAPI\zCViewDialogChoice.inl" />
+    <None Include="ZenGin_UserAPI\zCVob.inl" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
