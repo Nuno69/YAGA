@@ -1,1 +1,0 @@
-int Hook_RenderPoly(int flags);

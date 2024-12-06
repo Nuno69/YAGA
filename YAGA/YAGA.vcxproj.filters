@@ -2927,9 +2927,6 @@
     <ClInclude Include="Hooks\zCModel.cpp">
       <Filter>Plugin\Workspace\Hooks</Filter>
     </ClInclude>
-    <ClInclude Include="Hooks\zCPolygon.cpp">
-      <Filter>Plugin\Workspace\Hooks</Filter>
-    </ClInclude>
     <ClInclude Include="Hooks\zCVob.cpp">
       <Filter>Plugin\Workspace\Hooks</Filter>
     </ClInclude>
@@ -4820,9 +4817,6 @@
       <Filter>Plugin\Workspace\UserAPI</Filter>
     </None>
     <None Include="ZenGin_UserAPI\zCModel.inl">
-      <Filter>Plugin\Workspace\UserAPI</Filter>
-    </None>
-    <None Include="ZenGin_UserAPI\zCPolygon.inl">
       <Filter>Plugin\Workspace\UserAPI</Filter>
     </None>
     <None Include="ZenGin_UserAPI\zCRenderer.inl">

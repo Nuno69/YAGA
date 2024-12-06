@@ -944,7 +944,6 @@
     <ClInclude Include="Hooks\zCViewDialogChoice.cpp" />
     <ClInclude Include="Hooks\oCGame.cpp" />
     <ClInclude Include="Hooks\oCWorld.cpp" />
-    <ClInclude Include="Hooks\zCPolygon.cpp" />
     <ClInclude Include="Hooks\zCVob.cpp" />
     <ClInclude Include="Hooks\zCAIPlayer.cpp" />
     <ClInclude Include="Hooks\zCModel.cpp" />
@@ -2505,7 +2504,6 @@
     <None Include="ZenGin_UserAPI\zCAIPlayer.inl" />
     <None Include="ZenGin_UserAPI\zCMenu.inl" />
     <None Include="ZenGin_UserAPI\zCModel.inl" />
-    <None Include="ZenGin_UserAPI\zCPolygon.inl" />
     <None Include="ZenGin_UserAPI\zCRenderer.inl" />
     <None Include="ZenGin_UserAPI\zCTextureConvert.inl" />
     <None Include="ZenGin_UserAPI\zCViewDialogChoice.inl" />

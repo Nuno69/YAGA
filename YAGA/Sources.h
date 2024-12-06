@@ -32,7 +32,6 @@
 #include "Hooks/zCMenu.cpp"
 #include "Hooks/zCAIPlayer.cpp"
 #include "Hooks/zCModel.cpp"
-#include "Hooks/zCPolygon.cpp"
 #include "Hooks/zCViewDialogChoice.cpp"
 #include "Hooks/zCVob.cpp"
 #include "Plugin.cpp"
