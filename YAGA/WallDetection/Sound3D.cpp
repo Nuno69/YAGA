@@ -21,7 +21,7 @@ namespace GOTHIC_ENGINE {
 	zTSound3DParams zSound3D::MakeParameters() {
 		zTSound3DParams params;
 		params.SetDefaults();
-		params.obstruction = Parameters.Obstruction;
+		params.obstruction = static_cast<float>(Parameters.Obstruction);
 		params.loopType = Parameters.IsLooped ? zCSoundSystem::zSND_LOOPING_ENABLED : zCSoundSystem::zSND_LOOPING_DISABLED;
 		params.radius = Parameters.Radius;
 		params.pitchOffset = 1.0f - Parameters.Pitch;
@@ -34,7 +34,7 @@ namespace GOTHIC_ENGINE {
 		zTSound3DParams params;
 		zsound->GetSound3DProps(Handle, params);
 		Parameters3D params3D;
-		params3D.Obstruction = params.obstruction;
+		params3D.Obstruction = static_cast<int>(params.obstruction);
 		params3D.IsLooped = params.loopType == zCSoundSystem::zSND_LOOPING_ENABLED;
 		params3D.Radius = params.radius;
 		params3D.Pitch = 1.0f + params.pitchOffset;
@@ -54,7 +54,7 @@ namespace GOTHIC_ENGINE {
 				Parameters = params3D;
 
 			zTSound3DParams params;
-			params.obstruction = params3D.Obstruction;
+			params.obstruction = static_cast<float>(params3D.Obstruction);
 			params.loopType = params3D.IsLooped ? zCSoundSystem::zSND_LOOPING_ENABLED : zCSoundSystem::zSND_LOOPING_DISABLED;
 			params.radius = params3D.Radius;
 			params.pitchOffset = 1.0f - params3D.Pitch;
