@@ -2917,6 +2917,12 @@
     <ClInclude Include="Hooks\zCVob.cpp">
       <Filter>Plugin\Workspace\Hooks</Filter>
     </ClInclude>
+    <ClInclude Include="Hooks\oCGame.cpp">
+      <Filter>Plugin\Workspace\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="Hooks\oCWorld.cpp">
+      <Filter>Plugin\Workspace\Hooks</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include=".build_settings.inl">

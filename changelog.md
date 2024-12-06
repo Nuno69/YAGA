@@ -1,2 +1,3 @@
 - Fixed crashes while strafing (running left or right via A or D keys)
 - Fixed issues with staying 3d sounds in the world while object gets removed, now sounds will get properly removed
+- Fixed npc sound being played for the player character in gothic 1 and gothic sequel

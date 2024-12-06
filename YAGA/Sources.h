@@ -20,6 +20,8 @@
 #include "BlindCameraModel.cpp"
 #include "SmartMap.cpp"
 #include "Hooks/oCAIHuman.cpp"
+#include "Hooks/oCWorld.cpp"
+#include "Hooks/oCGame.cpp"
 #include "Hooks/oCItemContainer.cpp"
 #include "Hooks/oCMobInter.cpp"
 #include "Hooks/oCNpc.cpp"

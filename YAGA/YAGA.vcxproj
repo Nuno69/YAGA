@@ -943,6 +943,8 @@
     <ClInclude Include="Hooks\zCMenu.cpp" />
     <ClInclude Include="Hooks\zCViewDialogChoice.cpp" />
     <ClInclude Include="Hooks\zCVob.cpp" />
+    <ClInclude Include="Hooks\oCGame.cpp" />
+    <ClInclude Include="Hooks\oCWorld.cpp" />
     <ClCompile Include="Interface.cpp" />
     <ClCompile Include="ZenGin\Gothic_II_Addon\ClassDeclarators_G2A.cpp" />
     <ClCompile Include="ZenGin\Gothic_II_Addon\Globals_G2A.cpp" />
