@@ -1,0 +1,1 @@
+int RenderPoly_Union( int );

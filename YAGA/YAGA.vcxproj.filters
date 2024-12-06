@@ -279,6 +279,13 @@
     <ClCompile Include="ZenGin\Gothic_II_Addon\Statics_G2A.cpp">
       <Filter>Engine SDK\4. Gothic II NoTR\Overloads</Filter>
     </ClCompile>
+    <ClCompile Include="WallDetection\Detector.cpp" />
+    <ClCompile Include="Hooks\zCPolygon.cpp" />
+    <ClCompile Include="WallDetection\Navmesh.h" />
+    <ClCompile Include="WallDetection\Sound3D.h" />
+    <ClCompile Include="WallDetection\Controls.cpp" />
+    <ClCompile Include="WallDetection\Sound3D.cpp" />
+    <ClCompile Include="WallDetection\Navmesh.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ZenGin\zGothicAPI.h">
@@ -2917,6 +2924,7 @@
     <ClInclude Include="VobSoundEmitter.cpp">
       <Filter>Plugin\Workspace\Features\Radar</Filter>
     </ClInclude>
+    <ClInclude Include="WallDetection\Detector.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".build_settings.inl">
@@ -4824,6 +4832,7 @@
     <None Include="ZenGin_UserAPI\zCViewDialogChoice.inl">
       <Filter>Plugin\Workspace\UserAPI</Filter>
     </None>
+    <None Include="ZenGin_UserAPI\zCPolygon.inl" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
