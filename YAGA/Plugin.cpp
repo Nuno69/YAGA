@@ -6,23 +6,28 @@ namespace GOTHIC_ENGINE {
 	// TO DO
 	// Your code ...
 
-	void Game_Entry() {
+	void Game_Entry()
+	{
 	}
 
-	void Game_Init() {
+	void Game_Init()
+	{
 		Settings::SpeechEngine();
 		Settings::NPCTracker();
 		InitializeVobTracker();
 		InitializeSpeech(Settings::zSpeechDefaultEngine);
 	}
 
-	void Game_Exit() {
+	void Game_Exit()
+	{
 	}
 
-	void Game_PreLoop() {
+	void Game_PreLoop()
+	{
 	}
 
-	void Game_Loop() {
+	void Game_Loop()
+	{
 		VobTrackerLoop();
 		CompassReaderLoop();
 		FocusReaderLoop();
@@ -39,69 +44,87 @@ namespace GOTHIC_ENGINE {
 		// zSmartMap::RenderWorld();
 	}
 
-	void Game_PostLoop() {
+	void Game_PostLoop()
+	{
 	}
 
-	void Game_MenuLoop() {
+	void Game_MenuLoop()
+	{
 	}
 
 	// Information about current saving or loading world
 	TSaveLoadGameInfo& SaveLoadGameInfo = UnionCore::SaveLoadGameInfo;
 
-	void Game_SaveBegin() {
+	void Game_SaveBegin()
+	{
 		Read(L"Saving game...");
 	}
 
-	void Game_SaveEnd() {
+	void Game_SaveEnd()
+	{
 		Read(string::Combine("Save complete at slot %i!", SaveLoadGameInfo.slotID).AToW());
 	}
 
-	void LoadBegin() {
+	void LoadBegin()
+	{
 	}
 
-	void LoadEnd() {
+	void LoadEnd()
+	{
 	}
 
-	void Game_LoadBegin_NewGame() {
+	void Game_LoadBegin_NewGame()
+	{
 		LoadBegin();
 	}
 
-	void Game_LoadEnd_NewGame() {
+	void Game_LoadEnd_NewGame()
+	{
 		LoadEnd();
 	}
 
-	void Game_LoadBegin_SaveGame() {
+	void Game_LoadBegin_SaveGame()
+	{
 		LoadBegin();
 	}
 
-	void Game_LoadEnd_SaveGame() {
+	void Game_LoadEnd_SaveGame()
+	{
 		LoadEnd();
 	}
 
-	void Game_LoadBegin_ChangeLevel() {
+	void Game_LoadBegin_ChangeLevel()
+	{
 		LoadBegin();
 	}
 
-	void Game_LoadEnd_ChangeLevel() {
+	void Game_LoadEnd_ChangeLevel()
+	{
 		LoadEnd();
 	}
 
-	void Game_LoadBegin_Trigger() {
+	void Game_LoadBegin_Trigger()
+	{
 	}
 
-	void Game_LoadEnd_Trigger() {
+	void Game_LoadEnd_Trigger()
+	{
 	}
 
-	void Game_Pause() {
+	void Game_Pause()
+	{
 	}
 
-	void Game_Unpause() {
+	void Game_Unpause()
+	{
 	}
 
-	void Game_DefineExternals() {
+	void Game_DefineExternals()
+	{
 	}
 
-	void Game_ApplyOptions() {
+	void Game_ApplyOptions()
+	{
 	}
 
 	/*
