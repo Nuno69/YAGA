@@ -1,0 +1,1 @@
+int Hook_TraceRay(const zVEC3& origin, const zVEC3& ray, int flags, zTTraceRayReport& report);
