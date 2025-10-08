@@ -1,9 +1,4 @@
-// Supported with union (c) 2020 Union team
-// Union SOURCE file
-
 namespace GOTHIC_NAMESPACE {
-	// TO DO: change this to generic 'Read'
-
 	void ReadInventoryItem(oCItem* item)
 	{
 		if (item == nullptr)

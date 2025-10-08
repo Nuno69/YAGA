@@ -11,9 +11,16 @@
 #include "Hooks/zCModel.hpp"
 #include "Hooks/zCViewDialogChoice.hpp"
 
-#include "Readers/InventoryReader.hpp"
-
 #include "Settings/YAGASettings.hpp"
+#include "Utils.hpp"
+#include "Compass.hpp"
+
+#include "Readers/CompassReader.hpp"
+#include "Readers/DialogReader.hpp"
+#include "Readers/FocusReader.hpp"
+#include "Readers/GameReader.hpp"
+#include "Readers/InventoryReader.hpp"
+#include "Readers/MenuReader.hpp"
 
 #include "Trackers/NPCTracker.hpp"
 #include "Trackers/ObjectTracker.hpp"
@@ -24,8 +31,6 @@
 
 #include "AudioHelper.hpp"
 #include "BlindCameraModel.hpp"
-#include "Compass.hpp"
 #include "SmartMap.hpp"
-#include "Utils.hpp"
 
 #include "Plugin.hpp"
