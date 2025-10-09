@@ -14,15 +14,6 @@ namespace GOTHIC_NAMESPACE {
 		return std::format("North at {}", angle);
 	}
 
-	// TO DO: change return type to std::wstring later!
-	std::string ComposeReading(zCMenuItem* item)
-	{
-		zSTRING itemName = item->GetText(0);
-		zSTRING itemLabel = item->GetText(1);
-
-		return std::format("{}: {}", itemName.ToChar(), itemLabel.ToChar());
-	}
-
 	float GetAngleRelation(zCVob* source, zCVob* target)
 	{
 

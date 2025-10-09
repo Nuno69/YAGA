@@ -1,6 +1,6 @@
 // This file is included separately for each engine version
 
-namespace GOTHIC_NAMESPACE 
+namespace GOTHIC_NAMESPACE
 {
 	// NOTE! Callbacks won't be called by default, you need to uncomment
 	// hooks that will call specific callback
@@ -12,7 +12,7 @@ namespace GOTHIC_NAMESPACE
 
 	void Game_Init()
 	{
-		
+
 	}
 
 	void Game_Exit()
@@ -128,13 +128,13 @@ namespace GOTHIC_NAMESPACE
 		return Hook_WinMain(hInstance, hPrevInstance, lpCmdLine, nShowCmd);
 	}*/
 
-	/*void __fastcall oCGame_Init(oCGame* self, void* vtable);
+	void __fastcall oCGame_Init(oCGame* self, void* vtable);
 	auto Hook_oCGame_Init = Union::CreateHook(reinterpret_cast<void*>(zSwitch(0x00636F50, 0x0065D480, 0x006646D0, 0x006C1060)), &oCGame_Init, Union::HookType::Hook_Detours);
 	void __fastcall oCGame_Init(oCGame* self, void* vtable)
 	{
 		Hook_oCGame_Init(self, vtable);
 		Game_Init();
-	}*/
+	}
 
 	/*void __fastcall CGameManager_Done(CGameManager* self, void* vtable);
 	auto Hook_CGameManager_Done = Union::CreateHook(reinterpret_cast<void*>(zSwitch(0x00424850, 0x00427310, 0x004251A0, 0x004254E0)), &CGameManager_Done, Union::HookType::Hook_Detours);
