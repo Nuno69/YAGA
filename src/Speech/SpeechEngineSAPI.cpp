@@ -1,7 +1,7 @@
 #include <sapi.h>
 
 #include "SpeechEngineSAPI.h"
-#include "Settings/YAGASettings.hpp"
+#include "Settings/YAGA.hpp"
 
 SpeechEngineSAPI::SpeechEngineSAPI() : SpeechEngine(L"SAPI5"),
                                        voice(NULL)

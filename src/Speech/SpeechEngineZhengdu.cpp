@@ -1,5 +1,5 @@
 #include "SpeechEngineZhengdu.h"
-#include "Settings/YAGASettings.hpp"
+#include "Settings/YAGA.hpp"
 
 SpeechEngineZhengdu::SpeechEngineZhengdu() : SpeechEngine(L"ZDSR"),
                                              zhengdu(LoadLibrary("ZDSRAPI.DLL")),

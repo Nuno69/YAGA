@@ -3,7 +3,7 @@
 #include "Utils/String.hpp"
 #include "Utils/Generic.hpp"
 
-#include "Settings/YAGASettings.hpp"
+#include "Settings/YAGA.hpp"
 #include "Compass.hpp"
 
 #include "Readers/CompassReader.hpp"
