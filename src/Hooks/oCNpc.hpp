@@ -7,7 +7,7 @@ namespace GOTHIC_NAMESPACE {
 	}
 
 	// Removes the line of sight obstruction.
-	auto Patch_oCNpc_FreeLineOfSight = Union::CreateHook(reinterpret_cast<void*>(zSwitch(0x007418E0, 0x007418E0, 0x007418E0, 0x007418E0)), &oCNpc::Patch_FreeLineOfSight, Union::HookType::Hook_CallPatch);
+	auto Patch_oCNpc_FreeLineOfSight = Union::CreateHook(reinterpret_cast<void*>(zSwitch(0x00741940, 0x00741940, 0x00741940, 0x00741940)), &oCNpc::Patch_FreeLineOfSight, Union::HookType::Hook_CallPatch);
 	int oCNpc::Patch_FreeLineOfSight(zVEC3& pos, zCVob* vob)
 	{
 		return TRUE;
