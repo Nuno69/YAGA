@@ -12,7 +12,7 @@ namespace Settings
 
 namespace GOTHIC_NAMESPACE
 {
-	void SpeechEngine()
+	void LoadSpeechEngineSettings()
 	{
 		Settings::SpeechDefaultEngine = zoptions->ReadInt("YAGA", "DefaultSpeechEngine", 1);
 		Settings::SpeechZDUseMultiChannel = zoptions->ReadInt("YAGA", "ZDSRUseMultiChannel", 1);

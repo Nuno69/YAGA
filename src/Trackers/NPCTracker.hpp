@@ -7,7 +7,7 @@ namespace Settings
 #ifdef GOTHIC_NAMESPACE
 
 namespace GOTHIC_NAMESPACE {
-	void InitializeNPCTracker()
+	void LoadNPCTrackerSettings()
 	{
 		Settings::NPCTrackerReadIndex = zoptions->ReadInt("YAGA", "NPCTrackerReadIndex", 1);
 		Settings::NPCTrackerReadAngle = zoptions->ReadInt("YAGA", "NPCTrackerReadAngle", 1);

@@ -12,7 +12,11 @@ namespace GOTHIC_NAMESPACE
 
 	void Game_Init()
 	{
+		LoadSpeechEngineSettings();
+		LoadNPCTrackerSettings();
 
+		InitializeVobTracker();
+		InitializeSpeech(Settings::SpeechDefaultEngine);
 	}
 
 	void Game_Exit()
@@ -27,7 +31,25 @@ namespace GOTHIC_NAMESPACE
 
 	void Game_Loop()
 	{
+		Raycast();
+		zSound3D::UpdateAllSounds();
 
+		VobTrackerLoop();
+		CompassReaderLoop();
+		FocusReaderLoop();
+		GameReaderLoop();
+		BlindCameraLoop();
+
+		if (zinput->KeyToggled(KEY_M))
+			zSmartMap::Open();
+
+		// TO DO: wrap this with custom render delay?
+		//static Timer timer;
+		//if (timer[1].Await(50))
+		UpdateSoundHandles();
+
+		// zSmartMap::UpdateCurrentSector();
+		// zSmartMap::RenderWorld();
 	}
 
 	void Game_PostLoop()
@@ -42,12 +64,12 @@ namespace GOTHIC_NAMESPACE
 
 	void Game_SaveBegin()
 	{
-
+		// Read(L"Saving game...");
 	}
 
 	void Game_SaveEnd()
 	{
-
+		// Read(string::Combine("Save complete at slot %i!", SaveLoadGameInfo.slotID).AToW());
 	}
 
 	void LoadBegin()
@@ -154,12 +176,12 @@ namespace GOTHIC_NAMESPACE
 	}*/
 
 
-	/*void __fastcall oCGame_MainWorld_Render(Union::Registers& reg);
+	void __fastcall oCGame_MainWorld_Render(Union::Registers& reg);
 	auto Partial_zCWorld_Render = Union::CreatePartialHook(reinterpret_cast<void*>(zSwitch(0x0063DC76, 0x0066498B, 0x0066BA76, 0x006C87EB)), &oCGame_MainWorld_Render);
 	void __fastcall oCGame_MainWorld_Render(Union::Registers& reg)
 	{
 		Game_Loop();
-	}*/
+	}
 
 	/*void __fastcall zCMenu_Render(zCMenu* self, void* vtable);
 	auto Hook_zCMenu_Render = Union::CreateHook(reinterpret_cast<void*>(zSwitch(0x004D0DA0, 0x004E14E0, 0x004DB270, 0x004DDC20)), &zCMenu_Render, Union::HookType::Hook_Detours);
@@ -169,14 +191,14 @@ namespace GOTHIC_NAMESPACE
 		Game_MenuLoop();
 	}*/
 
-	/*void __fastcall oCGame_WriteSaveGame(oCGame* self, void* vtable, int slot, zBOOL saveGlobals);
+	void __fastcall oCGame_WriteSaveGame(oCGame* self, void* vtable, int slot, zBOOL saveGlobals);
 	auto Hook_oCGame_WriteSaveGame = Union::CreateHook(reinterpret_cast<void*>(zSwitch(0x0063AD80, 0x00661680, 0x006685D0, 0x006C5250)), &oCGame_WriteSaveGame, Union::HookType::Hook_Detours);
 	void __fastcall oCGame_WriteSaveGame(oCGame* self, void* vtable, int slot, zBOOL saveGlobals)
 	{
 		Game_SaveBegin();
 		Hook_oCGame_WriteSaveGame(self, vtable, slot, saveGlobals);
 		Game_SaveEnd();
-	}*/
+	}
 
 	/*void __fastcall oCGame_LoadGame(oCGame* self, void* vtable, int slot, const zSTRING& levelPath);
 	auto Hook_oCGame_LoadGame = Union::CreateHook(reinterpret_cast<void*>(zSwitch(0x0063C070, 0x00662B20, 0x00669970, 0x006C65A0)), &oCGame_LoadGame, Union::HookType::Hook_Detours);

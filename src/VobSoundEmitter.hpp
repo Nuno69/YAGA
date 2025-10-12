@@ -1,14 +1,11 @@
-// Supported with union (c) 2020 Union team
-// Union SOURCE file
-
 #include <unordered_set>
 #include <unordered_map>
 
-namespace GOTHIC_ENGINE {
+namespace GOTHIC_NAMESPACE {
 	std::unordered_map<zCVob*, int> vobSoundEmitters;
 	std::unordered_set<zCVob*> collectedVobSoundEmitters;
 
-	bool BindSound3D(const string& fileName, zCVob* vob)
+	bool BindSound3D(const zSTRING& fileName, zCVob* vob)
 	{
 		auto it = vobSoundEmitters.find(vob);
 		if (it != vobSoundEmitters.end())
@@ -24,7 +21,7 @@ namespace GOTHIC_ENGINE {
 		int handle = zsound->PlaySound3D(sfx, vob, 0, 0);
 		if (handle != 0)
 		{
-			sfx->SetLooping(True);
+			sfx->SetLooping(TRUE);
 
 			collectedVobSoundEmitters.insert(vob);
 			vobSoundEmitters.insert({ vob, handle });

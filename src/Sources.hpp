@@ -22,6 +22,7 @@
 
 #include "AudioHelper.hpp"
 #include "BlindCameraModel.hpp"
+#include "VobSoundEmitter.hpp"
 #include "SmartMap.hpp"
 
 #include "Hooks/oCAIHuman.hpp"
