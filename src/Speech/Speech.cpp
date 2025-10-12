@@ -1,6 +1,7 @@
 #include <iostream>
 #include <memory>
 
+#include "SpeechEngineZhengdu.h"
 #include "SpeechEngineNVDA.h"
 #include "SpeechEngineSAPI.h"
 
@@ -11,7 +12,7 @@ void InitializeSpeech(int engine)
 	switch (engine)
 	{
 		case 0:
-			//activeEngine = std::make_unique<zSpeechEngineZhengdu>();
+			activeEngine = std::make_unique<SpeechEngineZhengdu>();
 			break;
 
 		case 1:
