@@ -4,7 +4,7 @@ namespace GOTHIC_NAMESPACE {
 		if (zinput->KeyToggled(KEY_F1))
 		{
 			float compassAngle = GetCompassAngle();
-			//Read(GetCompassName(compassAngle));
+			Speech::Read(GetCompassName(compassAngle));
 		}
 
 		if (zinput->KeyPressed(KEY_LSHIFT) || zinput->KeyPressed(KEY_RSHIFT))
@@ -14,7 +14,7 @@ namespace GOTHIC_NAMESPACE {
 				RotateTowardsCompassAngle(-1);
 
 				float compassAngle = GetCompassAngle();
-				//Read(GetCompassName(compassAngle));
+				Speech::Read(GetCompassName(compassAngle));
 			}
 
 			if (zinput->KeyToggled(KEY_RIGHTARROW))
@@ -22,7 +22,7 @@ namespace GOTHIC_NAMESPACE {
 				RotateTowardsCompassAngle(1);
 
 				float compassAngle = GetCompassAngle();
-				//Read(GetCompassName(compassAngle));
+				Speech::Read(GetCompassName(compassAngle));
 			}
 		}
 	}

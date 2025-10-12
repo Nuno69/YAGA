@@ -16,7 +16,7 @@ namespace GOTHIC_NAMESPACE
 		LoadNPCTrackerSettings();
 
 		InitializeVobTracker();
-		InitializeSpeech(Settings::SpeechDefaultEngine);
+		Speech::Initialize(Settings::SpeechDefaultEngine);
 	}
 
 	void Game_Exit()
@@ -64,12 +64,12 @@ namespace GOTHIC_NAMESPACE
 
 	void Game_SaveBegin()
 	{
-		// Read(L"Saving game...");
+		Speech::Read("Saving game...");
 	}
 
-	void Game_SaveEnd()
+	void Game_SaveEnd(const int slot)
 	{
-		// Read(string::Combine("Save complete at slot %i!", SaveLoadGameInfo.slotID).AToW());
+		Speech::ReadFormat("Save complete at slot {}!", slot);
 	}
 
 	void LoadBegin()
@@ -197,7 +197,7 @@ namespace GOTHIC_NAMESPACE
 	{
 		Game_SaveBegin();
 		Hook_oCGame_WriteSaveGame(self, vtable, slot, saveGlobals);
-		Game_SaveEnd();
+		Game_SaveEnd(slot);
 	}
 
 	/*void __fastcall oCGame_LoadGame(oCGame* self, void* vtable, int slot, const zSTRING& levelPath);

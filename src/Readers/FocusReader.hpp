@@ -18,21 +18,23 @@ namespace GOTHIC_NAMESPACE {
         container = currentVob->CastTo<oCMobContainer>();
 
         if (item != nullptr) {
-            //Read(string(item->name));
-            return;
-        }
-        if (npc != nullptr) {
-            //Read(string(npc->GetName(0)));
-            if (npc->IsDead()) {
-                //Read(L"Is dead");
-            }
-            return;
-        }
-        if (container != nullptr) {
-            //Read(string(container->GetName()));
+            Speech::Read(item->name);
             return;
         }
 
-        //Read(string(currentVob->GetObjectName()));
+        if (npc != nullptr) {
+            Speech::Read(npc->GetName(0));
+            if (npc->IsDead()) {
+                Speech::Read(L"Is dead");
+            }
+            return;
+        }
+
+        if (container != nullptr) {
+            Speech::Read(container->GetName());
+            return;
+        }
+
+        Speech::Read(currentVob->GetObjectName());
 	}
 }

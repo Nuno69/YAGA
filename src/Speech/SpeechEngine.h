@@ -10,12 +10,10 @@ protected:
 public:
 	virtual ~SpeechEngine() {}
 
-public:
 	virtual int Read(const wchar_t* message, int interrupt) = 0;
 	virtual void StopReading() = 0;
 	virtual int IsReady() = 0;
 
-public:
 	const wchar_t* GetName() { return name; }
 
 private:

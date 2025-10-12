@@ -4,7 +4,7 @@ namespace GOTHIC_NAMESPACE {
 	void zCMenu::PreviousOption_Union()
 	{
 		(this->*Hook_zCMenu_PreviousOption)();
-		//ReadMenuItem(this->GetActiveItem());
+		Speech::Read(this->GetActiveItem());
 	}
 
 	// Reads a menu item focused by pressing the down arrow key.
@@ -12,6 +12,6 @@ namespace GOTHIC_NAMESPACE {
 	void zCMenu::NextOption_Union()
 	{
 		(this->*Hook_zCMenu_NextOption)();
-		//ReadMenuItem(this->GetActiveItem());
+		Speech::Read(this->GetActiveItem());
 	}
 }

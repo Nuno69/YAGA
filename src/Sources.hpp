@@ -6,6 +6,12 @@
 #include "Settings/YAGA.hpp"
 #include "Compass.hpp"
 
+#include "Speech/SpeechEngine.h"
+#include "Speech/SpeechEngineZhengdu.h"
+#include "Speech/SpeechEngineNVDA.h"
+#include "Speech/SpeechEngineSAPI.h"
+#include "Speech/Speech.hpp"
+
 #include "Readers/CompassReader.hpp"
 #include "Readers/DialogReader.hpp"
 #include "Readers/FocusReader.hpp"

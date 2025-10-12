@@ -8,8 +8,6 @@
 #include <format>
 #include <unordered_map>
 
-#include "Speech/Speech.h"
-
 #ifdef __G1
 #define GOTHIC_NAMESPACE Gothic_I_Classic
 #define ENGINE Engine_G1

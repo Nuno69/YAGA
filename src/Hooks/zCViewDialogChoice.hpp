@@ -4,7 +4,7 @@ namespace GOTHIC_NAMESPACE {
 	void zCViewDialogChoice::HighlightSelected_Union()
 	{
 	    (this->*Hook_zCViewDialogChoice_HighlightSelected)();
-		//ReadDialogChoice(this);
+		Speech::Read(this);
 	}
 
 	// Reads the default dialog choice when a dialog box is presented.
@@ -12,6 +12,6 @@ namespace GOTHIC_NAMESPACE {
 	void zCViewDialogChoice::StartSelection_Union()
 	{
 		(this->*Hook_zCViewDialogChoice_StartSelection)();
-		//ReadDialogChoice(this);
+		Speech::Read(this);
 	}
 }

@@ -1,6 +1,12 @@
 namespace GOTHIC_NAMESPACE {
-	void ReadMenuItem(zCMenuItem* item)
+	namespace Speech
 	{
-		//Read(ComposeReading(item));
+		void Read(zCMenuItem* item)
+		{
+			const zSTRING itemName = item->GetText(0);
+			const zSTRING itemLabel = item->GetText(1);
+
+			ReadFormat("{}: {}", itemName.ToChar(), itemLabel.ToChar());
+		}
 	}
 }

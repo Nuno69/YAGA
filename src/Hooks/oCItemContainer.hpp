@@ -3,7 +3,7 @@ namespace GOTHIC_NAMESPACE {
 	auto Hook_oCItemContainer_DrawItemInfo = Union::CreateHook(reinterpret_cast<void*>(zSwitch(0x00706E40, 0x00706E40, 0x00706E40, 0x00706E40)), &oCItemContainer::DrawItemInfo_Union, Union::HookType::Hook_CallPatch);
 	void oCItemContainer::DrawItemInfo_Union(oCItem* item, zCWorld* renderWorld)
 	{
-		//ReadInventoryItem(item);
+		Speech::Read(item);
 		(this->*Hook_oCItemContainer_DrawItemInfo)(item, renderWorld);
 	}
 
@@ -11,7 +11,7 @@ namespace GOTHIC_NAMESPACE {
 	auto Hook_oCItemContainer_Close = Union::CreateHook(reinterpret_cast<void*>(zSwitch(0x00708F30, 0x00708F30, 0x00708F30, 0x00708F30)), &oCItemContainer::Close_Union, Union::HookType::Hook_CallPatch);
 	void oCItemContainer::Close_Union()
 	{
-		//ReadInventoryItem(nullptr);
+		Speech::StopReading();
 		(this->*Hook_oCItemContainer_Close)();
 	}
 
@@ -23,7 +23,7 @@ namespace GOTHIC_NAMESPACE {
 		(this->*Hook_oCItemContainer_NextItem)();
 
 		if (!this->IsActive())
-			Read(L"Right container", 0);
+			Speech::Read(L"Right container", 0);
 	}
 #endif
 
@@ -34,6 +34,6 @@ namespace GOTHIC_NAMESPACE {
 		(this->*Hook_oCItemContainer_PrevItem)();
 
 		if (!this->IsActive())
-			Read(L"Left container", 0);
+			Speech::Read(L"Left container", 0);
 	}
 }

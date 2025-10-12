@@ -1,6 +1,9 @@
 namespace GOTHIC_NAMESPACE {
-	void ReadDialogChoice(zCViewDialogChoice* choice)
+	namespace Speech
 	{
-		//Read(choice->GetSelectedText());
+		void Read(zCViewDialogChoice* choice)
+		{
+			Read(choice->GetSelectedText());
+		}
 	}
 }

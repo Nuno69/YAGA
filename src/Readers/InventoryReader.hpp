@@ -1,25 +1,33 @@
 namespace GOTHIC_NAMESPACE {
-	void ReadInventoryItem(oCItem* item)
+	namespace Speech
 	{
-		if (item == nullptr)
-			return;
-
-		// TO DO: write some type of function for converting ANSI string to WIDE string
-		//string message = string::Combine("%z. ", item->name);
-
-		for (int i = 0; i < 6; i++)
+		void Read(oCItem* item)
 		{
-			zSTRING& text = item->text[i];
+			if (item == nullptr)
+				return;
 
-			if (text.Length() == 0)
-				continue;
+			zSTRING message = item->name;
+			message += ". ";
 
-			int& count = item->count[i];
-			//message += count != 0 ?
-			//	string::Combine("%z - %i.", text, count) :
-			//	string::Combine("%z ", text, count);
+			for (int i = 0; i < 6; i++)
+			{
+				const zSTRING& text = item->text[i];
+				if (text.Length() == 0)
+					continue;
 
-			//Read(message.AToW());
+				message += text;
+
+				const int& count = item->count[i];
+				if (count != 0)
+				{
+					message += " - ";
+					message += count;
+				}
+
+				message += ".";
+			}
+
+			Read(message);
 		}
 	}
 }

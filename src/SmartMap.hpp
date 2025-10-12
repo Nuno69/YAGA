@@ -143,8 +143,7 @@ namespace GOTHIC_NAMESPACE {
 			InitVobList();
 			UpdateWorldBounds();
 
-			//wstring messageEntry = wstring::Combine(L"Sector %i %i. Press ENTER to hear details. Use arrows to move on the map. Press SPACE to enable navigator.", CurrentSector.x, CurrentSector.y);
-			//Read(messageEntry);
+			Speech::ReadFormat("Sector {} {}. Press ENTER to hear details. use arrows to move on the map. Press SPACE to enable navigator.", CurrentSector.x, CurrentSector.y);
 
 			while (true)
 			{
@@ -196,10 +195,10 @@ namespace GOTHIC_NAMESPACE {
 					CurrentSector.y += at.y;
 			}
 
-			//if (stop)
-			//	Read(wstring::Combine(L"You can't go further, %i %i", CurrentSector.x, CurrentSector.y));
-			//else
-			//	Read(wstring::Combine(L"%i %i", CurrentSector.x, CurrentSector.y));
+			if (stop)
+				Speech::ReadFormat("You can't go further, {} {}", CurrentSector.x, CurrentSector.y);
+			else
+				Speech::ReadFormat("{} {}", CurrentSector.x, CurrentSector.y);
 		}
 
 		static void Move(const int& x, const int& y)
@@ -275,7 +274,7 @@ namespace GOTHIC_NAMESPACE {
 
 			// Messages
 			if (waypoints == 0) {
-				Read(L"Unreachable area.");
+				Speech::Read(L"Unreachable area.");
 				return;
 			}
 
@@ -299,7 +298,7 @@ namespace GOTHIC_NAMESPACE {
 			if (dragons)      message += L"Dragons: not detected! ";
 
 			// Reading
-			//Read(message);
+			Speech::Read(message);
 		}
 
 		static void RenderWorld()
