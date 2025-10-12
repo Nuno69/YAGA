@@ -1,4 +1,4 @@
-name: "Plugin CI/CD"
+name: "YAGA CI/CD"
 
 on:
   release:
@@ -8,7 +8,7 @@ permissions:
   contents: write
     
 jobs:
-  plugin:
+  yaga:
     runs-on: windows-latest
 
     steps:
@@ -23,21 +23,14 @@ jobs:
         with:
           arch: x86
  
-      - name: Compile plugin
+      - name: Compile yaga.dll & Build yaga.vdf
         run: |
           cmake . --preset MP-Release
           cmake --build --preset MP-Release
+          cmake --build --preset MP-Release --target vdf
 
-      - name: Find plugin
-        run: |
-          $plugin_dll = Get-ChildItem *.dll -Recurse | Select-Object -First 1 -ExpandProperty FullName
-          $plugin_dll = $plugin_dll.Replace((Resolve-Path ".").Path + "\", "")
-          $plugin_dll = $plugin_dll.Replace("\", "/")
-          echo "plugin_dll=$plugin_dll" >> $env:GITHUB_ENV
-          echo "Found plugin path: $plugin_dll"
-
-      - name: Upload plugin
+      - name: Upload yaga.vdf
         uses: softprops/action-gh-release@v2
         with:
           body_path: changelog.md
-          files: ${{ env.plugin_dll }}
+          files: vdf/yaga.vdf

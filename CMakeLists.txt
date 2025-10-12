@@ -36,3 +36,23 @@ target_add_versioninfo(${CMAKE_PROJECT_NAME}
 )
 
 add_subdirectory(dependencies)
+
+# VDF build target
+
+set(VDF_DIR "${PROJECT_SOURCE_DIR}/vdf/")
+set(VDF_AUTORUN_DIR "${VDF_DIR}System/Autorun/")
+
+set(VDF_BUILD_VM_FILE "${VDF_DIR}build.vm")
+string(REPLACE "/" "\\" VDF_BUILD_VM_FILE "${VDF_BUILD_VM_FILE}")
+
+add_custom_command(TARGET ${CMAKE_PROJECT_NAME}
+		POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${CMAKE_PROJECT_NAME}> ${VDF_AUTORUN_DIR}
+		COMMAND ${CMAKE_COMMAND} -E echo "[Post Build] $<TARGET_FILE_NAME:${CMAKE_PROJECT_NAME}> copied to: ${VDF_AUTORUN_DIR}")
+
+add_custom_target(vdf
+		COMMAND ${CMAKE_COMMAND} -E echo "[VDF] Generating archive..."
+		COMMAND "${VDF_DIR}/GothicVDFS.exe" /B "${VDF_BUILD_VM_FILE}"
+		COMMAND ${CMAKE_COMMAND} -E echo "[VDF] archive build successfully!"
+		WORKING_DIRECTORY "${VDF_DIR}"
+)
