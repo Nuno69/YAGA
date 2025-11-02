@@ -3,6 +3,9 @@ name: "YAGA CI/CD"
 on:
   release:
     types: [created]
+
+permissions:
+  contents: write
     
 jobs:
   yaga:
@@ -20,15 +23,14 @@ jobs:
         with:
           arch: x86
  
-      - name: Compile yaga.dll
-        run: msbuild -target:YAGA -p:Configuration="MP x2 MT Release"
-
-      - name: Build yaga.vdf
-        run: ./vdfsbuilder build.vm
-        working-directory: ./VDF
+      - name: Compile yaga.dll & Build yaga.vdf
+        run: |
+          cmake . --preset MP-Release
+          cmake --build --preset MP-Release
+          cmake --build --preset MP-Release --target vdf
 
       - name: Upload yaga.vdf
         uses: softprops/action-gh-release@v2
         with:
           body_path: changelog.md
-          files: VDF/yaga.vdf
+          files: vdf/yaga.vdf
