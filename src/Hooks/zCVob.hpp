@@ -1,5 +1,5 @@
 namespace GOTHIC_NAMESPACE {
-	auto Hook_zCVob_TraceRay = Union::CreateHook(reinterpret_cast<void*>(zSwitch(0x005FFE40, 0x005FFE40, 0x005FFE40, 0x005FFE40)), &zCVob::Hook_TraceRay);
+	auto Hook_zCVob_TraceRay = Union::CreateHook(SIGNATURE_OF(&zCVob::TraceRay), &zCVob::Hook_TraceRay);
 	int zCVob::Hook_TraceRay(zVEC3 const& origin, zVEC3 const& ray, int flags, zTTraceRayReport& report)
 	{
 		if (!this->CastTo<oCMobDoor>())

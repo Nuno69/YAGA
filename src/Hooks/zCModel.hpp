@@ -1,5 +1,5 @@
 namespace GOTHIC_NAMESPACE {
-    auto Hook_zCModel_CalcTransBlending = Union::CreateHook(reinterpret_cast<void*>(zSwitch(0x0057F8E0, 0x0057F8E0, 0x0057F8E0, 0x0057F8E0)), &zCModel::Hook_CalcTransBlending, Union::HookType::Hook_Detours);
+    auto Hook_zCModel_CalcTransBlending = Union::CreateHook(SIGNATURE_OF(&zCModel::CalcTransBlending), &zCModel::Hook_CalcTransBlending, Union::HookType::Hook_Detours);
     void zCModel::Hook_CalcTransBlending()
     {
         (this->*Hook_zCModel_CalcTransBlending)();

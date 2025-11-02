@@ -1,5 +1,5 @@
 namespace GOTHIC_NAMESPACE {
-    auto Hook_zCAIPlayer_CheckEnoughSpaceMoveForward = Union::CreateHook(reinterpret_cast<void*>(zSwitch(0x00511700, 0x00511700, 0x00511700, 0x00511700)), &zCAIPlayer::Hook_CheckEnoughSpaceMoveForward, Union::HookType::Hook_Detours);
+    auto Hook_zCAIPlayer_CheckEnoughSpaceMoveForward = Union::CreateHook(SIGNATURE_OF(&zCAIPlayer::CheckEnoughSpaceMoveForward), &zCAIPlayer::Hook_CheckEnoughSpaceMoveForward, Union::HookType::Hook_Detours);
     int zCAIPlayer::Hook_CheckEnoughSpaceMoveForward(const int a)
     {
         if (vob != player)
