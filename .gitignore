@@ -9,3 +9,6 @@
 # Local binaries
 /vdf/System/Autorun/YAGA.dll
 /vdf/yaga.vdf
+
+#macOS
+**/.DS_Store
