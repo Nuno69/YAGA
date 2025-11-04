@@ -1,5 +1,5 @@
 // Disable macro redefinition warning
-#pragma warning(disable: 4005)
+#pragma warning(disable : 4005)
 
 #include "resource.h"
 
@@ -14,7 +14,7 @@
 #define GOTHIC_NAMESPACE Gothic_I_Classic
 #define ENGINE Engine_G1
 HOOKSPACE(Gothic_I_Classic, GetGameVersion() == ENGINE);
-HOOKSPACE_WITH_SG_RC( Gothic_I_Classic, GetGameVersion() == ENGINE, IDR_GOTHIC_1_CLASSIC_TXT, RT_RCDATA);
+HOOKSPACE_WITH_SG_RC(Gothic_I_Classic, GetGameVersion() == ENGINE, IDR_GOTHIC_1_CLASSIC_TXT, RT_RCDATA);
 #include "Sources.hpp"
 #endif
 

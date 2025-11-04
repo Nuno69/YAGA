@@ -1,16 +1,16 @@
 // Add your plugin files here
 
-#include "Utils/String.hpp"
 #include "Utils/Generic.hpp"
+#include "Utils/String.hpp"
 
-#include "Settings/YAGA.hpp"
 #include "Compass.hpp"
+#include "Settings/YAGA.hpp"
 
+#include "Speech/Speech.hpp"
 #include "Speech/SpeechEngine.h"
-#include "Speech/SpeechEngineZhengdu.h"
 #include "Speech/SpeechEngineNVDA.h"
 #include "Speech/SpeechEngineSAPI.h"
-#include "Speech/Speech.hpp"
+#include "Speech/SpeechEngineZhengdu.h"
 
 #include "Readers/CompassReader.hpp"
 #include "Readers/DialogReader.hpp"
@@ -23,13 +23,13 @@
 #include "Trackers/ObjectTracker.hpp"
 #include "Trackers/VobTracker.hpp"
 
-#include "WallDetection/Sound3D.hpp"
 #include "WallDetection/Raycast.hpp"
+#include "WallDetection/Sound3D.hpp"
 
 #include "AudioHelper.hpp"
 #include "BlindCameraModel.hpp"
-#include "VobSoundEmitter.hpp"
 #include "SmartMap.hpp"
+#include "VobSoundEmitter.hpp"
 
 #include "Hooks/oCAIHuman.hpp"
 #include "Hooks/oCGame.hpp"
