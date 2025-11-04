@@ -59,3 +59,20 @@ add_custom_target(vdf
 		COMMAND ${CMAKE_COMMAND} -E echo "[VDF] archive build successfully!"
 		WORKING_DIRECTORY "${VDF_DIR}"
 )
+
+# clang-format support
+find_program(CLANG_FORMAT "clang-format")
+if (CLANG_FORMAT)
+	file(GLOB_RECURSE ALL_SOURCE_FILES
+		"${CMAKE_SOURCE_DIR}/src/*.cpp"
+		"${CMAKE_SOURCE_DIR}/src/*.h"
+		"${CMAKE_SOURCE_DIR}/src/*.hpp"
+	)
+	add_custom_target(format
+		COMMAND ${CLANG_FORMAT} -i -style=file ${ALL_SOURCE_FILES}
+		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+	)
+	message(STATUS "Format target enabled. Run 'cmake --build . --target format' to format code.")
+else()
+	message(WARNING "clang-format not found. Format target will not be available.")
+endif()
