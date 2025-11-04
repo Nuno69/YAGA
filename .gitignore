@@ -10,8 +10,8 @@
 /vdf/System/Autorun/YAGA.dll
 /vdf/yaga.vdf
 
-#macOS
-**/.DS_Store
+# macOS
+.DS_Store
 
 # Emacs
 *~
