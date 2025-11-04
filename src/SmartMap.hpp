@@ -166,16 +166,17 @@ struct zSmartMap
             zinput->ProcessInputEvents();
 
             if (zinput->KeyToggled(KEY_ESCAPE) || zinput->KeyToggled(KEY_M))
-            {
-                ogame->GetCameraVob()->SetSleeping(FALSE); // DELETE ME
                 break;
-            }
 
             HandleEvent();
 
             zrenderer->BeginFrame();
-            RenderWorld(); // DEMETE ME
+
+            // Render world and elements on the screen
+            // Helpful for ppl that can see the game
+            RenderWorld();
             screen->Render();
+
             zrenderer->EndFrame();
             zrenderer->Vid_Blit(1, 0, 0);
 
@@ -348,7 +349,6 @@ struct zSmartMap
                 static_cast<float>(CurrentSector.y * zMAP_SECTOR_SIZE));
         zVEC3 b(a[VX] + zMAP_SECTOR_SIZE, -4000.0f, a[VZ] + zMAP_SECTOR_SIZE);
 
-        ogame->GetCameraVob()->SetSleeping(TRUE);
         ogame->GetCameraVob()->SetPositionWorld(a);
         ogame->GetCameraVob()->SetHeadingWorld(b);
 
