@@ -165,7 +165,7 @@ struct zSmartMap
         {
             zinput->ProcessInputEvents();
 
-            if (zinput->KeyPressed(KEY_ESCAPE) || zinput->KeyPressed(KEY_M))
+            if (zinput->KeyToggled(KEY_ESCAPE) || zinput->KeyToggled(KEY_M))
             {
                 ogame->GetCameraVob()->SetSleeping(FALSE); // DELETE ME
                 break;
