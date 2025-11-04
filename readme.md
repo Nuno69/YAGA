@@ -10,7 +10,6 @@
 
 - The steam version of [Gothic 1](https://store.steampowered.com/app/65540/Gothic_1/) or [Gothic II: Night Of The Raven](https://store.steampowered.com/app/39510/Gothic_II_Gold_Edition/).  
 Other versions of the game should work however that has not been tested and so is not recommended.
-- [Union](https://www.worldofgothic.de/dl/download_651.htm)
 - The **NVDA screenreader** or the **Zhengdu Screenreader**
 - [yaga.vdf](https://github.com/Nuno69/YAGA/releases)
 
@@ -19,13 +18,24 @@ Other versions of the game should work however that has not been tested and so i
 Everything outlined above plus the following:
 
 - [git lfs](https://git-lfs.com/) (required for fetching lfs files from repo)
-- [Visual Studio](https://visualstudio.microsoft.com/pl/downloads/) (2022 or higher)
+- [CMake](https://cmake.org/)
+- [ClangFormat](https://clang.llvm.org/docs/ClangFormat.html)
 
 ### Building
 
-To build the project, open up the **YAGA.sln** in [Visual Studio](https://visualstudio.microsoft.com/pl/downloads/) and hit **Build Solution**.  
-This will produce the **Bin/yaga.dll** and **VDF/yaga.vdf** files.  
-You can also build **YAGA** project, to produce only the plugin without generating **yaga.vdf**.
+Before compiling the mod you need to clone this repository recursively by executing the following command: `git clone --recursive https://github.com/nuno69/yaga`
+
+### building with Visual Studio
+
+1. Open the repository in Visual Studio
+2. Choose a build target that matches your game version
+3. Build the project with `CTRL+SHIFT+B`
+
+### Building with Command Line
+
+1. Configure the build system with the following command: `cmake --preset G2-Release`
+2. Build the mod with `cmake --build --preset G2-Release`
+3. Optionally package the mod: `cmake --build out/build/G2-Release --target vdf`
 
 ## Settings
 
