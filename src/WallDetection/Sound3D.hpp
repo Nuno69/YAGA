@@ -195,6 +195,24 @@ class zSound3D : public zCObject
         return sound3D;
     }
 
+    static void PlayAllSounds()
+    {
+        for (int i = Sounds.GetNum() - 1; i != -1; --i)
+        {
+            zSound3D *sound = Sounds[i];
+            sound->Play();
+        }
+    }
+
+    static void StopAllSounds()
+    {
+        for (int i = Sounds.GetNum() - 1; i != -1; --i)
+        {
+            zSound3D *sound = Sounds[i];
+            sound->Stop();
+        }
+    }
+
     static void UpdateAllSounds()
     {
         // static Timer timer;

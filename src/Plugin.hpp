@@ -28,6 +28,10 @@ void Game_PreLoop()
 
 void Game_Loop()
 {
+    // If game is paused, then exit early
+    if (ogame->singleStep)
+        return;
+
     Raycast();
     zSound3D::UpdateAllSounds();
 
@@ -115,10 +119,12 @@ void Game_LoadEnd_TriggerChangeLevel()
 
 void Game_Pause()
 {
+    zSound3D::StopAllSounds();
 }
 
 void Game_Unpause()
 {
+    zSound3D::PlayAllSounds();
 }
 
 void Game_DefineExternals()
@@ -233,7 +239,7 @@ oCGame_TriggerChangeLevel(oCGame* self, void* vtable, const zSTRING& levelpath, 
     Game_LoadEnd_TriggerChangeLevel();
 }*/
 
-/*#if ENGINE <= Engine_G1A
+#if ENGINE <= Engine_G1A
     void __fastcall oCGame_Pause_G1(oCGame* self, void* vtable);
     auto Hook_oCGame_Pause = Union::CreateHook(reinterpret_cast<void*>(zSwitch(0x0063DF50, 0x00664CD0, 0, 0)),
 &oCGame_Pause_G1, Union::HookType::Hook_Detours); void __fastcall oCGame_Pause_G1(oCGame* self, void* vtable)
@@ -250,16 +256,16 @@ sessionPaused)
         Hook_oCGame_Pause(self, vtable, sessionPaused);
         Game_Pause();
     }
-#endif*/
+#endif
 
-/*void __fastcall oCGame_Unpause(oCGame* self, void* vtable);
+void __fastcall oCGame_Unpause(oCGame* self, void* vtable);
 auto Hook_oCGame_Unpause = Union::CreateHook(reinterpret_cast<void*>(zSwitch(0x0063E1D0, 0x00664F80, 0x0066BFD0,
 0x006C8D50)), &oCGame_Unpause, Union::HookType::Hook_Detours); void __fastcall oCGame_Unpause(oCGame* self, void*
 vtable)
 {
     Hook_oCGame_Unpause(self, vtable);
     Game_Unpause();
-}*/
+}
 
 /*void __fastcall oCGame_DefineExternals_Ulfi(oCGame* self, void* vtable, zCParser* parser);
 auto Hook_oCGame_DefineExternals_Ulfi = Union::CreateHook(reinterpret_cast<void*>(zSwitch(0x006495B0, 0x006715F0,
