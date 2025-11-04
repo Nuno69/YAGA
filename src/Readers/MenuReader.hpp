@@ -4,6 +4,9 @@ namespace Speech
 {
 void Read(zCMenuItem *item)
 {
+    if (!item)
+        return;
+
     const zSTRING itemName = item->GetText(0);
     const zSTRING itemLabel = item->GetText(1);
 
