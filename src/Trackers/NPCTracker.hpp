@@ -1,8 +1,13 @@
+#ifndef YAGA_NPC_TRACKER_SETTINGS
+#define YAGA_NPC_TRACKER_SETTINGS
+
 namespace Settings
 {
 inline int NPCTrackerReadIndex;
 inline int NPCTrackerReadAngle;
 } // namespace Settings
+
+#endif
 
 #ifdef GOTHIC_NAMESPACE
 

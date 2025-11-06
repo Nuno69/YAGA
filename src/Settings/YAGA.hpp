@@ -1,3 +1,6 @@
+#ifndef YAGA_SETTINGS
+#define YAGA_SETTINGS
+
 namespace Settings
 {
 inline int SpeechDefaultEngine;
@@ -7,6 +10,8 @@ inline int SpeechSAPIVolume;
 
 inline int CompassAngleOffset;
 } // namespace Settings
+
+#endif
 
 #ifdef GOTHIC_NAMESPACE
 

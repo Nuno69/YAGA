@@ -1,8 +1,13 @@
+#ifndef YAGA_OBJECT_TRACKER_SETTINGS
+#define YAGA_OBJECT_TRACKER_SETTINGS
+
 namespace Settings
 {
 inline int ObjectTrackerReadIndex;
 inline int ObjectTrackerReadDist;
 } // namespace Settings
+
+#endif
 
 #ifdef GOTHIC_NAMESPACE
 
