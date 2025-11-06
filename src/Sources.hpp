@@ -32,11 +32,11 @@
 #include "SmartMap.hpp"
 
 #include "Hooks/oCAIHuman.hpp"
+#include "Hooks/oCWorld.hpp"
 #include "Hooks/oCGame.hpp"
 #include "Hooks/oCItemContainer.hpp"
 #include "Hooks/oCMobInter.hpp"
 #include "Hooks/oCNpc.hpp"
-#include "Hooks/oCWorld.hpp"
 #include "Hooks/zCAIPlayer.hpp"
 #include "Hooks/zCMenu.hpp"
 #include "Hooks/zCModel.hpp"
