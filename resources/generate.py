@@ -93,7 +93,7 @@ with open(output_file, "w") as f:
                 f"\t{signature['calling_convention']}"
                 f"\t{signature['class_name']}"
                 f"\t{signature['method_name']}"
-                f"{"\t".join(signature['arguments'])}"
+                f"\t{"\t".join(signature['arguments'])}"
             )
 
             f.write(line + '\n')
