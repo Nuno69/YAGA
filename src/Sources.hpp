@@ -19,8 +19,6 @@
 #include "Readers/InventoryReader.hpp"
 #include "Readers/MenuReader.hpp"
 
-#include "Trackers/NPCTracker.hpp"
-#include "Trackers/ObjectTracker.hpp"
 #include "Trackers/VobTracker.hpp"
 
 #include "SpatialCueManager.hpp"

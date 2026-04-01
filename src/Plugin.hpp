@@ -12,7 +12,6 @@ void Game_EntryPoint()
 void Game_Init()
 {
     LoadSpeechEngineSettings();
-    LoadNPCTrackerSettings();
 
     InitializeMenuHooks();
     InitializeDialogChoiceHooks();
