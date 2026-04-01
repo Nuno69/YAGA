@@ -3,6 +3,17 @@ namespace GOTHIC_NAMESPACE
 constexpr float VobSoundMinVolume = 0.1f;
 constexpr float VobSoundMaxVolume = 1.0f;
 
+SpatialCues::RearCueSettings MakeVobRearCueSettings()
+{
+    SpatialCues::RearCueSettings settings;
+    settings.Enabled = true;
+    settings.MinVolumeScale = 1.0f;
+    settings.MaxObstruction = 0.05f;
+    settings.MaxPitchOffset = -0.5f;
+    settings.SmoothingMs = 150.0f;
+    return settings;
+}
+
 float GetVobSoundVolume(zCVob *vob, const float maxDistance)
 {
     if (!player || !vob || maxDistance <= 0.0f)
@@ -29,7 +40,7 @@ void SubmitVobSoundCue(zCVob *vob, const char *channel, const zSTRING &fileName)
 {
     const int canSee = player->CanSee(vob, 1);
     const zCSoundSystem::zTSound3DParams props = MakeVobSound3DProps(vob, canSee);
-    SpatialCues::SubmitVobCue({vob, channel}, fileName, vob, props);
+    SpatialCues::SubmitVobCue({vob, channel}, fileName, vob, props, {}, MakeVobRearCueSettings());
 }
 
 void CollectVobSoundCues()

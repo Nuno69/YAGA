@@ -20,6 +20,15 @@ struct DistancePulseSettings
     float MaxDistance = 0.0f;
 };
 
+struct RearCueSettings
+{
+    bool Enabled = false;
+    float MinVolumeScale = 1.0f;
+    float MaxObstruction = 0.05f;
+    float MaxPitchOffset = -0.5f;
+    float SmoothingMs = 150.0f;
+};
+
 struct Key
 {
     const void *Owner = nullptr;
@@ -45,6 +54,7 @@ struct Spec
     zTSound3DParams Params;
     Cadence CadenceType = Cadence::DistancePulse;
     DistancePulseSettings Pulse;
+    RearCueSettings RearCue;
     zCVob *AnchorVob = nullptr;
     zVEC3 AnchorPosition = 0.0f;
     bool UseWorldPosition = false;
@@ -55,6 +65,7 @@ struct State
     Spec Cue;
     int SoundHandle = 0;
     float NextPlaybackAt = 0.0f;
+    float RearCueAlpha = 0.0f;
     bool TouchedThisFrame = false;
     zCVob *WorldAnchorVob = nullptr;
 };
@@ -64,6 +75,11 @@ std::unordered_map<Key, State, KeyHash> ActiveCues;
 float GetCurrentTimeMs()
 {
     return ztimer ? ztimer->totalTimeFloat : 0.0f;
+}
+
+float GetFrameTimeMs()
+{
+    return ztimer ? ztimer->frameTimeFloat : 0.0f;
 }
 
 void Stop(State &state)
@@ -118,13 +134,68 @@ float GetPlaybackIntervalMs(State &state)
            (state.Cue.Pulse.FarIntervalMs - state.Cue.Pulse.NearIntervalMs) * distanceAlpha;
 }
 
+float GetRearCueTargetAlpha(State &state, zCVob *anchor)
+{
+    if (!state.Cue.RearCue.Enabled || !player || !anchor)
+        return 0.0f;
+
+    zVEC3 playerForward = player->GetAtVectorWorld();
+    playerForward[VY] = 0.0f;
+    if (playerForward.LengthApprox() <= 0.0f)
+        return 0.0f;
+
+    zVEC3 toAnchor = anchor->GetPositionWorld() - player->GetPositionWorld();
+    toAnchor[VY] = 0.0f;
+    if (toAnchor.LengthApprox() <= 0.0f)
+        return 0.0f;
+
+    playerForward = playerForward.Normalize();
+    toAnchor = toAnchor.Normalize();
+    return std::clamp(-playerForward.Dot(toAnchor), 0.0f, 1.0f);
+}
+
+void UpdateRearCueAlpha(State &state, zCVob *anchor)
+{
+    const float targetAlpha = GetRearCueTargetAlpha(state, anchor);
+    if (!state.Cue.RearCue.Enabled)
+    {
+        state.RearCueAlpha = 0.0f;
+        return;
+    }
+
+    if (state.Cue.RearCue.SmoothingMs <= 0.0f)
+    {
+        state.RearCueAlpha = targetAlpha;
+        return;
+    }
+
+    const float frameAlpha = std::clamp(GetFrameTimeMs() / state.Cue.RearCue.SmoothingMs, 0.0f, 1.0f);
+    state.RearCueAlpha += (targetAlpha - state.RearCueAlpha) * frameAlpha;
+}
+
+zTSound3DParams GetEffectiveParams(State &state, zCVob *anchor)
+{
+    UpdateRearCueAlpha(state, anchor);
+
+    zTSound3DParams params = state.Cue.Params;
+    if (!state.Cue.RearCue.Enabled)
+        return params;
+
+    const float rearAlpha = std::clamp(state.RearCueAlpha, 0.0f, 1.0f);
+    const float volumeScale = 1.0f - (1.0f - state.Cue.RearCue.MinVolumeScale) * rearAlpha;
+    params.volume *= volumeScale;
+    params.obstruction = (std::max)(params.obstruction, state.Cue.RearCue.MaxObstruction * rearAlpha);
+    params.pitchOffset += state.Cue.RearCue.MaxPitchOffset * rearAlpha;
+    return params;
+}
+
 void Play(State &state)
 {
     zCVob *anchor = ResolveAnchor(state);
     if (!anchor)
         return;
 
-    zTSound3DParams params = state.Cue.Params;
+    zTSound3DParams params = GetEffectiveParams(state, anchor);
     state.SoundHandle = zsound->PlaySound3D(state.Cue.FileName, anchor, 0, &params);
 
     if (state.Cue.CadenceType == Cadence::DistancePulse)
@@ -139,25 +210,28 @@ State &Touch(const Key &key)
 }
 
 void SubmitVobCue(const Key &key, const zSTRING &fileName, zCVob *anchorVob, const zTSound3DParams &params,
-                  const DistancePulseSettings &pulse = {})
+                  const DistancePulseSettings &pulse = {}, const RearCueSettings &rearCue = {})
 {
     State &state = Touch(key);
     state.Cue.FileName = fileName;
     state.Cue.Params = params;
     state.Cue.CadenceType = Cadence::DistancePulse;
     state.Cue.Pulse = pulse;
+    state.Cue.RearCue = rearCue;
     state.Cue.AnchorVob = anchorVob;
     state.Cue.UseWorldPosition = false;
 }
 
 void SubmitWorldCue(const Key &key, const zSTRING &fileName, const zVEC3 &position, const zTSound3DParams &params,
-                    const Cadence cadence, const DistancePulseSettings &pulse = {})
+                    const Cadence cadence, const DistancePulseSettings &pulse = {},
+                    const RearCueSettings &rearCue = {})
 {
     State &state = Touch(key);
     state.Cue.FileName = fileName;
     state.Cue.Params = params;
     state.Cue.CadenceType = cadence;
     state.Cue.Pulse = pulse;
+    state.Cue.RearCue = rearCue;
     state.Cue.AnchorPosition = position;
     state.Cue.UseWorldPosition = true;
 }
@@ -197,8 +271,10 @@ void UpdateAll()
             continue;
         }
 
+        zTSound3DParams params = GetEffectiveParams(state, anchor);
+
         if (IsHandleActive(state))
-            zsound->UpdateSound3D(state.SoundHandle, &state.Cue.Params);
+            zsound->UpdateSound3D(state.SoundHandle, &params);
         else
             state.SoundHandle = 0;
 
