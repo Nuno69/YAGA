@@ -44,9 +44,45 @@ add_subdirectory(dependencies)
 
 set(VDF_DIR "${PROJECT_SOURCE_DIR}/vdf/")
 set(VDF_AUTORUN_DIR "${VDF_DIR}System/Autorun/")
+set(VDF_SOUND_DIR "${VDF_DIR}_Work/Data/Sound/SFX/")
 
 set(VDF_BUILD_VM_FILE "${VDF_DIR}build.vm")
 string(REPLACE "/" "\\" VDF_BUILD_VM_FILE "${VDF_BUILD_VM_FILE}")
+
+option(YAGA_BUILD_SOUNDS "Build sound assets from Csound sources" ON)
+
+if (YAGA_BUILD_SOUNDS)
+	find_program(CSOUND NAMES csound csound64)
+	if (NOT CSOUND)
+		message(FATAL_ERROR "Csound not found. Install Csound or configure with -DYAGA_BUILD_SOUNDS=OFF.")
+	endif()
+
+	file(GLOB CSOUND_SOURCE_FILES CONFIGURE_DEPENDS
+		"${PROJECT_SOURCE_DIR}/audio/csound/cues/*.csd"
+	)
+
+	set(SOUND_OUTPUT_FILES)
+	foreach(CSOUND_SOURCE_FILE ${CSOUND_SOURCE_FILES})
+		get_filename_component(SOUND_NAME "${CSOUND_SOURCE_FILE}" NAME_WE)
+		set(SOUND_OUTPUT_FILE "${VDF_SOUND_DIR}${SOUND_NAME}.WAV")
+
+		add_custom_command(
+			OUTPUT "${SOUND_OUTPUT_FILE}"
+			COMMAND ${CMAKE_COMMAND} -E make_directory "${VDF_SOUND_DIR}"
+			COMMAND ${CSOUND} -+ignore_csopts=1 -d -W -o "${SOUND_OUTPUT_FILE}" "${CSOUND_SOURCE_FILE}"
+			DEPENDS "${CSOUND_SOURCE_FILE}"
+			COMMENT "[Sound] Rendering ${SOUND_NAME}.WAV"
+			VERBATIM
+		)
+
+		list(APPEND SOUND_OUTPUT_FILES "${SOUND_OUTPUT_FILE}")
+	endforeach()
+
+	add_custom_target(sounds
+		DEPENDS ${SOUND_OUTPUT_FILES}
+	)
+	add_dependencies(${CMAKE_PROJECT_NAME} sounds)
+endif()
 
 add_custom_command(TARGET ${CMAKE_PROJECT_NAME}
 		POST_BUILD
