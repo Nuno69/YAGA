@@ -9,6 +9,8 @@
 # Local binaries
 /vdf/System/Autorun/YAGA.dll
 /vdf/yaga.vdf
+/vdf/_Work/Data/Sound/SFX/*.WAV
+/vdf/_Work/Data/Sound/SFX/*.wav
 
 # macOS
 .DS_Store
