@@ -14,6 +14,9 @@ void Game_Init()
     LoadSpeechEngineSettings();
     LoadNPCTrackerSettings();
 
+    InitializeMenuHooks();
+    InitializeDialogChoiceHooks();
+
     InitializeVobTracker();
     Speech::Initialize(Settings::SpeechDefaultEngine);
 }
