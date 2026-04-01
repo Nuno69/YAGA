@@ -1,86 +1,52 @@
-#include <unordered_map>
-#include <unordered_set>
-
 namespace GOTHIC_NAMESPACE
 {
-std::unordered_map<zCVob *, int> vobSoundEmitters;
-std::unordered_set<zCVob *> collectedVobSoundEmitters;
+constexpr float VobSoundMinVolume = 0.1f;
+constexpr float VobSoundMaxVolume = 1.0f;
 
-bool BindSound3D(const zSTRING &fileName, zCVob *vob)
+float GetVobSoundVolume(zCVob *vob, const float maxDistance)
 {
-    auto it = vobSoundEmitters.find(vob);
-    if (it != vobSoundEmitters.end())
-    {
-        collectedVobSoundEmitters.insert(vob);
-        return true;
-    }
+    if (!player || !vob || maxDistance <= 0.0f)
+        return VobSoundMaxVolume;
 
-    zCSoundFX *sfx = zsound->LoadSoundFX(fileName);
-    if (!sfx)
-        return false;
-
-    int handle = zsound->PlaySound3D(sfx, vob, 0, 0);
-    if (handle != 0)
-    {
-        sfx->SetLooping(TRUE);
-
-        collectedVobSoundEmitters.insert(vob);
-        vobSoundEmitters.insert({vob, handle});
-    }
-
-    sfx->Release();
-    return handle != 0;
+    const float distance = player->GetPositionWorld().Distance(vob->GetPositionWorld());
+    const float distanceAlpha = std::clamp(distance / maxDistance, 0.0f, 1.0f);
+    return VobSoundMaxVolume - (VobSoundMaxVolume - VobSoundMinVolume) * distanceAlpha;
 }
 
-std::unordered_map<zCVob *, int>::iterator UnbindSound3D(std::unordered_map<zCVob *, int>::iterator it, zCVob *vob)
+zCSoundSystem::zTSound3DParams MakeVobSound3DProps(zCVob *vob, const int canSee)
 {
-    zsound->StopSound(it->second);
-    return vobSoundEmitters.erase(it);
+    zCSoundSystem::zTSound3DParams props;
+    props.SetDefaults();
+    props.loopType = zCSoundSystem::zSND_LOOPING_DISABLED;
+    props.pitchOffset = canSee ? 0.0f : -0.5f;
+    props.radius = canSee ? 3500.0f : 500.0f;
+    props.volume = GetVobSoundVolume(vob, props.radius);
+    props.reverbLevel = canSee ? 1.0f : 20.0f;
+    return props;
 }
 
-void UpdateSoundHandles()
+void SubmitVobSoundCue(zCVob *vob, const char *channel, const zSTRING &fileName)
 {
-    // clear the collected vob sound emitters, so that they can be populated again in this frame
-    collectedVobSoundEmitters.clear();
+    const int canSee = player->CanSee(vob, 1);
+    const zCSoundSystem::zTSound3DParams props = MakeVobSound3DProps(vob, canSee);
+    SpatialCues::SubmitVobCue({vob, channel}, fileName, vob, props);
+}
 
-    // iterate over every collected vob by the player and populate those that should emit the sound
+void CollectVobSoundCues()
+{
+    if (!player)
+        return;
+
     for (int i = 0; i < player->vobList.GetNumInList(); ++i)
     {
         zCVob *vob = player->vobList[i];
 
         if (zDYNAMIC_CAST<oCMobContainer>(vob))
-            BindSound3D("WhisperingChest.wav", vob);
+            SubmitVobSoundCue(vob, "container", "WhisperingChest.wav");
         else if (zDYNAMIC_CAST<oCItem>(vob))
-            BindSound3D("WhisperingItem.wav", vob);
+            SubmitVobSoundCue(vob, "item", "WhisperingItem.wav");
         else if (zDYNAMIC_CAST<oCNpc>(vob))
-            BindSound3D("WhisperingNPC.wav", vob);
-    }
-
-    // try to update the sound 3d if vob is still present in collectedVobSoundEmitters, if not, remove the tracked vob
-    // sound
-    for (auto it = vobSoundEmitters.begin(); it != vobSoundEmitters.end();)
-    {
-        zCVob *vob = it->first;
-        int soundHandle = it->second;
-
-        if (collectedVobSoundEmitters.find(vob) == collectedVobSoundEmitters.end())
-        {
-            it = UnbindSound3D(it, vob);
-            continue;
-        }
-
-        int canSee = player->CanSee(vob, 1);
-
-        zCSoundSystem::zTSound3DParams props;
-        zsound->GetSound3DProps(soundHandle, props);
-        props.volume = canSee ? 1.0f : 0.3f;
-        props.pitchOffset = canSee ? 0.0f : -0.5f;
-        props.radius = canSee ? 3500.0f : 500.0f;
-        props.reverbLevel = canSee ? 1.0f : 20.0f;
-
-        zsound->UpdateSound3D(soundHandle, &props);
-
-        ++it;
+            SubmitVobSoundCue(vob, "npc", "WhisperingNPC.wav");
     }
 }
 } // namespace GOTHIC_NAMESPACE
