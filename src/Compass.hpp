@@ -1,33 +1,45 @@
 namespace GOTHIC_NAMESPACE
 {
+float NormalizeCompassAngle(float angle)
+{
+    angle = std::fmod(angle, 360.0f);
+    if (angle < 0.0f)
+        angle += 360.0f;
+
+    return angle;
+}
+
 std::string GetCompassName(float _angle)
 {
-    int angle = static_cast<int>(_angle - 22);
+    const int angle = static_cast<int>(NormalizeCompassAngle(_angle));
+    const int sector = static_cast<int>((angle + 22) / 45) % 8;
 
-    if (angle < 45)
+    switch (sector)
+    {
+    case 0:
         return std::format("North at {}", angle);
-    if (angle < 90)
+    case 1:
         return std::format("North-east at {}", angle);
-    if (angle < 135)
+    case 2:
         return std::format("East at {}", angle);
-    if (angle < 180)
+    case 3:
         return std::format("South-east at {}", angle);
-    if (angle < 225)
+    case 4:
         return std::format("South at {}", angle);
-    if (angle < 270)
+    case 5:
         return std::format("South-west at {}", angle);
-    if (angle < 315)
+    case 6:
         return std::format("West at {}", angle);
-    if (angle < 360)
+    default:
         return std::format("North-west at {}", angle);
-    return std::format("North at {}", angle);
+    }
 }
 
 float GetCompassAngle()
 {
     zVEC3 atVectorWorld3D = player->GetAtVectorWorld();
     zVEC2 atVectorWorld2D = zVEC2(atVectorWorld3D[VX], atVectorWorld3D[VZ]);
-    return atVectorWorld2D.GetAngle() * DEGREE;
+    return NormalizeCompassAngle(atVectorWorld2D.GetAngle() * DEGREE);
 }
 
 void RotateTowardsCompassAngle(int direction)
