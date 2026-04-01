@@ -23,10 +23,9 @@
 #include "Trackers/ObjectTracker.hpp"
 #include "Trackers/VobTracker.hpp"
 
-#include "WallDetection/Sound3D.hpp"
+#include "SpatialCueManager.hpp"
 #include "WallDetection/Raycast.hpp"
 
-#include "AudioHelper.hpp"
 #include "BlindCameraModel.hpp"
 #include "VobSoundEmitter.hpp"
 #include "SmartMap.hpp"

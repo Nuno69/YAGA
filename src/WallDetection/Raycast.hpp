@@ -50,32 +50,23 @@ inline float GetGradient(const float &value, const float &max)
     return value * sqrt(x);
 }
 
+zCSoundSystem::zTSound3DParams MakeWorldCueProps(const float radius, const float volume = 1.0f)
+{
+    zCSoundSystem::zTSound3DParams props;
+    props.SetDefaults();
+    props.loopType = zCSoundSystem::zSND_LOOPING_DISABLED;
+    props.radius = radius;
+    props.volume = volume;
+    return props;
+}
+
 void WallLoop(bool detected, const zVEC3 &position = GetFarSoundPosition(), const zVEC3 &normal = zVEC3())
 {
-    static zFreeSound3D *FarSound = nullptr;
-    static zFreeSound3D *NearSound = nullptr;
+    if (!detected)
+        return;
 
-    if (!FarSound)
-    {
-        FarSound = zFreeSound3D::CreateSound("WallHumFar.wav");
-        FarSound->Parameters.AutoDetele = FALSE;
-        FarSound->Parameters.IsLooped = TRUE;
-        FarSound->Parameters.Radius = 900.0f;
-        FarSound->Play(position);
-    }
-    else if (!FarSound->IsPlays())
-        FarSound->Play(position);
-
-    if (!NearSound)
-    {
-        NearSound = zFreeSound3D::CreateSound("WallHumNear.wav");
-        NearSound->Parameters.AutoDetele = FALSE;
-        NearSound->Parameters.IsLooped = TRUE;
-        NearSound->Parameters.Radius = 120.0f;
-        NearSound->Play(position);
-    }
-    else if (!NearSound->IsPlays())
-        NearSound->Play(position);
+    static const char WallFarCueToken = 0;
+    static const char WallNearCueToken = 0;
 
     zVEC3 positionHero = player->GetPositionWorld();
     zVEC3 hitVector = position - positionHero;
@@ -84,33 +75,20 @@ void WallLoop(bool detected, const zVEC3 &position = GetFarSoundPosition(), cons
     zVEC3 positionBest = positionHero + MakeVector(positionHero, positionNorm, hitDistance);
     positionBest[VY] = ogame->GetCameraVob()->GetPositionWorld()[VY];
 
-    FarSound->UpdatePosition(positionBest, 0.25f);
-    NearSound->UpdatePosition(positionBest, 0.25f);
+    SpatialCues::SubmitWorldCue({&WallFarCueToken, "wall-far"}, "WallHumFar.wav", positionBest, MakeWorldCueProps(900.0f),
+                                SpatialCues::Cadence::DistancePulse);
+    SpatialCues::SubmitWorldCue({&WallNearCueToken, "wall-near"}, "WallHumNear.wav", positionBest,
+                                MakeWorldCueProps(120.0f), SpatialCues::Cadence::DistancePulse);
 }
 
 void ChasmLoop(bool detected, const zVEC3 &position = zVEC3())
 {
-    static zFreeSound3D *LastSound = nullptr;
-    static bool LastDetection = false;
-    if (detected && !LastDetection)
-    {
-        LastDetection = true;
-        LastSound = zFreeSound3D::CreateSound("Chasm.wav");
-        LastSound->Parameters.IsLooped = TRUE;
-        LastSound->Parameters.Volume = 5.0f;
-        LastSound->Parameters.Radius = 1500.0f;
-        LastSound->Play(position);
-    }
-    else if (!detected && LastDetection)
-    {
-        LastDetection = false;
-        LastSound->Parameters.IsLooped = FALSE;
-        LastSound->UpdateParameters();
-        LastSound = nullptr;
-    }
+    if (!detected)
+        return;
 
-    if (LastSound)
-        LastSound->UpdatePosition(position, 0.01f);
+    static const char ChasmCueToken = 0;
+    SpatialCues::SubmitWorldCue({&ChasmCueToken, "chasm"}, "Chasm.wav", position, MakeWorldCueProps(1500.0f, 5.0f),
+                                SpatialCues::Cadence::DistancePulse);
 }
 
 bool GetFloorAt(const zVEC3 &origin, zVEC3 &result)

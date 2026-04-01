@@ -35,8 +35,8 @@ void Game_Loop()
     if (ogame->singleStep)
         return;
 
+    SpatialCues::BeginFrame();
     Raycast();
-    zSound3D::UpdateAllSounds();
 
     VobTrackerLoop();
     CompassReaderLoop();
@@ -47,10 +47,8 @@ void Game_Loop()
     if (zinput->KeyToggled(KEY_M))
         zSmartMap::Open();
 
-    // TO DO: wrap this with custom render delay?
-    // static Timer timer;
-    // if (timer[1].Await(50))
-    UpdateSoundHandles();
+    CollectVobSoundCues();
+    SpatialCues::UpdateAll();
 
     // zSmartMap::UpdateCurrentSector();
     // zSmartMap::RenderWorld();
@@ -122,12 +120,11 @@ void Game_LoadEnd_TriggerChangeLevel()
 
 void Game_Pause()
 {
-    zSound3D::StopAllSounds();
+    SpatialCues::StopAll();
 }
 
 void Game_Unpause()
 {
-    zSound3D::PlayAllSounds();
 }
 
 void Game_DefineExternals()
