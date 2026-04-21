@@ -18,6 +18,7 @@ struct Category
 inline std::vector<zCVob *> Candidates;
 inline zCVob *SelectedVob = nullptr;
 inline int CurrentCategoryIndex = 0;
+inline bool RadarEnabled = false;
 
 bool IsSupportedVob(zCVob *vob)
 {
@@ -78,6 +79,27 @@ float GetDistanceToPlayer(zCVob *vob)
         return 0.0f;
 
     return player->GetPositionWorld().Distance(vob->GetPositionWorld());
+}
+
+SpatialCues::DistancePulseSettings GetTrackedCuePulseSettings()
+{
+    SpatialCues::DistancePulseSettings settings;
+    settings.NearIntervalMs = 250.0f;
+    settings.FarIntervalMs = 2000.0f;
+    settings.MaxDistance = 15000.0f;
+    return settings;
+}
+
+zCSoundSystem::zTSound3DParams MakeTrackedCue3DProps()
+{
+    zCSoundSystem::zTSound3DParams props;
+    props.SetDefaults();
+    props.loopType = zCSoundSystem::zSND_LOOPING_DISABLED;
+    props.radius = 15000.0f;
+    props.volume = 1.0f;
+    props.reverbLevel = 1.0f;
+    props.pitchOffset = 0.0f;
+    return props;
 }
 
 void RefreshCandidates()
@@ -161,6 +183,12 @@ void CycleCategory()
     Speech::Read(GetCurrentCategory().Name);
 }
 
+void ToggleRadar()
+{
+    RadarEnabled = !RadarEnabled;
+    Speech::Read(RadarEnabled ? "Enabled tracking" : "Disabled tracking");
+}
+
 zCVob *MoveSelection(const int direction)
 {
     if (Candidates.empty())
@@ -208,6 +236,9 @@ void HandleInput()
     if (zinput->KeyToggled(KEY_T))
         CycleCategory();
 
+    if (zinput->KeyToggled(KEY_R))
+        ToggleRadar();
+
     if (zinput->KeyToggled(KEY_LBRACKET))
         ReadSelectedVob(MoveSelection(-1));
 
@@ -217,6 +248,23 @@ void HandleInput()
     if (zinput->KeyToggled(KEY_HOME))
         PointPlayerAtSelectedVob();
 }
+
+void SubmitRadarCue()
+{
+    if (!RadarEnabled)
+        return;
+
+    zCVob *trackedVob = GetSelectedVob();
+    if (!trackedVob)
+        return;
+
+    SpatialCues::SubmitVobCue(
+        {trackedVob, "tracked"},
+        "TRACKED.WAV",
+        trackedVob,
+        MakeTrackedCue3DProps(),
+        GetTrackedCuePulseSettings());
+}
 } // namespace VobTracker
 
 void InitializeVobTracker()
@@ -224,6 +272,7 @@ void InitializeVobTracker()
     VobTracker::Candidates.clear();
     VobTracker::SelectedVob = nullptr;
     VobTracker::CurrentCategoryIndex = 0;
+    VobTracker::RadarEnabled = false;
 }
 
 void VobTrackerLoop()
@@ -233,5 +282,6 @@ void VobTrackerLoop()
 
     VobTracker::RefreshCandidates();
     VobTracker::HandleInput();
+    VobTracker::SubmitRadarCue();
 }
 } // namespace GOTHIC_NAMESPACE

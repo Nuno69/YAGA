@@ -19,9 +19,8 @@
 #include "Readers/InventoryReader.hpp"
 #include "Readers/MenuReader.hpp"
 
-#include "Trackers/VobTracker.hpp"
-
 #include "SpatialCueManager.hpp"
+#include "Trackers/VobTracker.hpp"
 #include "WallDetection/Raycast.hpp"
 
 #include "BlindCameraModel.hpp"
