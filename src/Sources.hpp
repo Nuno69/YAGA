@@ -27,6 +27,8 @@
 #include "BlindCameraModel.hpp"
 #include "VobSoundEmitter.hpp"
 #include "Navigation/Sectors.hpp"
+#include "Navigation/WaynetPatch_G1.hpp"
+#include "Navigation/WaynetPatch.hpp"
 #include "Navigation/Navigator.hpp"
 #include "SmartMap.hpp"
 #include "Dev/DevConsole.hpp"

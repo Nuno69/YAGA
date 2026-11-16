@@ -60,6 +60,33 @@ enum class Phase
     OpeningDoor
 };
 
+// Legs and first steps a route must leave out. A navigation keeps its own set; planning for a test command uses a
+// fresh one, so results do not leak between plans.
+struct Blocked
+{
+    std::set<std::pair<zCWaypoint *, zCWaypoint *>> Legs; // legs the hero failed to walk
+    std::set<zCWaypoint *> Starts;                         // waypoints the hero failed to reach from where it stood
+};
+
+enum class TargetKind
+{
+    None,
+    Sector,
+    Waypoint,
+    Position
+};
+
+// How the last navigation ended, for the test tour.
+struct Outcome
+{
+    StopReason Reason = StopReason::Cancelled;
+    float Seconds = 0.0f;
+    int Recalculations = 0;
+    int BlockedLegs = 0;
+    int MetersLeft = 0;
+    bool ArrivedInSector = false; // gave up, but already inside the target sector (or near the target point)
+};
+
 struct Plan
 {
     std::vector<zCWaypoint *> Waypoints;
@@ -76,9 +103,14 @@ inline bool Active = false;
 inline Phase CurrentPhase = Phase::Walking;
 inline std::vector<zCWaypoint *> Path;
 inline size_t Index = 0;
-inline zCWaypoint *TargetWaypoint = nullptr;
-inline bool HasTargetSector = false;
+inline zCWaypoint *TargetWaypoint = nullptr; // the goal the current plan leads to
+inline TargetKind Kind = TargetKind::None;
 inline SECTOR TargetSector{};
+inline zCWaypoint *RequestedWaypoint = nullptr;
+inline zVEC3 TargetPosition;
+inline bool UseEngineRoute = false; // NavigatorMode 1, only while every leg is a way net way
+inline Outcome LastOutcome;
+inline int Outcomes = 0; // counts finished navigations
 inline zCWorld *NavWorld = nullptr;
 inline zCWayNet *NavWayNet = nullptr;
 inline zVEC3 StuckReference;
@@ -89,8 +121,7 @@ inline int LastHitpoints = 0;
 inline int WaypointsSinceAnnouncement = 0;
 inline float StartedAt = 0.0f;
 inline float PhaseStartedAt = 0.0f;
-inline std::set<Leg> BlockedLegs;               // legs the hero failed to walk during this navigation
-inline std::set<zCWaypoint *> BlockedStarts;    // waypoints the hero failed to reach from where it stood
+inline Blocked NavBlocked;                      // what the current navigation has learned to avoid
 inline std::set<oCMobDoor *> TriedDoors;        // doors already opened (or found locked) during this navigation
 inline float DriveJumpUntil = 0.0f;
 inline bool DriveJumped = false;
@@ -157,7 +188,10 @@ float NowMs()
 zCWayNet *GetWayNet()
 {
     oCWorld *world = ogame ? ogame->GetGameWorld() : nullptr;
-    return world ? world->wayNet : nullptr;
+    zCWayNet *wayNet = world ? world->wayNet : nullptr;
+    if (wayNet)
+        WaynetPatch::EnsureBuilt();
+    return wayNet;
 }
 
 std::string WaypointName(zCWaypoint *wp)
@@ -182,9 +216,9 @@ Leg MakeLeg(zCWaypoint *a, zCWaypoint *b)
     return a < b ? Leg(a, b) : Leg(b, a);
 }
 
-bool IsLegBlocked(zCWaypoint *a, zCWaypoint *b)
+bool IsLegBlocked(const Blocked &blocked, zCWaypoint *a, zCWaypoint *b)
 {
-    return BlockedLegs.count(MakeLeg(a, b)) != 0;
+    return blocked.Legs.count(MakeLeg(a, b)) != 0 || WaynetPatch::IsAvoided(a, b);
 }
 
 // Line of sight against the static world and collidable vobs, ignoring characters and see-through polygons
@@ -230,11 +264,15 @@ bool CrossesDeepWater(const zVEC3 &from, const zVEC3 &to)
     return false;
 }
 
+// Way net waypoints plus the patch nodes.
 template <typename Fn> void ForEachWaypoint(zCWayNet *wayNet, Fn fn)
 {
     for (auto node = wayNet->wplist.next; node; node = node->next)
         if (node->data)
             fn(node->data);
+    if (WaynetPatch::BuiltFor == wayNet)
+        for (zCWaypoint *wp : WaynetPatch::Nodes)
+            fn(wp);
 }
 
 zCWaypoint *OtherEnd(zCWay *way, zCWaypoint *from)
@@ -244,6 +282,21 @@ zCWaypoint *OtherEnd(zCWay *way, zCWaypoint *from)
     if (way->right == from)
         return way->left;
     return nullptr;
+}
+
+// Way net ways plus patch links.
+template <typename Fn> void ForEachNeighbour(zCWaypoint *wp, Fn fn)
+{
+    for (auto node = wp->wayList.next; node; node = node->next)
+        if (zCWaypoint *next = node->data ? OtherEnd(node->data, wp) : nullptr)
+            fn(next);
+    WaynetPatch::ForEachLink(wp, fn);
+}
+
+// A waypoint by name: a patch node or a way net waypoint (names are upper case).
+zCWaypoint *FindWaypoint(const std::string &name)
+{
+    return WaynetPatch::Find(GetWayNet(), name);
 }
 
 // zCRoute keeps the start waypoint and the ways leading from it to the goal.
@@ -301,11 +354,11 @@ float DistanceToLegXZ(const zVEC3 &p, const zVEC3 &a, const zVEC3 &b)
 
 // The first waypoint of a route: the nearest one the hero can see. The engine's own FindRoute(position, ...) takes
 // the plain nearest waypoint, which is often on the other side of a wall or a cliff.
-zCWaypoint *ChooseStartWaypoint(zCWayNet *wayNet, const zVEC3 &from)
+zCWaypoint *ChooseStartWaypoint(zCWayNet *wayNet, const zVEC3 &from, const Blocked &blocked)
 {
     std::vector<std::pair<float, zCWaypoint *>> nearby;
     ForEachWaypoint(wayNet, [&](zCWaypoint *wp) {
-        if (BlockedStarts.count(wp))
+        if (blocked.Starts.count(wp))
             return;
         const float distance = from.Distance(wp->GetPositionWorld());
         if (distance <= StartSearchRadius)
@@ -326,6 +379,21 @@ zCWaypoint *ChooseStartWaypoint(zCWayNet *wayNet, const zVEC3 &from)
     return wayNet->GetNearestWaypoint(from);
 }
 
+// Goals for a point: the waypoints nearest to it (XZ), so a route can end at the next best one when the nearest is
+// out of reach.
+std::vector<zCWaypoint *> WaypointsNear(zCWayNet *wayNet, const zVEC3 &position, const size_t count = 12)
+{
+    std::vector<std::pair<float, zCWaypoint *>> all;
+    ForEachWaypoint(wayNet,
+                    [&](zCWaypoint *wp) { all.emplace_back(DistanceXZ(wp->GetPositionWorld(), position), wp); });
+    std::sort(all.begin(), all.end(), [](const auto &left, const auto &right) { return left.first < right.first; });
+
+    std::vector<zCWaypoint *> result;
+    for (size_t i = 0; i < all.size() && i < count; ++i)
+        result.push_back(all[i].second);
+    return result;
+}
+
 std::vector<zCWaypoint *> WaypointsInSector(zCWayNet *wayNet, const SECTOR &sector)
 {
     std::vector<zCWaypoint *> result;
@@ -343,7 +411,7 @@ std::vector<zCWaypoint *> WaypointsInSector(zCWayNet *wayNet, const SECTOR &sect
 
 // Dijkstra from one waypoint over the way net, leaving out blocked legs. The net has under 3000 waypoints, so a full
 // search costs a fraction of a millisecond.
-void ShortestPaths(zCWaypoint *start, std::unordered_map<zCWaypoint *, float> &distance,
+void ShortestPaths(zCWaypoint *start, const Blocked &blocked, std::unordered_map<zCWaypoint *, float> &distance,
                    std::unordered_map<zCWaypoint *, zCWaypoint *> &parent)
 {
     using Item = std::pair<float, zCWaypoint *>;
@@ -353,17 +421,15 @@ void ShortestPaths(zCWaypoint *start, std::unordered_map<zCWaypoint *, float> &d
     open.push({0.0f, start});
     while (!open.empty())
     {
-        const auto [cost, wp] = open.top();
+        const float cost = open.top().first;
+        zCWaypoint *wp = open.top().second;
         open.pop();
         if (cost > distance[wp])
             continue;
 
-        for (auto node = wp->wayList.next; node; node = node->next)
-        {
-            zCWay *way = node->data;
-            zCWaypoint *next = way ? OtherEnd(way, wp) : nullptr;
-            if (!next || IsLegBlocked(wp, next))
-                continue;
+        ForEachNeighbour(wp, [&](zCWaypoint *next) {
+            if (IsLegBlocked(blocked, wp, next))
+                return;
 
             const float nextCost = cost + wp->GetPositionWorld().Distance(next->GetPositionWorld());
             const auto found = distance.find(next);
@@ -373,15 +439,15 @@ void ShortestPaths(zCWaypoint *start, std::unordered_map<zCWaypoint *, float> &d
                 parent[next] = wp;
                 open.push({nextCost, next});
             }
-        }
+        });
     }
 }
 
 // Skip leading waypoints that would make the hero walk back: while the following waypoint is in sight and no farther
 // from the hero than from the waypoint before it, head straight for it.
-void TrimLeadingWaypoints(std::vector<zCWaypoint *> &waypoints, const zVEC3 &from)
+void TrimLeadingWaypoints(std::vector<zCWaypoint *> &waypoints, const zVEC3 &from, const Blocked &blocked)
 {
-    while (waypoints.size() >= 2 && !BlockedStarts.count(waypoints[1]))
+    while (waypoints.size() >= 2 && !blocked.Starts.count(waypoints[1]))
     {
         const zVEC3 first = waypoints[0]->GetPositionWorld();
         const zVEC3 second = waypoints[1]->GetPositionWorld();
@@ -393,7 +459,8 @@ void TrimLeadingWaypoints(std::vector<zCWaypoint *> &waypoints, const zVEC3 &fro
 }
 
 // Goals are tried in order (for a sector: nearest to its centre first); the first one the search reached wins.
-bool PlanRouteOnce(zCWayNet *wayNet, const zVEC3 &from, const std::vector<zCWaypoint *> &goals, Plan &plan)
+bool PlanRouteOnce(zCWayNet *wayNet, const zVEC3 &from, const std::vector<zCWaypoint *> &goals, Plan &plan,
+                   const Blocked &blocked)
 {
     const auto started = std::chrono::high_resolution_clock::now();
     const auto elapsed = [&]() {
@@ -401,13 +468,13 @@ bool PlanRouteOnce(zCWayNet *wayNet, const zVEC3 &from, const std::vector<zCWayp
     };
 
     plan = Plan();
-    plan.Start = ChooseStartWaypoint(wayNet, from);
+    plan.Start = ChooseStartWaypoint(wayNet, from, blocked);
     if (!plan.Start)
         return false;
 
     std::unordered_map<zCWaypoint *, float> distance;
     std::unordered_map<zCWaypoint *, zCWaypoint *> parent;
-    ShortestPaths(plan.Start, distance, parent);
+    ShortestPaths(plan.Start, blocked, distance, parent);
     plan.Reachable = static_cast<int>(distance.size());
 
     for (zCWaypoint *goal : goals)
@@ -429,7 +496,7 @@ bool PlanRouteOnce(zCWayNet *wayNet, const zVEC3 &from, const std::vector<zCWayp
         plan.Waypoints.push_back(wp);
     std::reverse(plan.Waypoints.begin(), plan.Waypoints.end());
 
-    TrimLeadingWaypoints(plan.Waypoints, from);
+    TrimLeadingWaypoints(plan.Waypoints, from, blocked);
     plan.Length = RemainingLength(from, plan.Waypoints, 0);
     plan.Milliseconds = elapsed();
     return true;
@@ -438,14 +505,15 @@ bool PlanRouteOnce(zCWayNet *wayNet, const zVEC3 &from, const std::vector<zCWayp
 // Plans, then checks the route for deep water and plans again without the wet legs. Only the legs of the found route
 // are traced, so this costs a few traces per waypoint instead of tracing the whole way net. A hero who is already
 // swimming may swim the first leg, to get out.
-bool PlanRoute(zCWayNet *wayNet, const zVEC3 &from, const std::vector<zCWaypoint *> &goals, Plan &plan)
+bool PlanRoute(zCWayNet *wayNet, const zVEC3 &from, const std::vector<zCWaypoint *> &goals, Plan &plan,
+               Blocked &blocked)
 {
     const auto started = std::chrono::high_resolution_clock::now();
     const bool swimming = player->anictrl && player->anictrl->IsInWater();
 
     for (int attempt = 0; attempt < MaxWaterReplans; ++attempt)
     {
-        if (!PlanRouteOnce(wayNet, from, goals, plan))
+        if (!PlanRouteOnce(wayNet, from, goals, plan, blocked))
             break;
 
         bool dry = true;
@@ -457,9 +525,9 @@ bool PlanRoute(zCWayNet *wayNet, const zVEC3 &from, const std::vector<zCWaypoint
             {
                 dry = false;
                 if (i == 0)
-                    BlockedStarts.insert(plan.Waypoints[0]);
+                    blocked.Starts.insert(plan.Waypoints[0]);
                 else
-                    BlockedLegs.insert(MakeLeg(plan.Waypoints[i - 1], plan.Waypoints[i]));
+                    blocked.Legs.insert(MakeLeg(plan.Waypoints[i - 1], plan.Waypoints[i]));
                 YagaLog::Write(std::format("[nav] deep water on the way to {}, leaving that leg out",
                                            WaypointName(plan.Waypoints[i])));
             }
@@ -480,7 +548,7 @@ bool PlanRoute(zCWayNet *wayNet, const zVEC3 &from, const std::vector<zCWaypoint
     return false;
 }
 
-void LogPlan(const char *what, const Plan &plan)
+void LogPlan(const char *what, const Plan &plan, const Blocked &blocked)
 {
     std::string names;
     for (size_t i = 0; i < plan.Waypoints.size(); ++i)
@@ -493,7 +561,7 @@ void LogPlan(const char *what, const Plan &plan)
     YagaLog::Write(std::format("[nav] {}: start {}, goal {}, {} waypoints, {} m, {} reachable, {} blocked legs, "
                                "{:.3f} ms",
                                what, WaypointName(plan.Start), WaypointName(plan.Target), plan.Waypoints.size(),
-                               Meters(plan.Length), plan.Reachable, BlockedLegs.size(), plan.Milliseconds));
+                               Meters(plan.Length), plan.Reachable, blocked.Legs.size(), plan.Milliseconds));
     YagaLog::Write("[nav] path: " + names);
 }
 
@@ -558,14 +626,21 @@ void IssueStep()
     CurrentPhase = Phase::Walking;
 
     // NPC movement cannot swim.
-    if (HeroInWater() && Settings::NavigatorMode != 1)
+    if (HeroInWater() && !UseEngineRoute)
     {
         StartDriving("in water");
         return;
     }
 
+    // A patch leg marked "jump": NPC movement would stop at the ledge.
+    if (!UseEngineRoute && Index > 0 && WaynetPatch::IsJumpLeg(Path[Index - 1], Path[Index]))
+    {
+        StartDriving("jump leg");
+        return;
+    }
+
     oCMsgMovement *message = nullptr;
-    if (Settings::NavigatorMode == 1)
+    if (UseEngineRoute)
         message = new oCMsgMovement(oCMsgMovement::EV_GOROUTE, TargetWaypoint->GetName());
     else
         message = new oCMsgMovement(oCMsgMovement::EV_GOTOPOS, Path[Index]->GetPositionWorld());
@@ -579,12 +654,32 @@ void IssueStep()
 
 std::string DescribeTarget()
 {
-    if (HasTargetSector)
+    switch (Kind)
+    {
+    case TargetKind::Sector:
         return std::format("sector {} {}", TargetSector.x, TargetSector.y);
-    return WaypointName(TargetWaypoint);
+    case TargetKind::Waypoint:
+        return WaypointName(RequestedWaypoint);
+    case TargetKind::Position:
+        return std::format("position {} {}", Meters(TargetPosition[VX]), Meters(TargetPosition[VZ]));
+    default:
+        return "nowhere";
+    }
 }
 
-void Stop(const StopReason reason)
+// The hero did not reach the goal waypoint, but stands where the player wanted to go anyway: inside the target
+// sector, or close to the target point.
+bool HeroAtDestination()
+{
+    const zVEC3 hero = HeroPosition();
+    if (Kind == TargetKind::Sector)
+        return SameSector(SectorOf(hero), TargetSector);
+    if (Kind == TargetKind::Position)
+        return DistanceXZ(hero, TargetPosition) < 1500.0f;
+    return false;
+}
+
+void Stop(StopReason reason)
 {
     if (!Active)
         return;
@@ -593,6 +688,16 @@ void Stop(const StopReason reason)
     ReleaseKeys();
 
     const bool worldStillValid = reason != StopReason::WorldChanged;
+    bool arrivedInSector = false;
+    if (worldStillValid && player && (reason == StopReason::GaveUp || reason == StopReason::NoRoute) &&
+        HeroAtDestination())
+    {
+        YagaLog::Write(std::format("[nav] could not reach {}, but the hero is at the destination",
+                                   WaypointName(TargetWaypoint)));
+        reason = StopReason::Arrived;
+        arrivedInSector = true;
+    }
+
     if (worldStillValid && player)
     {
         ClearMovement();
@@ -600,9 +705,18 @@ void Stop(const StopReason reason)
             player->anictrl->_Stand();
     }
 
-    const float seconds = (NowMs() - StartedAt) / 1000.0f;
-    YagaLog::Write(std::format("[nav] stop reason {} after {:.1f} s, {} recalculations, {} blocked legs",
-                               static_cast<int>(reason), seconds, Recalculations, BlockedLegs.size()));
+    LastOutcome = Outcome();
+    LastOutcome.Reason = reason;
+    LastOutcome.Seconds = (NowMs() - StartedAt) / 1000.0f;
+    LastOutcome.Recalculations = Recalculations;
+    LastOutcome.BlockedLegs = static_cast<int>(NavBlocked.Legs.size());
+    LastOutcome.MetersLeft = worldStillValid && player ? Meters(RemainingLength(HeroPosition(), Path, Index)) : 0;
+    LastOutcome.ArrivedInSector = arrivedInSector;
+    ++Outcomes;
+
+    YagaLog::Write(std::format("[nav] stop reason {} after {:.1f} s, {} recalculations, {} blocked legs, {} m left",
+                               static_cast<int>(reason), LastOutcome.Seconds, Recalculations,
+                               NavBlocked.Legs.size(), LastOutcome.MetersLeft));
 
     switch (reason)
     {
@@ -619,8 +733,7 @@ void Stop(const StopReason reason)
         Speech::ReadFormat("No way through to {}.", DescribeTarget());
         break;
     case StopReason::GaveUp:
-        Speech::ReadFormat("Navigation stopped, cannot get through. {} meters left.",
-                           Meters(RemainingLength(HeroPosition(), Path, Index)));
+        Speech::ReadFormat("Navigation stopped, cannot get through. {} meters left.", LastOutcome.MetersLeft);
         break;
     case StopReason::WorldChanged:
     case StopReason::Dead:
@@ -632,42 +745,75 @@ void Stop(const StopReason reason)
     TargetWaypoint = nullptr;
 }
 
-// Goals: every waypoint of the sector, nearest to its centre first; or one named waypoint.
-std::vector<zCWaypoint *> CurrentGoals(zCWayNet *wayNet)
+// A navigation that could not even start still counts as finished, so a test tour sees its result.
+void RecordFailedStart(const StopReason reason)
 {
-    if (HasTargetSector)
-        return WaypointsInSector(wayNet, TargetSector);
-    if (TargetWaypoint)
-        return {TargetWaypoint};
-    return {};
+    LastOutcome = Outcome();
+    LastOutcome.Reason = reason;
+    ++Outcomes;
 }
 
-bool Begin(const std::vector<zCWaypoint *> &goals)
+// Goals: every waypoint of the sector, nearest to its centre first; the waypoints nearest a point; or one waypoint.
+std::vector<zCWaypoint *> CurrentGoals(zCWayNet *wayNet)
+{
+    switch (Kind)
+    {
+    case TargetKind::Sector:
+        return WaypointsInSector(wayNet, TargetSector);
+    case TargetKind::Position:
+        return WaypointsNear(wayNet, TargetPosition);
+    case TargetKind::Waypoint:
+        return RequestedWaypoint ? std::vector<zCWaypoint *>{RequestedWaypoint} : std::vector<zCWaypoint *>{};
+    default:
+        return {};
+    }
+}
+
+// NavigatorMode 1 hands the route to the engine, which only knows way net ways and ignores blocked legs.
+bool RouteFitsEngine(const std::vector<zCWaypoint *> &waypoints)
+{
+    if (Settings::NavigatorMode != 1 || NavBlocked.Legs.size() || NavBlocked.Starts.size())
+        return false;
+    for (size_t i = 0; i < waypoints.size(); ++i)
+    {
+        if (WaynetPatch::IsOurs(waypoints[i]))
+            return false;
+        if (i > 0 && (!waypoints[i - 1]->HasWay(waypoints[i]) || WaynetPatch::IsAvoided(waypoints[i - 1], waypoints[i])))
+            return false;
+    }
+    return true;
+}
+
+bool Begin()
 {
     zCWayNet *wayNet = GetWayNet();
     if (!player || !wayNet)
         return false;
 
+    const std::vector<zCWaypoint *> goals = CurrentGoals(wayNet);
     if (goals.empty())
     {
         Speech::ReadFormat("No waypoints in {}, unreachable area.", DescribeTarget());
+        RecordFailedStart(StopReason::NoRoute);
         return false;
     }
 
     if (Active)
+    {
         ClearMovement();
+        Active = false;
+    }
 
-    BlockedLegs.clear();
-    BlockedStarts.clear();
+    NavBlocked = Blocked();
     TriedDoors.clear();
 
     Plan plan;
-    const bool found = PlanRoute(wayNet, HeroPosition(), goals, plan);
-    LogPlan(found ? "plan" : "plan failed", plan);
+    const bool found = PlanRoute(wayNet, HeroPosition(), goals, plan, NavBlocked);
+    LogPlan(found ? "plan" : "plan failed", plan, NavBlocked);
     if (!found)
     {
-        Active = false;
         Speech::ReadFormat("No route to {}.", DescribeTarget());
+        RecordFailedStart(StopReason::NoRoute);
         return false;
     }
 
@@ -675,6 +821,7 @@ bool Begin(const std::vector<zCWaypoint *> &goals)
     Path = plan.Waypoints;
     Index = 0;
     TargetWaypoint = plan.Target;
+    UseEngineRoute = RouteFitsEngine(Path);
     NavWorld = ogame->GetGameWorld();
     NavWayNet = wayNet;
     RetriesOnWaypoint = 0;
@@ -691,32 +838,33 @@ bool Begin(const std::vector<zCWaypoint *> &goals)
 
 bool StartToSector(const SECTOR &sector)
 {
-    zCWayNet *wayNet = GetWayNet();
-    if (!player || !wayNet)
-        return false;
-
-    HasTargetSector = true;
+    Kind = TargetKind::Sector;
     TargetSector = sector;
-    TargetWaypoint = nullptr;
-    return Begin(WaypointsInSector(wayNet, sector));
+    RequestedWaypoint = nullptr;
+    return Begin();
 }
 
-bool StartToWaypoint(const zSTRING &name)
+bool StartToWaypoint(const std::string &name)
 {
-    zCWayNet *wayNet = GetWayNet();
-    if (!player || !wayNet)
-        return false;
-
-    zCWaypoint *wp = wayNet->GetWaypoint(name);
+    zCWaypoint *wp = FindWaypoint(name);
     if (!wp)
     {
-        Speech::ReadFormat("Waypoint {} not found.", name.ToChar());
+        Speech::ReadFormat("Waypoint {} not found.", name);
+        RecordFailedStart(StopReason::NoRoute);
         return false;
     }
 
-    HasTargetSector = false;
-    TargetWaypoint = wp;
-    return Begin({wp});
+    Kind = TargetKind::Waypoint;
+    RequestedWaypoint = wp;
+    return Begin();
+}
+
+bool StartToPosition(const zVEC3 &position)
+{
+    Kind = TargetKind::Position;
+    TargetPosition = position;
+    RequestedWaypoint = nullptr;
+    return Begin();
 }
 
 // Plan again from where the hero stands, keeping the same destination and leaving out blocked legs.
@@ -731,8 +879,8 @@ void Recalculate(const char *why)
 
     zCWayNet *wayNet = GetWayNet();
     Plan plan;
-    const bool found = PlanRoute(wayNet, HeroPosition(), CurrentGoals(wayNet), plan);
-    LogPlan(found ? "recalculated" : "recalculation failed", plan);
+    const bool found = PlanRoute(wayNet, HeroPosition(), CurrentGoals(wayNet), plan, NavBlocked);
+    LogPlan(found ? "recalculated" : "recalculation failed", plan, NavBlocked);
     if (!found)
     {
         Stop(StopReason::NoRoute);
@@ -743,6 +891,7 @@ void Recalculate(const char *why)
     Path = plan.Waypoints;
     Index = 0;
     TargetWaypoint = plan.Target;
+    UseEngineRoute = RouteFitsEngine(Path);
     RetriesOnWaypoint = 0;
     IssueStep();
 }
@@ -752,13 +901,13 @@ void BlockCurrentLeg()
 {
     if (Index > 0)
     {
-        BlockedLegs.insert(MakeLeg(Path[Index - 1], Path[Index]));
+        NavBlocked.Legs.insert(MakeLeg(Path[Index - 1], Path[Index]));
         YagaLog::Write(std::format("[nav] blocked leg {} - {}", WaypointName(Path[Index - 1]),
                                    WaypointName(Path[Index])));
     }
     else
     {
-        BlockedStarts.insert(Path[0]);
+        NavBlocked.Starts.insert(Path[0]);
         YagaLog::Write("[nav] blocked start " + WaypointName(Path[0]));
     }
 }
@@ -927,7 +1076,7 @@ void AdvanceWaypoint()
         Speech::ReadFormat("{} meters.", Meters(RemainingLength(HeroPosition(), Path, Index)));
     }
 
-    if (Settings::NavigatorMode != 1)
+    if (!UseEngineRoute)
         IssueStep();
 }
 
@@ -1022,7 +1171,7 @@ void Update()
         return;
     }
 
-    if (Settings::NavigatorMode == 1)
+    if (UseEngineRoute)
     {
         UpdateEngineRoute(hero, engineBusy);
         return;
@@ -1089,9 +1238,13 @@ void Reset()
     TargetWaypoint = nullptr;
     NavWorld = nullptr;
     NavWayNet = nullptr;
-    BlockedLegs.clear();
-    BlockedStarts.clear();
+    NavBlocked = Blocked();
     TriedDoors.clear();
+    Kind = TargetKind::None;
+    RequestedWaypoint = nullptr;
+    UseEngineRoute = false;
+    // Patch nodes belong to the old world's way net.
+    WaynetPatch::Clear();
 }
 } // namespace Navigator
 
