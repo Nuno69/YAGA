@@ -94,19 +94,37 @@ The default value is `auto`.
 
 ### DevCommands
 
-Development aid. With `1` the plugin reads commands from `yaga_cmd.txt` in the game folder (position, route planning, benchmarks, teleporting to a waypoint) and writes the results to `YAGA.log`.
+Development aid. With `1` the plugin reads commands from `yaga_cmd.txt` in the game folder and writes the results to `YAGA.log`: position, route planning, benchmarks, teleporting, an invulnerable hero with monsters removed around it (`god`, `peace`), way net and height map dumps (`dumpnet`, `heightmap`), a graph check of every sector (`routeall`) and a walk through a list of destinations (`tour`).
 The default value is `0`.
 
 ## Navigation
 
-Press `M` to open the sector map. Arrows move between 50 by 50 metre sectors, `ENTER` describes the selected sector and `SPACE` closes the map and walks the hero to it.
+Press `M` to open the sector map. Arrows move between 50 by 50 metre sectors, `ENTER` describes the selected sector and `SPACE` closes the map and walks the hero to it. `PAGE DOWN` and `PAGE UP` jump between named places (camps, mines, towers, the mountain fortress...) in alphabetical order. A sector with a named place says its name when you enter it with the arrows and on `ENTER`.
 
-- Routes follow the game's own way net, the waypoints NPCs walk on. The goal is the reachable waypoint nearest to the centre of the sector.
-- Legs through deep water are left out of routes: NPC movement cannot swim, and some lakes kill a swimming hero.
-- The hero is walked by the engine's NPC movement, which steps around small obstacles. Where it gives up, the navigator walks the hero itself and jumps when the hero stops moving. A hero who starts in the water swims to the first waypoint.
+- Routes follow the game's own way net, the waypoints NPCs walk on. The goal is the named place of the sector, if it has one, otherwise the reachable waypoint nearest to the centre of the sector.
+- The hero is walked by the engine's NPC movement, which steps around small obstacles. Where it gives up, the navigator walks the hero itself and jumps when the hero stops moving.
+- Ladders on the way are climbed, up or down. Closed doors on the way are opened; locked ones are reported, and so are closed gates. Places behind a gate the game opens by script (the monastery ruins, the fog tower, the Sleeper's temple) lead to the spot in front of it.
+- Legs through deep water are swum. They count four times their length when the route is chosen, so a dry way round wins when there is one. The lake below the intro cliff, which kills a swimming hero, is left out.
 - When the hero is stuck or pushed off the route, the navigator remembers the blocked leg and recalculates the route around it.
 - Any movement key cancels the walk. The walk also stops when the hero takes damage.
 - `J` speaks the navigation status: target, remaining distance and waypoint.
+- Giving up inside the target sector, or a few metres from the goal, counts as arrival.
+
+### Navigator waypoints
+
+Some places the player can reach have no waypoints, or only a separate patch of them, because the way net was made for NPCs. YAGA adds its own waypoints and ways there. The navigator is the only one to see them: they are not inserted into the game's way net, so NPC routes and savegames do not change.
+
+They come from a table built into the plugin and from `yaga_waynet_patch.txt` in the game folder, read when a world is loaded. One entry per line, `#` starts a comment:
+
+```
+world WORLD.ZEN        # following entries apply to this world only
+node NAME x y z        # a new waypoint (world coordinates in cm, it is dropped onto the ground below)
+link A B [jump]        # a way between two waypoints (new or the game's); "jump" marks a leg that needs a jump
+unlink A B             # removes a link given earlier
+avoid A B              # a way of the game's way net the hero cannot walk
+```
+
+With `DevCommands=1`, `patch` reloads the file and `rec start NAME` / `rec stop` record the hero's walk into `yaga_rec.txt` in this format.
 
 Every spoken line and every navigator decision is written to `YAGA.log` in the game folder. Attach it to bug reports.
 

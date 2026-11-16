@@ -30,6 +30,8 @@
 #include "Navigation/Sectors.hpp"
 #include "Navigation/WaynetPatch_G1.hpp"
 #include "Navigation/WaynetPatch.hpp"
+#include "Navigation/Places.hpp"
+#include "Navigation/Places_G1.hpp"
 #include "Navigation/Navigator.hpp"
 #include "SmartMap.hpp"
 #include "Dev/DevConsole.hpp"

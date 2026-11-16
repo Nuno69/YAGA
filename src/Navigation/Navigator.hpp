@@ -2,6 +2,7 @@
 #include <cctype>
 #include <chrono>
 #include <functional>
+#include <map>
 #include <queue>
 #include <set>
 #include <unordered_map>
@@ -24,6 +25,7 @@ namespace Navigator
 {
 constexpr float ArriveRadius = 150.0f;       // a waypoint counts as reached within this XZ distance (cm)
 constexpr float EngineDoneRadius = 400.0f;   // ... or within this one when the engine reports the move as finished
+constexpr float ArriveHeight = 300.0f;       // ... and no farther above or below (ladders and ledges are vertical)
 constexpr float StartSearchRadius = 5000.0f; // waypoints considered as the first step of a route
 constexpr float StuckWindowMs = 2500.0f;     // no progress for this long counts as stuck
 constexpr float StuckMinMove = 40.0f;        // ... where progress means moving at least this far
@@ -34,10 +36,17 @@ constexpr float DoorTimeoutMs = 3000.0f;     // a door that is not open by then 
 constexpr float DriveJumpAfterMs = 1200.0f;  // driving without progress this long: try a jump / climb
 constexpr float DriveJumpHoldMs = 300.0f;
 constexpr float DriveGiveUpMs = 4000.0f;     // driving without progress this long: the leg is blocked
-// Water deeper than this makes the hero swim. Legs through it are left out of routes: NPC movement cannot swim, and
-// some lakes kill a swimming hero outright (the one below the intro cliff does).
+// Water deeper than this makes the hero swim. NPC movement cannot swim, so the navigator swims such legs itself, and
+// the search makes them cost more than walking, so a dry way round wins when there is one. Water that kills a
+// swimming hero (the lake below the intro cliff) is kept out of routes by "avoid" entries in the waynet patch.
 constexpr float DeepWater = 100.0f;
-constexpr int MaxWaterReplans = 16;
+constexpr float SwimCostFactor = 4.0f;
+constexpr float StepBaseMs = 15000.0f;       // a single leg may take this long plus 10 ms per cm (1 m/s) before it
+constexpr float StepMsPerCm = 10.0f;         // counts as failed, so circling round an obstacle cannot last forever
+constexpr float CloseEnough = 600.0f;        // giving up this close to the goal waypoint still counts as arrived
+constexpr float LadderReachDistance = 250.0f; // the hero gets on a ladder from this close
+constexpr float LadderMountMs = 4000.0f;
+constexpr float LadderClimbMs = 20000.0f;
 constexpr int MaxRetriesPerWaypoint = 1;     // re-issue the same step before giving up on the leg
 constexpr int MaxRecalculations = 8;         // per navigation, before giving up
 constexpr int MaxStartCandidates = 16;       // nearest waypoints checked for a clear line from the hero
@@ -57,7 +66,8 @@ enum class Phase
 {
     Walking,     // the engine's NPC movement walks the leg
     Driving,     // the navigator holds the forward key itself
-    OpeningDoor
+    OpeningDoor,
+    Ladder       // gets on a ladder (action + forward), then climbs it up or down
 };
 
 // Legs and first steps a route must leave out. A navigation keeps its own set; planning for a test command uses a
@@ -108,6 +118,8 @@ inline TargetKind Kind = TargetKind::None;
 inline SECTOR TargetSector{};
 inline zCWaypoint *RequestedWaypoint = nullptr;
 inline zVEC3 TargetPosition;
+inline std::wstring TargetPlaceName;            // a named place in the target sector, if any
+inline zCWaypoint *TargetPlaceWaypoint = nullptr; // ... and its waypoint, tried before the rest of the sector
 inline bool UseEngineRoute = false; // NavigatorMode 1, only while every leg is a way net way
 inline Outcome LastOutcome;
 inline int Outcomes = 0; // counts finished navigations
@@ -121,11 +133,25 @@ inline int LastHitpoints = 0;
 inline int WaypointsSinceAnnouncement = 0;
 inline float StartedAt = 0.0f;
 inline float PhaseStartedAt = 0.0f;
+inline float StepStartedAt = 0.0f;
+inline float StepLimitMs = 0.0f;
 inline Blocked NavBlocked;                      // what the current navigation has learned to avoid
 inline std::set<oCMobDoor *> TriedDoors;        // doors already opened (or found locked) during this navigation
+inline std::set<zCVob *> ReportedGates;         // closed gates already announced during this navigation
+inline float DriveJumpStart = 0.0f;
 inline float DriveJumpUntil = 0.0f;
-inline bool DriveJumped = false;
+inline int DriveJumps = 0;          // jumps tried since the hero last made progress
+inline bool DriveClimbing = false;  // the current jump is a standing one, which climbs a ledge
+inline float DriveBest = 0.0f;      // the hero's best distance to the waypoint (XZ plus height) while driving
 inline oCMobDoor *DoorBeingOpened = nullptr;
+inline oCMobLadder *LadderInUse = nullptr;
+inline bool LadderMounted = false;
+inline bool LadderPlaced = false; // the hero was turned to the ladder on its use spot
+inline bool LadderHasSpot = false;
+inline zVEC3 LadderSpot;          // where the engine wants a character to stand to use the ladder
+inline bool LadderUp = true;
+inline bool LegWet = false;                          // the current leg goes through deep water
+inline std::map<std::pair<zCWaypoint *, zCWaypoint *>, bool> WetLegs; // cache: does a leg cross deep water
 
 // Logical keys the navigator is holding down (bit per GAME_* key), read by the zCInput_Win32::GetState hook, and the
 // presses not yet reported by GetToggled.
@@ -216,6 +242,20 @@ Leg MakeLeg(zCWaypoint *a, zCWaypoint *b)
     return a < b ? Leg(a, b) : Leg(b, a);
 }
 
+bool CrossesDeepWater(const zVEC3 &from, const zVEC3 &to);
+
+// Whether a leg goes through deep water, traced once per leg and remembered.
+bool IsWetLeg(zCWaypoint *a, zCWaypoint *b)
+{
+    const Leg leg = MakeLeg(a, b);
+    const auto found = WetLegs.find(leg);
+    if (found != WetLegs.end())
+        return found->second;
+    const bool wet = CrossesDeepWater(a->GetPositionWorld(), b->GetPositionWorld());
+    WetLegs[leg] = wet;
+    return wet;
+}
+
 bool IsLegBlocked(const Blocked &blocked, zCWaypoint *a, zCWaypoint *b)
 {
     return blocked.Legs.count(MakeLeg(a, b)) != 0 || WaynetPatch::IsAvoided(a, b);
@@ -233,33 +273,38 @@ bool HasClearLine(const zVEC3 &from, const zVEC3 &waypointPosition)
 }
 
 // Depth of the water at a spot (0 = dry): the water surface found by a downward trace that hits water polygons, minus
-// the ground found by one that does not.
+// the ground found by one that does not. Collidable vobs count as ground, so a wooden bridge or boardwalk over water
+// is dry.
 float WaterDepthAt(const zVEC3 &position)
 {
     oCWorld *world = ogame->GetGameWorld();
     const zVEC3 origin = position + zVEC3(0.0f, 250.0f, 0.0f);
     const zVEC3 ray(0.0f, -1500.0f, 0.0f);
+    const int solid = zTRACERAY_STAT_POLY | zTRACERAY_VOB_IGNORE_NO_CD_DYN | zTRACERAY_VOB_IGNORE_CHARACTER |
+                      zTRACERAY_POLY_IGNORE_TRANSP;
 
-    if (!world->TraceRayNearestHit(origin, ray, player, zTRACERAY_STAT_POLY | zTRACERAY_POLY_TEST_WATER |
-                                                            zTRACERAY_VOB_IGNORE))
+    if (!world->TraceRayNearestHit(origin, ray, player, solid | zTRACERAY_POLY_TEST_WATER))
         return 0.0f;
 
+    if (world->traceRayReport.foundVob)
+        return 0.0f; // a bridge, a raft, a boardwalk
     zCPolygon *poly = world->traceRayReport.foundPoly;
     if (!poly || !poly->material || poly->material->matGroup != zMAT_GROUP_WATER)
         return 0.0f;
 
     const float surface = world->traceRayReport.foundIntersection[VY];
-    if (!world->TraceRayNearestHit(origin, ray, player,
-                                   zTRACERAY_STAT_POLY | zTRACERAY_VOB_IGNORE | zTRACERAY_POLY_IGNORE_TRANSP))
+    if (!world->TraceRayNearestHit(origin, ray, player, solid))
         return 1500.0f;
 
     return (std::max)(0.0f, surface - world->traceRayReport.foundIntersection[VY]);
 }
 
+// Samples every 3 m along the line.
 bool CrossesDeepWater(const zVEC3 &from, const zVEC3 &to)
 {
-    for (const float t : {0.25f, 0.5f, 0.75f, 1.0f})
-        if (WaterDepthAt(from + (to - from) * t) > DeepWater)
+    const int samples = (std::max)(4, static_cast<int>(DistanceXZ(from, to) / 300.0f));
+    for (int i = 1; i <= samples; ++i)
+        if (WaterDepthAt(from + (to - from) * (static_cast<float>(i) / samples)) > DeepWater)
             return true;
     return false;
 }
@@ -336,6 +381,13 @@ float RemainingLength(const zVEC3 &from, const std::vector<zCWaypoint *> &waypoi
     return length;
 }
 
+// Close enough to a waypoint, in the XZ plane and in height.
+bool Within(const zVEC3 &hero, zCWaypoint *wp, const float radius)
+{
+    const zVEC3 position = wp->GetPositionWorld();
+    return DistanceXZ(hero, position) < radius && std::abs(hero[VY] - position[VY]) < ArriveHeight;
+}
+
 // Distance from a point to the segment a-b, measured in the XZ plane.
 float DistanceToLegXZ(const zVEC3 &p, const zVEC3 &a, const zVEC3 &b)
 {
@@ -354,6 +406,37 @@ float DistanceToLegXZ(const zVEC3 &p, const zVEC3 &a, const zVEC3 &b)
 
 // The first waypoint of a route: the nearest one the hero can see. The engine's own FindRoute(position, ...) takes
 // the plain nearest waypoint, which is often on the other side of a wall or a cliff.
+// Candidates for the first waypoint: the ones the hero can see, nearest first, then the nearest one at all. More than
+// one, because the nearest can belong to a patch of waypoints cut off from the destination (a tower interior seen
+// through its door).
+std::vector<zCWaypoint *> StartCandidates(zCWayNet *wayNet, const zVEC3 &from, const Blocked &blocked)
+{
+    std::vector<std::pair<float, zCWaypoint *>> nearby;
+    ForEachWaypoint(wayNet, [&](zCWaypoint *wp) {
+        if (blocked.Starts.count(wp))
+            return;
+        const float distance = from.Distance(wp->GetPositionWorld());
+        if (distance <= StartSearchRadius)
+            nearby.emplace_back(distance, wp);
+    });
+
+    std::sort(nearby.begin(), nearby.end(),
+              [](const auto &left, const auto &right) { return left.first < right.first; });
+
+    std::vector<zCWaypoint *> result;
+    const size_t checks = (std::min)(nearby.size(), static_cast<size_t>(MaxStartCandidates));
+    for (size_t i = 0; i < checks; ++i)
+        if (HasClearLine(from, nearby[i].second->GetPositionWorld()))
+            result.push_back(nearby[i].second);
+
+    if (!nearby.empty() && std::find(result.begin(), result.end(), nearby.front().second) == result.end())
+        result.push_back(nearby.front().second);
+    if (result.empty())
+        if (zCWaypoint *nearest = wayNet->GetNearestWaypoint(from))
+            result.push_back(nearest);
+    return result;
+}
+
 zCWaypoint *ChooseStartWaypoint(zCWayNet *wayNet, const zVEC3 &from, const Blocked &blocked)
 {
     std::vector<std::pair<float, zCWaypoint *>> nearby;
@@ -431,7 +514,8 @@ void ShortestPaths(zCWaypoint *start, const Blocked &blocked, std::unordered_map
             if (IsLegBlocked(blocked, wp, next))
                 return;
 
-            const float nextCost = cost + wp->GetPositionWorld().Distance(next->GetPositionWorld());
+            const float length = wp->GetPositionWorld().Distance(next->GetPositionWorld());
+            const float nextCost = cost + (IsWetLeg(wp, next) ? length * SwimCostFactor : length);
             const auto found = distance.find(next);
             if (found == distance.end() || nextCost < found->second)
             {
@@ -468,21 +552,24 @@ bool PlanRouteOnce(zCWayNet *wayNet, const zVEC3 &from, const std::vector<zCWayp
     };
 
     plan = Plan();
-    plan.Start = ChooseStartWaypoint(wayNet, from, blocked);
-    if (!plan.Start)
-        return false;
-
     std::unordered_map<zCWaypoint *, float> distance;
     std::unordered_map<zCWaypoint *, zCWaypoint *> parent;
-    ShortestPaths(plan.Start, blocked, distance, parent);
-    plan.Reachable = static_cast<int>(distance.size());
-
-    for (zCWaypoint *goal : goals)
+    const std::vector<zCWaypoint *> starts = StartCandidates(wayNet, from, blocked);
+    for (size_t i = 0; i < starts.size() && i < 6 && !plan.Target; ++i)
     {
-        if (distance.count(goal))
+        distance.clear();
+        parent.clear();
+        plan.Start = starts[i];
+        ShortestPaths(plan.Start, blocked, distance, parent);
+        plan.Reachable = static_cast<int>(distance.size());
+
+        for (zCWaypoint *goal : goals)
         {
-            plan.Target = goal;
-            break;
+            if (distance.count(goal))
+            {
+                plan.Target = goal;
+                break;
+            }
         }
     }
 
@@ -502,50 +589,11 @@ bool PlanRouteOnce(zCWayNet *wayNet, const zVEC3 &from, const std::vector<zCWayp
     return true;
 }
 
-// Plans, then checks the route for deep water and plans again without the wet legs. Only the legs of the found route
-// are traced, so this costs a few traces per waypoint instead of tracing the whole way net. A hero who is already
-// swimming may swim the first leg, to get out.
+// Swimming legs are part of the search (at a higher cost), so one search is enough.
 bool PlanRoute(zCWayNet *wayNet, const zVEC3 &from, const std::vector<zCWaypoint *> &goals, Plan &plan,
                Blocked &blocked)
 {
-    const auto started = std::chrono::high_resolution_clock::now();
-    const bool swimming = player->anictrl && player->anictrl->IsInWater();
-
-    for (int attempt = 0; attempt < MaxWaterReplans; ++attempt)
-    {
-        if (!PlanRouteOnce(wayNet, from, goals, plan, blocked))
-            break;
-
-        bool dry = true;
-        zVEC3 previous = from;
-        for (size_t i = 0; i < plan.Waypoints.size() && dry; ++i)
-        {
-            const zVEC3 current = plan.Waypoints[i]->GetPositionWorld();
-            if (!(i == 0 && swimming) && CrossesDeepWater(previous, current))
-            {
-                dry = false;
-                if (i == 0)
-                    blocked.Starts.insert(plan.Waypoints[0]);
-                else
-                    blocked.Legs.insert(MakeLeg(plan.Waypoints[i - 1], plan.Waypoints[i]));
-                YagaLog::Write(std::format("[nav] deep water on the way to {}, leaving that leg out",
-                                           WaypointName(plan.Waypoints[i])));
-            }
-            previous = current;
-        }
-
-        if (dry)
-        {
-            plan.Milliseconds =
-                std::chrono::duration<double, std::milli>(std::chrono::high_resolution_clock::now() - started).count();
-            return true;
-        }
-    }
-
-    plan.Waypoints.clear();
-    plan.Milliseconds =
-        std::chrono::duration<double, std::milli>(std::chrono::high_resolution_clock::now() - started).count();
-    return false;
+    return PlanRouteOnce(wayNet, from, goals, plan, blocked);
 }
 
 void LogPlan(const char *what, const Plan &plan, const Blocked &blocked)
@@ -604,14 +652,23 @@ void ResetStuckWatch()
     StuckReferenceTime = NowMs();
 }
 
+void StartStepTimer()
+{
+    StepStartedAt = NowMs();
+    StepLimitMs = StepBaseMs + StepMsPerCm * HeroPosition().Distance(Path[Index]->GetPositionWorld());
+}
+
 void StartDriving(const char *why)
 {
     ClearMovement();
     ReleaseKeys();
+    StartStepTimer();
     CurrentPhase = Phase::Driving;
     PhaseStartedAt = NowMs();
-    DriveJumped = false;
+    DriveJumps = 0;
+    DriveJumpStart = 0.0f;
     DriveJumpUntil = 0.0f;
+    DriveBest = 1e9f;
     ResetStuckWatch();
 
     YagaLog::Write(std::format("[nav] driving ({}) {}/{} -> {} ({} m)", why, Index + 1, Path.size(),
@@ -619,11 +676,114 @@ void StartDriving(const char *why)
                                Meters(DistanceXZ(HeroPosition(), Path[Index]->GetPositionWorld()))));
 }
 
+// The ladder of a way net way. The engine marks such ways when it loads the way net, but the ladder it links is not
+// always the one at the way (in the mountain fortress three ladders share a name), so the ladder actually used is
+// the one nearest to the start of the leg.
+oCMobLadder *LadderOnLeg(zCWaypoint *a, zCWaypoint *b)
+{
+    if (WaynetPatch::IsOurs(a) || WaynetPatch::IsOurs(b))
+        return nullptr;
+    zCWay *way = a->HasWay(b);
+    oCMobLadder *marked = way ? static_cast<oCWay *>(way)->ladder : nullptr;
+    const zVEC3 start = a->GetPositionWorld();
+    const zVEC3 end = b->GetPositionWorld();
+
+    // Not marked, but a climb straight up or down (a tower's floors): a ladder standing right there is the way.
+    const bool vertical = DistanceXZ(start, end) < 300.0f && std::abs(end[VY] - start[VY]) > 250.0f;
+    if (!marked && !vertical)
+        return nullptr;
+
+    oCMobLadder *best = marked;
+    float bestDistance = marked ? DistanceXZ(start, marked->GetPositionWorld()) + 1.0f : 400.0f;
+    for (zCListSort<zCVob> *node = ogame->GetGameWorld()->voblist; node; node = node->next)
+    {
+        oCMobLadder *ladder = zDYNAMIC_CAST<oCMobLadder>(node->data);
+        if (!ladder)
+            continue;
+        const zVEC3 position = ladder->GetPositionWorld();
+        const float distance = DistanceXZ(start, position) + std::abs(start[VY] - position[VY]) * 0.5f;
+        if (distance < bestDistance)
+        {
+            best = ladder;
+            bestDistance = distance;
+        }
+    }
+    return best;
+}
+
+oCMobDoor *DoorOnLeg(zCWaypoint *a, zCWaypoint *b)
+{
+    if (WaynetPatch::IsOurs(a) || WaynetPatch::IsOurs(b))
+        return nullptr;
+    zCWay *way = a->HasWay(b);
+    return way ? static_cast<oCWay *>(way)->door : nullptr;
+}
+
+// Get on the ladder like a player: face it and press action + forward; then climb with forward or back.
+void StartLadder(oCMobLadder *ladder)
+{
+    ClearMovement();
+    ReleaseKeys();
+    LadderInUse = ladder;
+    LadderMounted = false;
+    LadderPlaced = false;
+    // Stand in front of the ladder, not beside it: the spot 80 cm from it along its facing, on the side that is not
+    // inside a wall. (Asking the engine for its use spot reserves the spot, and then the use itself fails.)
+    const zVEC3 base = ladder->GetPositionWorld();
+    zVEC3 facing = ladder->GetAtVectorWorld();
+    facing[VY] = 0.0f;
+    LadderHasSpot = false;
+    if (facing.LengthApprox() > 0.1f)
+    {
+        facing.Normalize();
+        const zVEC3 lift(0.0f, 100.0f, 0.0f);
+        const zVEC3 hero = HeroPosition();
+        float bestSpot = 0.0f;
+        for (const float side : {1.0f, -1.0f})
+        {
+            const zVEC3 candidate = base + facing * (80.0f * side);
+            if (ogame->GetGameWorld()->TraceRayNearestHit(base + lift, candidate - base, ladder,
+                                                          zTRACERAY_STAT_POLY | zTRACERAY_VOB_IGNORE))
+                continue;
+            const float distance = DistanceXZ(hero, candidate);
+            if (!LadderHasSpot || distance < bestSpot)
+            {
+                LadderSpot = candidate;
+                bestSpot = distance;
+                LadderHasSpot = true;
+            }
+        }
+    }
+    CurrentPhase = Phase::Ladder;
+    PhaseStartedAt = NowMs();
+    ResetStuckWatch();
+    YagaLog::Write(std::format("[nav] ladder {} {} at {} m", ladder->GetObjectName().ToChar(), LadderUp ? "up" : "down",
+                               Meters(HeroPosition().Distance(ladder->GetPositionWorld()))));
+}
+
 void IssueStep()
 {
     ClearMovement();
     ReleaseKeys();
     CurrentPhase = Phase::Walking;
+    StartStepTimer();
+
+    LegWet = Index > 0 ? IsWetLeg(Path[Index - 1], Path[Index])
+                       : CrossesDeepWater(HeroPosition(), Path[0]->GetPositionWorld());
+
+    if (!UseEngineRoute && Index > 0)
+        if (oCMobLadder *ladder = LadderOnLeg(Path[Index - 1], Path[Index]))
+        {
+            StartLadder(ladder);
+            return;
+        }
+
+    // A leg through deep water: NPC movement cannot swim.
+    if (LegWet && !UseEngineRoute)
+    {
+        StartDriving("swim");
+        return;
+    }
 
     // NPC movement cannot swim.
     if (HeroInWater() && !UseEngineRoute)
@@ -652,18 +812,21 @@ void IssueStep()
                                Meters(DistanceXZ(HeroPosition(), Path[Index]->GetPositionWorld()))));
 }
 
-std::string DescribeTarget()
+std::wstring DescribeTarget()
 {
     switch (Kind)
     {
     case TargetKind::Sector:
-        return std::format("sector {} {}", TargetSector.x, TargetSector.y);
+        if (!TargetPlaceName.empty())
+            return Loc::Format(L"{}, sector {} {}", L"{}, sektor {} {}", TargetPlaceName, TargetSector.x,
+                               TargetSector.y);
+        return Loc::Format(L"sector {} {}", L"sektor {} {}", TargetSector.x, TargetSector.y);
     case TargetKind::Waypoint:
-        return WaypointName(RequestedWaypoint);
+        return ToWString(WaypointName(RequestedWaypoint));
     case TargetKind::Position:
-        return std::format("position {} {}", Meters(TargetPosition[VX]), Meters(TargetPosition[VZ]));
+        return Loc::Format(L"point {} {}", L"punkt {} {}", Meters(TargetPosition[VX]), Meters(TargetPosition[VZ]));
     default:
-        return "nowhere";
+        return L"-";
     }
 }
 
@@ -672,6 +835,12 @@ std::string DescribeTarget()
 bool HeroAtDestination()
 {
     const zVEC3 hero = HeroPosition();
+    if (TargetWaypoint)
+    {
+        const zVEC3 goal = TargetWaypoint->GetPositionWorld();
+        if (DistanceXZ(hero, goal) < CloseEnough && std::abs(hero[VY] - goal[VY]) < 300.0f)
+            return true;
+    }
     if (Kind == TargetKind::Sector)
         return SameSector(SectorOf(hero), TargetSector);
     if (Kind == TargetKind::Position)
@@ -721,19 +890,21 @@ void Stop(StopReason reason)
     switch (reason)
     {
     case StopReason::Arrived:
-        Speech::ReadFormat("Arrived, {}.", DescribeTarget());
+        Speech::Read(Loc::Format(L"Arrived, {}.", L"Jesteś na miejscu: {}.", DescribeTarget()));
         break;
     case StopReason::Cancelled:
-        Speech::Read("Navigation cancelled.");
+        Speech::Read(Loc::T(L"Navigation cancelled.", L"Nawigacja przerwana."));
         break;
     case StopReason::Attacked:
-        Speech::Read("Navigation stopped, you are under attack.");
+        Speech::Read(Loc::T(L"Navigation stopped, you are under attack.", L"Nawigacja zatrzymana, ktoś cię atakuje."));
         break;
     case StopReason::NoRoute:
-        Speech::ReadFormat("No way through to {}.", DescribeTarget());
+        Speech::Read(Loc::Format(L"No way through to {}.", L"Nie ma przejścia do: {}.", DescribeTarget()));
         break;
     case StopReason::GaveUp:
-        Speech::ReadFormat("Navigation stopped, cannot get through. {} meters left.", LastOutcome.MetersLeft);
+        Speech::Read(Loc::Format(L"Navigation stopped, cannot get through. {} left.",
+                                 L"Nawigacja zatrzymana, nie da się przejść. Do celu {}.",
+                                 Loc::Meters(LastOutcome.MetersLeft)));
         break;
     case StopReason::WorldChanged:
     case StopReason::Dead:
@@ -759,7 +930,15 @@ std::vector<zCWaypoint *> CurrentGoals(zCWayNet *wayNet)
     switch (Kind)
     {
     case TargetKind::Sector:
-        return WaypointsInSector(wayNet, TargetSector);
+    {
+        std::vector<zCWaypoint *> goals = WaypointsInSector(wayNet, TargetSector);
+        if (TargetPlaceWaypoint)
+        {
+            goals.erase(std::remove(goals.begin(), goals.end(), TargetPlaceWaypoint), goals.end());
+            goals.insert(goals.begin(), TargetPlaceWaypoint);
+        }
+        return goals;
+    }
     case TargetKind::Position:
         return WaypointsNear(wayNet, TargetPosition);
     case TargetKind::Waypoint:
@@ -793,7 +972,8 @@ bool Begin()
     const std::vector<zCWaypoint *> goals = CurrentGoals(wayNet);
     if (goals.empty())
     {
-        Speech::ReadFormat("No waypoints in {}, unreachable area.", DescribeTarget());
+        Speech::Read(Loc::Format(L"No waypoints in {}, unreachable area.", L"Brak punktów trasy w: {}, obszar niedostępny.",
+                                 DescribeTarget()));
         RecordFailedStart(StopReason::NoRoute);
         return false;
     }
@@ -806,13 +986,14 @@ bool Begin()
 
     NavBlocked = Blocked();
     TriedDoors.clear();
+    ReportedGates.clear();
 
     Plan plan;
     const bool found = PlanRoute(wayNet, HeroPosition(), goals, plan, NavBlocked);
     LogPlan(found ? "plan" : "plan failed", plan, NavBlocked);
     if (!found)
     {
-        Speech::ReadFormat("No route to {}.", DescribeTarget());
+        Speech::Read(Loc::Format(L"No route to {}.", L"Brak trasy do: {}.", DescribeTarget()));
         RecordFailedStart(StopReason::NoRoute);
         return false;
     }
@@ -830,8 +1011,8 @@ bool Begin()
     LastHitpoints = player->GetAttribute(NPC_ATR_HITPOINTS);
     StartedAt = NowMs();
 
-    Speech::ReadFormat("Walking to {}, {} meters, {} waypoints.", DescribeTarget(), Meters(plan.Length),
-                       plan.Waypoints.size());
+    Speech::Read(Loc::Format(L"Walking to {}, {}, {}.", L"Prowadzę do: {}, {}, {}.", DescribeTarget(),
+                             Loc::Meters(Meters(plan.Length)), Loc::Waypoints(static_cast<int>(plan.Waypoints.size()))));
     IssueStep();
     return true;
 }
@@ -841,6 +1022,14 @@ bool StartToSector(const SECTOR &sector)
     Kind = TargetKind::Sector;
     TargetSector = sector;
     RequestedWaypoint = nullptr;
+    TargetPlaceName.clear();
+    TargetPlaceWaypoint = nullptr;
+    const std::vector<const Places::Entry *> places = Places::InSector(sector);
+    if (!places.empty())
+    {
+        TargetPlaceName = Places::Name(*places.front());
+        TargetPlaceWaypoint = places.front()->Waypoint;
+    }
     return Begin();
 }
 
@@ -849,7 +1038,7 @@ bool StartToWaypoint(const std::string &name)
     zCWaypoint *wp = FindWaypoint(name);
     if (!wp)
     {
-        Speech::ReadFormat("Waypoint {} not found.", name);
+        Speech::Read(Loc::Format(L"Waypoint {} not found.", L"Nie ma punktu {}.", ToWString(name)));
         RecordFailedStart(StopReason::NoRoute);
         return false;
     }
@@ -868,7 +1057,7 @@ bool StartToPosition(const zVEC3 &position)
 }
 
 // Plan again from where the hero stands, keeping the same destination and leaving out blocked legs.
-void Recalculate(const char *why)
+void Recalculate(const std::wstring &why)
 {
     ++Recalculations;
     if (Recalculations > MaxRecalculations)
@@ -887,7 +1076,8 @@ void Recalculate(const char *why)
         return;
     }
 
-    Speech::ReadFormat("{}, recalculating. {} meters.", why, Meters(plan.Length));
+    Speech::Read(Loc::Format(L"{}, recalculating. {}.", L"{}, przeliczam trasę. {}.", why,
+                             Loc::Meters(Meters(plan.Length))));
     Path = plan.Waypoints;
     Index = 0;
     TargetWaypoint = plan.Target;
@@ -921,10 +1111,17 @@ bool IsDoor(oCMobDoor *mob)
     return scheme.find("DOOR") != std::string::npos;
 }
 
-// A closed door near the hero, between it and the waypoint it is heading for, or right next to it.
+// A closed door near the hero, between it and the waypoint it is heading for, or right next to it. The door the way
+// net puts on the current leg comes first.
 oCMobDoor *FindClosedDoor()
 {
     const zVEC3 hero = HeroPosition();
+    if (Index > 0)
+        if (oCMobDoor *door = DoorOnLeg(Path[Index - 1], Path[Index]))
+            if (!TriedDoors.count(door) && door->GetState() == 0 &&
+                hero.Distance(door->GetPositionWorld()) < DoorSearchRadius * 2.0f)
+                return door;
+
     const zVEC3 target = Path[Index]->GetPositionWorld();
     oCMobDoor *best = nullptr;
     float bestDistance = DoorSearchRadius;
@@ -960,7 +1157,7 @@ bool TryOpenDoor()
     TriedDoors.insert(door);
     if (door->locked)
     {
-        Speech::Read("Locked door.");
+        Speech::Read(Loc::T(L"Locked door.", L"Drzwi zamknięte na klucz."));
         YagaLog::Write("[nav] locked door " + std::string(door->GetObjectName().ToChar()));
         return false;
     }
@@ -969,9 +1166,7 @@ bool TryOpenDoor()
     // way, but the player's event manager never finishes it.
     ClearMovement();
     ReleaseKeys();
-    zVEC3 look = door->GetPositionWorld();
-    look[VY] = HeroPosition()[VY];
-    player->SetHeadingYWorld(look);
+    door->SetHeading(player); // the way the engine turns a character before using the mob
 
     DoorBeingOpened = door;
     CurrentPhase = Phase::OpeningDoor;
@@ -979,6 +1174,28 @@ bool TryOpenDoor()
     YagaLog::Write(std::format("[nav] opening door {} at {} m", door->GetObjectName().ToChar(),
                                Meters(HeroPosition().Distance(door->GetPositionWorld()))));
     return true;
+}
+
+// A gate (a moving vob such as a portcullis) on the current leg. The game opens gates with winches or by script; the
+// navigator cannot tell whether one is open, so it is only named when the hero cannot get past it.
+zCVob *GateOnLeg()
+{
+    const zVEC3 hero = HeroPosition();
+    const zVEC3 from = Index > 0 ? Path[Index - 1]->GetPositionWorld() : hero;
+    const zVEC3 to = Path[Index]->GetPositionWorld();
+
+    zCArray<zCVob *> movers;
+    ogame->GetGameWorld()->SearchVobListByBaseClass(zCMover::classDef, movers, nullptr);
+    for (int i = 0; i < movers.GetNumInList(); ++i)
+    {
+        zCVob *gate = movers[i];
+        if (!gate)
+            continue;
+        const zVEC3 position = gate->GetPositionWorld();
+        if (hero.Distance(position) < 1200.0f && DistanceToLegXZ(position, from, to) < 400.0f)
+            return gate;
+    }
+    return nullptr;
 }
 
 // The current step failed (the engine gave up, or the hero stopped moving).
@@ -1005,8 +1222,15 @@ void OnStepFailed(const char *what)
     }
 
     ReleaseKeys();
+    std::wstring why = Loc::T(L"Blocked", L"Przeszkoda");
+    if (zCVob *gate = GateOnLeg())
+    {
+        why = Loc::T(L"Gate closed", L"Brama zamknięta");
+        if (ReportedGates.insert(gate).second)
+            YagaLog::Write(std::format("[nav] closed gate {}", gate->GetObjectName().ToChar()));
+    }
     BlockCurrentLeg();
-    Recalculate("Blocked");
+    Recalculate(why);
 }
 
 void UpdateDriving(const zVEC3 &hero)
@@ -1014,8 +1238,8 @@ void UpdateDriving(const zVEC3 &hero)
     zVEC3 target = Path[Index]->GetPositionWorld();
     target[VY] = hero[VY];
 
-    // Never push a hero on dry land into deep water.
-    if (!HeroInWater())
+    // Never push a hero on dry land into deep water, unless the leg is meant to be swum.
+    if (!HeroInWater() && !LegWet)
     {
         zVEC3 direction = target - hero;
         direction[VY] = 0.0f;
@@ -1027,35 +1251,166 @@ void UpdateDriving(const zVEC3 &hero)
                 ReleaseKeys();
                 YagaLog::Write("[nav] driving: deep water ahead");
                 BlockCurrentLeg();
-                Recalculate("Water ahead");
+                Recalculate(Loc::T(L"Water ahead", L"Przed tobą woda"));
                 return;
             }
         }
     }
 
-    player->SetHeadingYWorld(target);
+    const float now = NowMs();
+    oCAniCtrl_Human *ani = player->anictrl;
+    const bool swimming = ani && ani->IsInWater();
 
-    Inject(GAME_UP, true);
-    Inject(GAME_SMOVE, NowMs() < DriveJumpUntil);
-
-    if (DistanceXZ(hero, StuckReference) > StuckMinMove)
+    // Under water: the jump key dives, and a diving hero kept going forward sinks deeper. Let go of every key so the
+    // hero floats up, then swim on.
+    if (ani && ani->walkmode == ANI_WALKMODE_DIVE)
     {
-        ResetStuckWatch();
-        DriveJumped = false;
+        ReleaseKeys();
+        if (now - StuckReferenceTime > DriveGiveUpMs * 4.0f)
+            OnStepFailed("under water");
         return;
     }
 
-    const float idle = NowMs() - StuckReferenceTime;
-    if (!DriveJumped && idle > DriveJumpAfterMs)
+    player->SetHeadingYWorld(target);
+
+    // A standing jump (forward key released) climbs the ledge in front of the hero; a running one clears a gap.
+    // Never in water: there the jump key dives.
+    const bool standStill = !swimming && DriveJumps > 0 && DriveClimbing && now < DriveJumpUntil + 800.0f;
+    Inject(GAME_UP, !standStill);
+    Inject(GAME_SMOVE, !swimming && now >= DriveJumpStart && now < DriveJumpUntil);
+
+    // Progress means getting closer to the waypoint, not just moving: jumping on the spot moves the hero too.
+    const zVEC3 goal = Path[Index]->GetPositionWorld();
+    const float remaining = DistanceXZ(hero, goal) + std::abs(hero[VY] - goal[VY]);
+    if (remaining < DriveBest - StuckMinMove)
     {
-        DriveJumped = true;
-        DriveJumpUntil = NowMs() + DriveJumpHoldMs;
-        YagaLog::Write("[nav] driving: no progress, jumping");
+        DriveBest = remaining;
+        ResetStuckWatch();
+        DriveJumps = 0;
+        return;
+    }
+
+    const float idle = now - StuckReferenceTime;
+    if (swimming)
+    {
+        // Against the bank: the engine climbs out of the water when the ledge is low enough.
+        if (idle > DriveJumpAfterMs && ani->Swim_CanClimbLedge())
+        {
+            YagaLog::Write("[nav] driving: climbing out of the water");
+            ani->Swim_ClimbLedge();
+            ResetStuckWatch();
+            return;
+        }
+        if (idle > DriveGiveUpMs)
+            OnStepFailed("swimming made no progress");
+        return;
+    }
+
+    if (DriveJumps < 2 && idle > DriveJumpAfterMs * (DriveJumps + 1))
+    {
+        DriveClimbing = DriveJumps == 0;
+        DriveJumpStart = now + (DriveClimbing ? 250.0f : 0.0f);
+        DriveJumpUntil = DriveJumpStart + DriveJumpHoldMs;
+        ++DriveJumps;
+        YagaLog::Write(std::format("[nav] driving: no progress, {}", DriveClimbing ? "climbing" : "jumping"));
         return;
     }
 
     if (idle > DriveGiveUpMs)
         OnStepFailed("driving made no progress");
+}
+
+void AdvanceWaypoint();
+
+void UpdateLadder(const zVEC3 &hero)
+{
+    const float elapsed = NowMs() - PhaseStartedAt;
+    const bool onLadder = player->GetInteractMob() == LadderInUse;
+
+    if (!LadderMounted)
+    {
+        if (onLadder)
+        {
+            LadderMounted = true;
+            PhaseStartedAt = NowMs();
+            ReleaseKeys();
+            YagaLog::Write("[nav] on the ladder");
+            return;
+        }
+
+        // Walk to the spot the ladder is used from (in front of it, not beside it), turn the way the engine wants and
+        // use it: action, then forward.
+        const zVEC3 spot = LadderHasSpot ? LadderSpot : LadderInUse->GetPositionWorld();
+        const float toSpot = DistanceXZ(hero, spot);
+        const bool inReach = LadderHasSpot ? toSpot < 50.0f || (elapsed > 3000.0f && toSpot < LadderReachDistance)
+                                           : toSpot < LadderReachDistance;
+        if (inReach)
+        {
+            if (!LadderPlaced)
+            {
+                LadderPlaced = true;
+                PhaseStartedAt = NowMs(); // the mount timeout counts from here
+                LadderInUse->SetIdealPosition(player);
+                YagaLog::Write(std::format("[nav] at the ladder spot {:.0f} {:.0f} ({} cm off), ladder at {:.0f} {:.0f}",
+                                           spot[VX], spot[VZ], static_cast<int>(toSpot),
+                                           LadderInUse->GetPositionWorld()[VX], LadderInUse->GetPositionWorld()[VZ]));
+            }
+            LadderInUse->SetHeading(player);
+            const float cycle = std::fmod(elapsed, 1000.0f); // press again every second
+            Inject(GAME_ACTION, cycle < 700.0f);
+            Inject(GAME_UP, cycle > 150.0f && cycle < 700.0f);
+        }
+        else
+        {
+            zVEC3 look = spot;
+            look[VY] = hero[VY];
+            player->SetHeadingYWorld(look);
+            Inject(GAME_ACTION, false);
+            Inject(GAME_UP, true);
+        }
+        if (elapsed > LadderMountMs + (inReach ? 0.0f : 4000.0f))
+        {
+            ReleaseKeys();
+            LadderInUse = nullptr;
+            OnStepFailed("could not get on the ladder");
+        }
+        return;
+    }
+
+    if (onLadder)
+    {
+        static float lastReport = 0.0f;
+        if (NowMs() - lastReport > 1000.0f)
+        {
+            lastReport = NowMs();
+            YagaLog::Write(std::format("[nav] climbing: state {}/{}, height {:.0f}, body state {}", LadderInUse->state,
+                                       LadderInUse->state_num, hero[VY], player->GetBodyState()));
+        }
+        Inject(GAME_ACTION, true);
+        Inject(LadderUp ? GAME_UP : GAME_DOWN, true);
+        if (elapsed > LadderClimbMs)
+        {
+            ReleaseKeys();
+            LadderInUse = nullptr;
+            OnStepFailed("stuck on the ladder");
+        }
+        return;
+    }
+
+    // Off the ladder at the other end.
+    ReleaseKeys();
+    YagaLog::Write(std::format("[nav] off the ladder after {:.1f} s, {} m from {}", elapsed / 1000.0f,
+                               Meters(DistanceXZ(hero, Path[Index]->GetPositionWorld())), WaypointName(Path[Index])));
+    LadderInUse = nullptr;
+    if (Within(hero, Path[Index], EngineDoneRadius))
+        AdvanceWaypoint();
+    else
+    {
+        CurrentPhase = Phase::Walking;
+        oCMsgMovement *message = new oCMsgMovement(oCMsgMovement::EV_GOTOPOS, Path[Index]->GetPositionWorld());
+        player->GetEM()->OnMessage(message, player);
+        ResetStuckWatch();
+    }
 }
 
 void AdvanceWaypoint()
@@ -1073,7 +1428,7 @@ void AdvanceWaypoint()
     if (Settings::NavigatorProgressEvery > 0 && WaypointsSinceAnnouncement >= Settings::NavigatorProgressEvery)
     {
         WaypointsSinceAnnouncement = 0;
-        Speech::ReadFormat("{} meters.", Meters(RemainingLength(HeroPosition(), Path, Index)));
+        Speech::Read(Loc::Meters(Meters(RemainingLength(HeroPosition(), Path, Index))) + L".");
     }
 
     if (!UseEngineRoute)
@@ -1094,25 +1449,26 @@ void SpeakStatus()
 {
     if (!Active)
     {
-        Speech::Read("Navigator idle.");
+        Speech::Read(Loc::T(L"Navigator idle.", L"Nawigator nieaktywny."));
         return;
     }
 
-    Speech::ReadFormat("Walking to {}, {} meters left, waypoint {} of {}.", DescribeTarget(),
-                       Meters(RemainingLength(HeroPosition(), Path, Index)), Index + 1, Path.size());
+    Speech::Read(Loc::Format(L"Walking to {}, {} left, waypoint {} of {}.", L"Prowadzę do: {}, do celu {}, punkt {} z {}.",
+                             DescribeTarget(), Loc::Meters(Meters(RemainingLength(HeroPosition(), Path, Index))),
+                             Index + 1, Path.size()));
 }
 
 void UpdateEngineRoute(const zVEC3 &hero, const bool engineBusy)
 {
-    while (Index + 1 < Path.size() && DistanceXZ(hero, Path[Index]->GetPositionWorld()) < ArriveRadius * 2.0f)
+    while (Index + 1 < Path.size() && Within(hero, Path[Index], ArriveRadius * 2.0f))
         AdvanceWaypoint();
 
     if (!engineBusy)
     {
-        if (DistanceXZ(hero, Path.back()->GetPositionWorld()) < EngineDoneRadius)
+        if (Within(hero, Path.back(), EngineDoneRadius))
             Stop(StopReason::Arrived);
         else
-            Recalculate("Route interrupted");
+            Recalculate(Loc::T(L"Route interrupted", L"Trasa przerwana"));
     }
 }
 
@@ -1155,7 +1511,7 @@ void Update()
         const float elapsed = NowMs() - PhaseStartedAt;
         const bool pressing = elapsed < DoorPressMs;
         Inject(GAME_ACTION, pressing);
-        Inject(GAME_UP, pressing);
+        Inject(GAME_UP, pressing && elapsed > 150.0f); // like a player: action held first, then forward
 
         const bool open = DoorBeingOpened && DoorBeingOpened->GetState() != 0;
         if (open || elapsed > DoorTimeoutMs)
@@ -1164,10 +1520,16 @@ void Update()
             YagaLog::Write(std::format("[nav] door {} after {:.1f} s", open ? "open" : "still closed",
                                        elapsed / 1000.0f));
             if (open)
-                Speech::Read("Door opened.", 0);
+                Speech::Read(Loc::T(L"Door opened.", L"Drzwi otwarte."), 0);
             DoorBeingOpened = nullptr;
             IssueStep();
         }
+        return;
+    }
+
+    if (CurrentPhase == Phase::Ladder)
+    {
+        UpdateLadder(hero);
         return;
     }
 
@@ -1177,10 +1539,15 @@ void Update()
         return;
     }
 
-    const float toWaypoint = DistanceXZ(hero, Path[Index]->GetPositionWorld());
+    if ((CurrentPhase == Phase::Driving || CurrentPhase == Phase::Walking) && NowMs() - StepStartedAt > StepLimitMs)
+    {
+        OnStepFailed("the leg took too long");
+        return;
+    }
+
     if (CurrentPhase == Phase::Driving)
     {
-        if (toWaypoint < ArriveRadius)
+        if (Within(hero, Path[Index], ArriveRadius))
         {
             ReleaseKeys();
             AdvanceWaypoint();
@@ -1190,7 +1557,7 @@ void Update()
         return;
     }
 
-    if (toWaypoint < ArriveRadius || (!engineBusy && toWaypoint < EngineDoneRadius))
+    if (Within(hero, Path[Index], ArriveRadius) || (!engineBusy && Within(hero, Path[Index], EngineDoneRadius)))
     {
         AdvanceWaypoint();
         return;
@@ -1206,7 +1573,7 @@ void Update()
     if (Index > 0 &&
         DistanceToLegXZ(hero, Path[Index - 1]->GetPositionWorld(), Path[Index]->GetPositionWorld()) > OffRouteDistance)
     {
-        Recalculate("Off route");
+        Recalculate(Loc::T(L"Off route", L"Zejście z trasy"));
         return;
     }
 
@@ -1232,6 +1599,8 @@ void Reset()
     Active = false;
     ReleaseKeys();
     DoorBeingOpened = nullptr;
+    LadderInUse = nullptr;
+    WetLegs.clear();
     CurrentPhase = Phase::Walking;
     Path.clear();
     Index = 0;
@@ -1242,6 +1611,8 @@ void Reset()
     TriedDoors.clear();
     Kind = TargetKind::None;
     RequestedWaypoint = nullptr;
+    TargetPlaceName.clear();
+    TargetPlaceWaypoint = nullptr;
     UseEngineRoute = false;
     // Patch nodes belong to the old world's way net.
     WaynetPatch::Clear();

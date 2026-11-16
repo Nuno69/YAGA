@@ -35,6 +35,7 @@ inline std::set<Leg> JumpLegs;
 inline zCWayNet *BuiltFor = nullptr;
 inline std::string BuiltWorld;
 inline int Problems = 0;
+inline int Generation = 0; // bumped on every build, so holders of node pointers know to look them up again
 
 inline Leg MakeLeg(zCWaypoint *a, zCWaypoint *b)
 {
@@ -278,6 +279,7 @@ inline void EnsureBuilt()
     Clear();
     BuiltFor = wayNet;
     BuiltWorld = worldName;
+    ++Generation;
 
     std::istringstream compiled(CompiledPatch());
     Apply(world, wayNet, worldName, compiled, "built-in");

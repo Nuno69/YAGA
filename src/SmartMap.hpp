@@ -155,9 +155,12 @@ struct zSmartMap
         UpdateWorldBounds();
         NavigationRequested = false;
 
-        Speech::ReadFormat("Sector {} {}. Press ENTER to hear details. use arrows to move on the map. Press SPACE to "
-                           "enable navigator.",
-                           CurrentSector.x, CurrentSector.y);
+        PlaceIndex = -1;
+        Speech::Read(Loc::Format(L"Sector {} {}. {}Press ENTER to hear details. Use arrows to move on the map, PAGE UP "
+                                 L"and PAGE DOWN to jump between places. Press SPACE to enable navigator.",
+                                 L"Sektor {} {}. {}Enter: szczegóły. Strzałki: ruch po mapie, Page Up i Page Down: "
+                                 L"kolejne miejsca. Spacja: nawigacja.",
+                                 CurrentSector.x, CurrentSector.y, PlacePrefix(CurrentSector)));
 
         while (true)
         {
@@ -242,10 +245,47 @@ struct zSmartMap
                 CurrentSector.y += at.y;
         }
 
+        const std::wstring places = Places::NamesInSector(CurrentSector);
+        std::wstring text;
         if (stop)
-            Speech::ReadFormat("You can't go further, {} {}", CurrentSector.x, CurrentSector.y);
+            text = Loc::Format(L"You can't go further, {} {}", L"Dalej się nie da, {} {}", CurrentSector.x,
+                               CurrentSector.y);
         else
-            Speech::ReadFormat("{} {}", CurrentSector.x, CurrentSector.y);
+            text = std::format(L"{} {}", CurrentSector.x, CurrentSector.y);
+        if (!places.empty())
+            text += L", " + places;
+        Speech::Read(text);
+    }
+
+    // "Stary Obóz, zamek. " before the rest of a message, or nothing.
+    static std::wstring PlacePrefix(const SECTOR &sector)
+    {
+        const std::wstring places = Places::NamesInSector(sector);
+        return places.empty() ? std::wstring() : places + L". ";
+    }
+
+    // PAGE DOWN / PAGE UP walk through the named places in alphabetical order.
+    static inline int PlaceIndex = -1;
+
+    static void JumpToPlace(const int direction)
+    {
+        const std::vector<const Places::Entry *> places = Places::Sorted();
+        if (places.empty())
+        {
+            Speech::Read(Loc::T(L"No named places in this world.", L"W tym świecie nie ma nazwanych miejsc."));
+            return;
+        }
+
+        const int count = static_cast<int>(places.size());
+        if (PlaceIndex < 0)
+            PlaceIndex = direction > 0 ? 0 : count - 1;
+        else
+            PlaceIndex = (PlaceIndex + direction + count) % count;
+
+        const Places::Entry *place = places[PlaceIndex];
+        CurrentSector = place->Sector;
+        Speech::Read(Loc::Format(L"{}, sector {} {}", L"{}, sektor {} {}", Places::Name(*place), CurrentSector.x,
+                                 CurrentSector.y));
     }
 
     static void Move(const int &x, const int &y)
@@ -269,6 +309,10 @@ struct zSmartMap
             Move(0, -1);
         else if (zinput->KeyToggled(KEY_RETURN))
             Details();
+        else if (zinput->KeyToggled(KEY_NEXT))
+            JumpToPlace(+1);
+        else if (zinput->KeyToggled(KEY_PRIOR))
+            JumpToPlace(-1);
     }
 
     static bool IsInCurrentSector(const zVEC3 &position)
@@ -320,23 +364,19 @@ struct zSmartMap
             }
         }
 
-        for (int i = 0, end = Waypoints.GetNumInList(); i < end; ++i)
-        {
-            zCWaypoint *wp = Waypoints[i];
-
-            if (IsInCurrentSector(wp->pos))
-                waypoints++;
-        }
+        // Way net waypoints and the navigator's own patch nodes.
+        if (zCWayNet *wayNet = Navigator::GetWayNet())
+            waypoints = static_cast<int>(Navigator::WaypointsInSector(wayNet, CurrentSector).size());
 
         // Messages
+        std::wstring message = PlacePrefix(CurrentSector);
         if (waypoints == 0)
         {
-            Speech::Read(L"Unreachable area.");
+            Speech::Read(message + Loc::T(L"Unreachable area.", L"Obszar niedostępny."));
             return;
         }
 
-        std::wstring message;
-        message += L"Characters: ";
+        message += Loc::T(L"Characters: ", L"Postacie: ");
         if (npcMapList.size() > 0)
         {
             for (auto &pair : npcMapList)
@@ -346,17 +386,17 @@ struct zSmartMap
             }
 
             if (others)
-                message += std::format(L"and {} others. ", others);
+                message += Loc::Format(L"and {} others. ", L"i {} innych. ", others);
         }
         else
-            message += L"not detected. ";
+            message += Loc::T(L"not detected. ", L"brak. ");
 
         if (orcs > 0)
-            message += std::format(L"Orcs: {}. ", orcs);
+            message += Loc::Format(L"Orcs: {}. ", L"Orkowie: {}. ", orcs);
         if (monsters > 0)
-            message += std::format(L"Monsters: {}. ", monsters);
+            message += Loc::Format(L"Monsters: {}. ", L"Potwory: {}. ", monsters);
         if (dragons)
-            message += L"Dragons: not detected! ";
+            message += Loc::T(L"Dragons: not detected! ", L"Smoki! ");
 
         // Reading
         Speech::Read(message);

@@ -286,10 +286,14 @@ void CommandDiag()
         zCEventMessage *message = em->GetEventMessage(i);
         messages += std::format("{}:{} ", message->_GetClassDef()->className.ToChar(), message->subType);
     }
-    Out(std::format("diag walkmode {} wmode {} inWater {} standing {} em [{}] nav {} phase {} index {}/{}",
+    oCMobInter *mob = player->GetInteractMob();
+    Out(std::format("diag walkmode {} wmode {} inWater {} standing {} bodystate {} interact {} (state {}/{}) em [{}] "
+                    "nav {} phase {} index {}/{}",
                     ani ? ani->walkmode : -1, ani ? ani->wmode : -1, ani ? ani->IsInWater() : -1,
-                    ani ? ani->IsStanding() : -1, messages, Navigator::Active,
-                    static_cast<int>(Navigator::CurrentPhase), Navigator::Index, Navigator::Path.size()));
+                    ani ? ani->IsStanding() : -1, player->GetBodyState(),
+                    mob ? mob->GetObjectName().ToChar() : "none", mob ? mob->state : -1, mob ? mob->state_num : -1,
+                    messages, Navigator::Active, static_cast<int>(Navigator::CurrentPhase), Navigator::Index,
+                    Navigator::Path.size()));
 }
 
 // ---------------------------------------------------------------- teleporting
@@ -977,6 +981,32 @@ void Update()
 
 inline ULONGLONG PushUntil = 0;
 
+// "use UP_AT_MS END_MS [KEY]": holds action from now, the forward key (or KEY: up, down) from UP_AT_MS, releases
+// both at END_MS, then logs the hero's state. For finding how mobs (ladders, doors, winches) react to the keys.
+namespace UseTest
+{
+inline bool Active = false;
+inline float StartedAt = 0.0f;
+inline float UpAt = 0.0f;
+inline float EndAt = 0.0f;
+inline unsigned short Key = GAME_UP;
+
+void Update()
+{
+    if (!Active)
+        return;
+    const float t = GameMs() - StartedAt;
+    Navigator::Inject(GAME_ACTION, t < EndAt);
+    Navigator::Inject(Key, t >= UpAt && t < EndAt);
+    if (t >= EndAt)
+    {
+        Active = false;
+        Navigator::ReleaseKeys();
+        CommandDiag();
+    }
+}
+} // namespace UseTest
+
 void Run(const std::string &line)
 {
     std::istringstream in(line);
@@ -1120,6 +1150,67 @@ void Run(const std::string &line)
                         position[VX], position[VY], position[VZ], wp->waterDepth, wp->underWater,
                         WaynetPatch::IsOurs(wp) ? 1 : 0, ways));
     }
+    else if (command == "places")
+    {
+        // Every named place: sector, waypoint and whether the graph reaches it; also writes a tour that walks to each
+        // place's sector the way SPACE on the map does.
+        zCWayNet *wayNet = Navigator::GetWayNet();
+        Navigator::Blocked blocked;
+        std::unordered_map<zCWaypoint *, float> distance;
+        std::unordered_map<zCWaypoint *, zCWaypoint *> parent;
+        if (zCWaypoint *start = Navigator::ChooseStartWaypoint(wayNet, player->GetPositionWorld(), blocked))
+            Navigator::ShortestPaths(start, blocked, distance, parent);
+
+        std::ofstream tour("yaga_tour_places.txt");
+        Places::EnsureResolved();
+        for (const Places::Entry &entry : Places::Entries)
+        {
+            YagaLog::Write(std::format(L"[dev] place {} / {}: {} sector {} {}, {}", entry.Info->English,
+                                       entry.Info->Polish, ToWString(entry.Info->Waypoint), entry.Sector.x,
+                                       entry.Sector.y, distance.count(entry.Waypoint) ? L"reachable" : L"NOT reachable"));
+            std::string label = WaynetPatch::Upper(entry.Info->Waypoint);
+            tour << std::format("{} sector {} {}\n", label, entry.Sector.x, entry.Sector.y);
+        }
+        Out(std::format("{} places of {} resolved, tour written to yaga_tour_places.txt", Places::Entries.size(),
+                        Places::Table().size()));
+    }
+    else if (command == "facemob")
+    {
+        // The nearest usable mob turns the hero the way the engine does before using it.
+        oCMobInter *best = nullptr;
+        float bestDistance = 1500.0f;
+        const zVEC3 hero = player->GetPositionWorld();
+        for (zCListSort<zCVob> *node = ogame->GetGameWorld()->voblist; node; node = node->next)
+        {
+            oCMobInter *mob = zDYNAMIC_CAST<oCMobInter>(node->data);
+            if (mob && hero.Distance(mob->GetPositionWorld()) < bestDistance)
+            {
+                best = mob;
+                bestDistance = hero.Distance(mob->GetPositionWorld());
+            }
+        }
+        if (best)
+        {
+            std::string how;
+            in >> how;
+            if (how == "place")
+                best->SetIdealPosition(player);
+            best->SetHeading(player);
+            Out(std::format("facemob {} at {:.0f} cm, heading {:.0f}", best->GetObjectName().ToChar(), bestDistance,
+                            GetCompassAngle()));
+        }
+    }
+    else if (command == "use")
+    {
+        std::string key = "up";
+        UseTest::UpAt = 150.0f;
+        UseTest::EndAt = 1500.0f;
+        in >> UseTest::UpAt >> UseTest::EndAt >> key;
+        UseTest::Key = key == "down" ? GAME_DOWN : GAME_UP;
+        UseTest::StartedAt = GameMs();
+        UseTest::Active = true;
+        Out(std::format("use: action now, {} from {:.0f} ms, release at {:.0f} ms", key, UseTest::UpAt, UseTest::EndAt));
+    }
     else if (command == "push")
     {
         int ms = 1000;
@@ -1224,6 +1315,7 @@ void Poll()
     Drive::Update();
     Recorder::Update();
     Tour::Update();
+    UseTest::Update();
 
     const ULONGLONG now = GetTickCount64();
     if (PushUntil)
