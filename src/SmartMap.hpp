@@ -1,5 +1,3 @@
-#define zMAP_SECTOR_SIZE 5000
-
 namespace GOTHIC_NAMESPACE
 {
 #if ENGINE == Engine_G2A
@@ -17,8 +15,6 @@ void __cdecl sysEvent(void)
 {
 }
 #endif
-
-using SECTOR = POINT;
 
 inline void AddNpcToMap(std::unordered_map<std::string, int> &map, std::string npcName)
 {
@@ -137,25 +133,27 @@ struct zSmartMap
         zCWorld *world = ogame->GetGameWorld();
 
         auto bbox3D = world->GetBspTree()->bspRoot->bbox3D;
-        Min.x = static_cast<LONG>(bbox3D.mins[VX]) / zMAP_SECTOR_SIZE;
-        Min.y = static_cast<LONG>(bbox3D.mins[VZ]) / zMAP_SECTOR_SIZE;
-        Max.x = static_cast<LONG>(bbox3D.maxs[VX]) / zMAP_SECTOR_SIZE + 1;
-        Max.y = static_cast<LONG>(bbox3D.maxs[VZ]) / zMAP_SECTOR_SIZE + 1;
+        Min.x = SectorCoord(bbox3D.mins[VX]);
+        Min.y = SectorCoord(bbox3D.mins[VZ]);
+        Max.x = SectorCoord(bbox3D.maxs[VX]);
+        Max.y = SectorCoord(bbox3D.maxs[VZ]);
 
         UpdateCurrentSector();
     }
 
     static void UpdateCurrentSector()
     {
-        zVEC3 position = player->GetPositionWorld();
-        CurrentSector.x = static_cast<LONG>(position[VX]) / zMAP_SECTOR_SIZE;
-        CurrentSector.y = static_cast<LONG>(position[VZ]) / zMAP_SECTOR_SIZE;
+        CurrentSector = SectorOf(player->GetPositionWorld());
     }
+
+    // Set by SPACE: the map closes and the navigator starts walking to this sector.
+    static inline bool NavigationRequested = false;
 
     static void Open()
     {
         InitVobList();
         UpdateWorldBounds();
+        NavigationRequested = false;
 
         Speech::ReadFormat("Sector {} {}. Press ENTER to hear details. use arrows to move on the map. Press SPACE to "
                            "enable navigator.",
@@ -167,6 +165,12 @@ struct zSmartMap
 
             if (zinput->KeyToggled(KEY_ESCAPE) || zinput->KeyToggled(KEY_M))
                 break;
+
+            if (zinput->KeyToggled(KEY_SPACE))
+            {
+                NavigationRequested = true;
+                break;
+            }
 
             HandleEvent();
 
@@ -182,6 +186,25 @@ struct zSmartMap
 
             zsound->DoSoundUpdate();
             sysEvent();
+        }
+
+        // Do not let the key that closed the map reach the game (SPACE draws the weapon, ESCAPE opens the menu).
+        WaitForKeyRelease(KEY_SPACE);
+        WaitForKeyRelease(KEY_ESCAPE);
+        zinput->ClearKeyBuffer();
+
+        if (NavigationRequested)
+            Navigator::StartToSector(CurrentSector);
+    }
+
+    static void WaitForKeyRelease(const int key)
+    {
+        const ULONGLONG deadline = GetTickCount64() + 2000;
+        while (zinput->KeyPressed(key) && GetTickCount64() < deadline)
+        {
+            zinput->ProcessInputEvents();
+            sysEvent();
+            Sleep(10);
         }
     }
 
@@ -250,8 +273,7 @@ struct zSmartMap
 
     static bool IsInCurrentSector(const zVEC3 &position)
     {
-        return int(position[VX] / zMAP_SECTOR_SIZE) == CurrentSector.x &&
-               int(position[VZ] / zMAP_SECTOR_SIZE) == CurrentSector.y;
+        return SameSector(SectorOf(position), CurrentSector);
     }
 
     static void Details()

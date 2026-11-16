@@ -70,12 +70,43 @@ The default value is `100`, minimum is `1` and maximum is `100`.
 Controls the global compass offset angle in degrees, when you press `SHIFT+LEFT_ARROW` or `SHIFT+RIGHT_ARROW` your world rotation will be set to next closest angle.  
 The default value is `45`.
 
+### NavigatorMode
+
+Controls how the navigator walks the hero along a route:
+- `0` - the navigator hands the hero one waypoint at a time to the engine's NPC movement and watches every step (recommended)
+- `1` - the whole route is handed to the engine (`EV_GOROUTE`), the navigator only watches the result
+
+The default value is `0`.
+
+### NavigatorProgressEvery
+
+The navigator speaks the remaining distance every this many waypoints. `0` speaks only at the start, on recalculation and on arrival.
+The default value is `5`.
+
+### DevCommands
+
+Development aid. With `1` the plugin reads commands from `yaga_cmd.txt` in the game folder (position, route planning, benchmarks, teleporting to a waypoint) and writes the results to `YAGA.log`.
+The default value is `0`.
+
+## Navigation
+
+Press `M` to open the sector map. Arrows move between 50 by 50 metre sectors, `ENTER` describes the selected sector and `SPACE` closes the map and walks the hero to it.
+
+- Routes follow the game's own way net, the waypoints NPCs walk on. The goal is the reachable waypoint nearest to the centre of the sector.
+- Legs through deep water are left out of routes: NPC movement cannot swim, and some lakes kill a swimming hero.
+- The hero is walked by the engine's NPC movement, which steps around small obstacles. Where it gives up, the navigator walks the hero itself and jumps when the hero stops moving. A hero who starts in the water swims to the first waypoint.
+- When the hero is stuck or pushed off the route, the navigator remembers the blocked leg and recalculates the route around it.
+- Any movement key cancels the walk. The walk also stops when the hero takes damage.
+- `J` speaks the navigation status: target, remaining distance and waypoint.
+
+Every spoken line and every navigator decision is written to `YAGA.log` in the game folder. Attach it to bug reports.
+
 ## TODO
 
 - [ ] Perform code clean up. Refactor the code to adhere to single responsibility principle. Put input handling in one place
 - [ ] Make the game automatically speak in menus and dialogs
 - [ ] Make an accessible audio radar which will inform the player about their surroundings with both speech and sound
-- [ ] Create a system which will allow the player to traverse the world from point A to point B (turn by turn navigation)
+- [ ] Create a system which will allow the player to traverse the world from point A to point B (turn by turn navigation). Auto-walk to a map sector is done; turn by turn guidance is not.
 - [ ] During combat, report adversary's weapon proficiency.
 - [ ] Make all game screens accessible, namely trading, learning, ETC
 - [ ] Make all game popups accessible

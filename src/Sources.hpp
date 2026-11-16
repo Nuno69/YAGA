@@ -1,5 +1,6 @@
 // Add your plugin files here
 
+#include "Utils/Log.hpp"
 #include "Utils/String.hpp"
 #include "Utils/Generic.hpp"
 
@@ -25,7 +26,10 @@
 
 #include "BlindCameraModel.hpp"
 #include "VobSoundEmitter.hpp"
+#include "Navigation/Sectors.hpp"
+#include "Navigation/Navigator.hpp"
 #include "SmartMap.hpp"
+#include "Dev/DevConsole.hpp"
 
 #include "Hooks/oCAIHuman.hpp"
 #include "Hooks/oCWorld.hpp"
@@ -34,6 +38,7 @@
 #include "Hooks/oCMobInter.hpp"
 #include "Hooks/oCNpc.hpp"
 #include "Hooks/zCAIPlayer.hpp"
+#include "Hooks/zCInput.hpp"
 #include "Hooks/zCMenu.hpp"
 #include "Hooks/zCModel.hpp"
 #include "Hooks/zCViewDialogChoice.hpp"

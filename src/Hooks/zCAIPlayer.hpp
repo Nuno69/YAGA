@@ -5,7 +5,8 @@ auto Hook_zCAIPlayer_CheckEnoughSpaceMoveForward =
                       &zCAIPlayer::Hook_CheckEnoughSpaceMoveForward, Union::HookType::Hook_Detours);
 int zCAIPlayer::Hook_CheckEnoughSpaceMoveForward(const int a)
 {
-    if (vob != player)
+    // The navigator walks the hero straight at its target, so it needs the engine's own forward check.
+    if (vob != player || Navigator::Active)
         return (this->*Hook_zCAIPlayer_CheckEnoughSpaceMoveForward)(a);
 
     float angle = 45.0f;

@@ -46,6 +46,9 @@ void Game_Loop()
     if (zinput->KeyToggled(KEY_M))
         zSmartMap::Open();
 
+    NavigatorLoop();
+    DevConsole::Poll();
+
     CollectVobSoundCues();
     SpatialCues::UpdateAll();
 
@@ -73,6 +76,8 @@ void Game_SaveEnd(const int slot)
 
 void LoadBegin()
 {
+    // Waypoints of the old world are about to be freed.
+    Navigator::Reset();
 }
 
 void LoadEnd()
@@ -120,6 +125,7 @@ void Game_LoadEnd_TriggerChangeLevel()
 void Game_Pause()
 {
     SpatialCues::StopAll();
+    Navigator::OnPause();
 }
 
 void Game_Unpause()
@@ -198,35 +204,38 @@ void __fastcall oCGame_WriteSaveGame(oCGame *self, void *vtable, int slot, zBOOL
     Game_SaveEnd(slot);
 }
 
-/*void __fastcall oCGame_LoadGame(oCGame* self, void* vtable, int slot, const zSTRING& levelPath);
-auto Hook_oCGame_LoadGame = Union::CreateHook(reinterpret_cast<void*>(zSwitch(0x0063C070, 0x00662B20, 0x00669970,
-0x006C65A0)), &oCGame_LoadGame, Union::HookType::Hook_Detours); void __fastcall oCGame_LoadGame(oCGame* self, void*
-vtable, int slot, const zSTRING& levelPath)
+void __fastcall oCGame_LoadGame(oCGame *self, void *vtable, int slot, const zSTRING &levelPath);
+auto Hook_oCGame_LoadGame =
+    Union::CreateHook(reinterpret_cast<void *>(zSwitch(0x0063C070, 0x00662B20, 0x00669970, 0x006C65A0)),
+                      &oCGame_LoadGame, Union::HookType::Hook_Detours);
+void __fastcall oCGame_LoadGame(oCGame *self, void *vtable, int slot, const zSTRING &levelPath)
 {
     Game_LoadBegin_NewGame();
     Hook_oCGame_LoadGame(self, vtable, slot, levelPath);
     Game_LoadEnd_NewGame();
-}*/
+}
 
-/*void __fastcall oCGame_LoadSaveGame(oCGame* self, void* vtable, int slot, zBOOL loadGlobals);
-auto Hook_oCGame_LoadSaveGame = Union::CreateHook(reinterpret_cast<void*>(zSwitch(0x0063C2A0, 0x00662D60, 0x00669BA0,
-0x006C67D0)), &oCGame_LoadSaveGame, Union::HookType::Hook_Detours); void __fastcall oCGame_LoadSaveGame(oCGame* self,
-void* vtable, int slot, zBOOL loadGlobals)
+void __fastcall oCGame_LoadSaveGame(oCGame *self, void *vtable, int slot, zBOOL loadGlobals);
+auto Hook_oCGame_LoadSaveGame =
+    Union::CreateHook(reinterpret_cast<void *>(zSwitch(0x0063C2A0, 0x00662D60, 0x00669BA0, 0x006C67D0)),
+                      &oCGame_LoadSaveGame, Union::HookType::Hook_Detours);
+void __fastcall oCGame_LoadSaveGame(oCGame *self, void *vtable, int slot, zBOOL loadGlobals)
 {
     Game_LoadBegin_SaveGame();
     Hook_oCGame_LoadSaveGame(self, vtable, slot, loadGlobals);
     Game_LoadEnd_SaveGame();
-}*/
+}
 
-/*void __fastcall oCGame_ChangeLevel(oCGame* self, void* vtable, const zSTRING& levelpath, const zSTRING& startpoint);
-auto Hook_Game_Load_ChangeLevel = Union::CreateHook(reinterpret_cast<void*>(zSwitch(0x0063CD60, 0x00663950, 0x0066A660,
-0x006C7290)), &oCGame_ChangeLevel, Union::HookType::Hook_Detours); void __fastcall oCGame_ChangeLevel(oCGame* self,
-void* vtable, const zSTRING& levelpath, const zSTRING& startpoint)
+void __fastcall oCGame_ChangeLevel(oCGame *self, void *vtable, const zSTRING &levelpath, const zSTRING &startpoint);
+auto Hook_Game_Load_ChangeLevel =
+    Union::CreateHook(reinterpret_cast<void *>(zSwitch(0x0063CD60, 0x00663950, 0x0066A660, 0x006C7290)),
+                      &oCGame_ChangeLevel, Union::HookType::Hook_Detours);
+void __fastcall oCGame_ChangeLevel(oCGame *self, void *vtable, const zSTRING &levelpath, const zSTRING &startpoint)
 {
     Game_LoadBegin_ChangeLevel();
     Hook_Game_Load_ChangeLevel(self, vtable, levelpath, startpoint);
     Game_LoadEnd_ChangeLevel();
-}*/
+}
 
 /*void __fastcall oCGame_TriggerChangeLevel(oCGame* self, void* vtable, const zSTRING& levelpath, const zSTRING&
 startpoint); auto Hook_oCGame_TriggerChangeLevel = Union::CreateHook(reinterpret_cast<void*>(zSwitch(0x0063D480,
