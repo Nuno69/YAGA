@@ -1,6 +1,8 @@
 #ifndef YAGA_SETTINGS
 #define YAGA_SETTINGS
 
+#include <string>
+
 namespace Settings
 {
 inline int SpeechDefaultEngine;
@@ -17,6 +19,8 @@ inline int NavigatorMode;
 inline int NavigatorProgressEvery;
 // Enables the yaga_cmd.txt command file used for automated testing.
 inline int DevCommands;
+// Language of spoken messages: "auto" (the game's language), "pl" or "en".
+inline std::string Language;
 } // namespace Settings
 
 #endif
@@ -37,6 +41,7 @@ void LoadSpeechEngineSettings()
     Settings::NavigatorMode = zoptions->ReadInt("YAGA", "NavigatorMode", 0);
     Settings::NavigatorProgressEvery = zoptions->ReadInt("YAGA", "NavigatorProgressEvery", 5);
     Settings::DevCommands = zoptions->ReadInt("YAGA", "DevCommands", 0);
+    Settings::Language = zoptions->ReadString("YAGA", "Language", "auto").ToChar();
 }
 } // namespace GOTHIC_NAMESPACE
 

@@ -12,6 +12,7 @@ void Game_EntryPoint()
 void Game_Init()
 {
     LoadSpeechEngineSettings();
+    DetectLanguage(Settings::Language);
 
     InitializeMenuHooks();
     InitializeDialogChoiceHooks();
@@ -66,12 +67,12 @@ void Game_MenuLoop()
 
 void Game_SaveBegin()
 {
-    Speech::Read("Saving game...");
+    Speech::Read(Loc::T(L"Saving game...", L"Zapisywanie gry..."));
 }
 
 void Game_SaveEnd(const int slot)
 {
-    Speech::ReadFormat("Save complete at slot {}!", slot);
+    Speech::Read(Loc::Format(L"Save complete at slot {}!", L"Zapisano grę w miejscu {}.", slot));
 }
 
 void LoadBegin()

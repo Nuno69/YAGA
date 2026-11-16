@@ -1,6 +1,7 @@
 // Add your plugin files here
 
 #include "Utils/Log.hpp"
+#include "Utils/Locale.hpp"
 #include "Utils/String.hpp"
 #include "Utils/Generic.hpp"
 

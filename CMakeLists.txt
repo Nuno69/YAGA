@@ -22,6 +22,11 @@ file(GLOB_RECURSE SRC
 add_library(${CMAKE_PROJECT_NAME} SHARED)
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE ${SRC})
 
+# Sources hold Polish messages in UTF-8.
+if (MSVC)
+	target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE /utf-8)
+endif()
+
 target_include_directories(${CMAKE_PROJECT_NAME}
     INTERFACE
 		"include/"

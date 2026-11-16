@@ -83,6 +83,15 @@ The default value is `0`.
 The navigator speaks the remaining distance every this many waypoints. `0` speaks only at the start, on recalculation and on arrival.
 The default value is `5`.
 
+### Language
+
+Language of the messages YAGA speaks itself (the game's own texts are always in the game's language):
+- `auto` - the language of the game: Polish for the Polish release, English otherwise
+- `pl` - Polish
+- `en` - English
+
+The default value is `auto`.
+
 ### DevCommands
 
 Development aid. With `1` the plugin reads commands from `yaga_cmd.txt` in the game folder (position, route planning, benchmarks, teleporting to a waypoint) and writes the results to `YAGA.log`.
@@ -110,7 +119,7 @@ Every spoken line and every navigator decision is written to `YAGA.log` in the g
 - [ ] During combat, report adversary's weapon proficiency.
 - [ ] Make all game screens accessible, namely trading, learning, ETC
 - [ ] Make all game popups accessible
-- [ ] Make the plugin localizable
+- [ ] Make the plugin localizable. YAGA's own messages are in Polish and English, picked by the game language; more languages need a translation table.
 - [x] Make the plugin configurable
 
 ## Contributions
