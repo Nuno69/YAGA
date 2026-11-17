@@ -4,30 +4,25 @@ namespace Speech
 {
 std::unique_ptr<SpeechEngine> engine;
 
-void Initialize(const int engineId)
+// A problem found while starting speech, said once the player is in the game (in the menu the menu reader would talk
+// over it at once).
+inline std::wstring PendingWarning;
+
+// All speech goes through Prism: the running screen reader, or a speech engine when none runs.
+void Initialize(const std::string &backend, const int rate, const int volume)
 {
-    switch (engineId)
-    {
-    case 0:
-        engine = std::make_unique<SpeechEngineZhengdu>();
-        break;
-
-    case 1:
-        engine = std::make_unique<SpeechEngineNVDA>();
-        break;
-
-    case 2:
-        engine = std::make_unique<SpeechEngineSAPI>();
-        break;
-
-    default:
-        break;
-    }
+    YagaLog::Write("[speech] Prism, asked for backend " + backend);
+    auto prism = std::make_unique<SpeechEnginePrism>(backend, rate, volume);
+    const std::wstring stale = prism->StaleZdsrLibrary();
+    engine = std::move(prism);
+    if (!stale.empty())
+        PendingWarning = L"An old ZDSRAPI.dll keeps the Zhengdu screen reader from working. Delete " + stale;
 }
 
 void StopReading()
 {
-    engine->StopReading();
+    if (engine)
+        engine->StopReading();
 }
 
 // Read methods
@@ -59,6 +54,14 @@ int Read(const zSTRING &str, const int interrupt = 1)
 {
     const auto text = ToWString(str);
     return engine->Read(text.c_str(), interrupt);
+}
+
+void SayPendingWarning()
+{
+    if (PendingWarning.empty())
+        return;
+    Read(PendingWarning);
+    PendingWarning.clear();
 }
 
 // ReadFormat methods

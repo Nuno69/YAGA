@@ -10,7 +10,7 @@
 
 - The steam version of [Gothic 1](https://store.steampowered.com/app/65540/Gothic_1/) or [Gothic II: Night Of The Raven](https://store.steampowered.com/app/39510/Gothic_II_Gold_Edition/).  
 Other versions of the game should work however that has not been tested and so is not recommended.
-- The **NVDA screenreader** or the **Zhengdu Screenreader**
+- A screen reader: **NVDA**, **JAWS**, the **Zhengdu Screenreader** (ZDSR) or another one supported by [Prism](https://github.com/ethindp/prism). Without one, YAGA speaks through the Windows voices (OneCore or SAPI).
 - [yaga.vdf](https://github.com/Nuno69/YAGA/releases)
 
 ### For developers
@@ -18,7 +18,9 @@ Other versions of the game should work however that has not been tested and so i
 Everything outlined above plus the following:
 
 - [git lfs](https://git-lfs.com/) (required for fetching lfs files from repo)
-- [CMake](https://cmake.org/)
+- [CMake](https://cmake.org/) 3.28 or newer
+- Visual Studio 2022 (or its Build Tools) with the **C++ ATL** component, which [Prism](https://github.com/ethindp/prism) needs
+- An internet connection for the first configure: CMake downloads the Prism release source (pinned by its hash)
 - [ClangFormat](https://clang.llvm.org/docs/ClangFormat.html)
 
 ### Building
@@ -41,29 +43,26 @@ Before compiling the mod you need to clone this repository recursively by execut
 
 Here all the settings of the mod are going to be described. All settings are located in the **gothic.ini** file, in the `[YAGA]` section. If the setting is not in the file, its default value will be restored and written to the file.
 
-### DefaultSpeechEngine
+### SpeechBackend
 
-Controls what speech engine is being used for speech output in YAGA. Possible values are:
-- `0` - (ZDSR)
-- `1` - (NVDA)
-- `2` - (SAPI)
+YAGA speaks through [Prism](https://github.com/ethindp/prism), which talks to the screen reader or to a speech engine. Possible values are:
+- `auto` - the running screen reader; when none runs, a Windows voice (OneCore or SAPI). A screen reader started later takes over within ten seconds, and one that is closed hands over to a Windows voice.
+- a Prism backend name, for example `NVDA`, `JAWS`, `ZDSR`, `SAPI` or `OneCore` (exact case). If it does not work, `auto` is used.
 
-The default value is `1`.
+Text also goes to the braille display when the screen reader supports it.  
+The default value is `auto`.
 
-### ZDSRUseMultiChannel
+Prism uses the ZDSR library installed with the screen reader. If an older YAGA was copied into the game by hand, delete `ZDSRAPI.dll` and `nvdaControllerClient32.dll` from `Gothic\system\Autorun`: the old `ZDSRAPI.dll` is loaded by Union first and keeps ZDSR from working. YAGA says so when it finds it.
 
-Controls whether the multi channel feature of **ZDSR** is going to be utilized by YAGA (works only for **ZDSR** speech engine).  
-The default value is `1`.
+### SpeechRate
 
-### SAPIRate
+Rate of a Windows voice (screen readers keep their own settings), from `0` to `100`.  
+The default value is `50`, the voice's normal rate.
 
-Controls the rate of the **SAPI5** speech engine.  
-The default value value is `5`, minimum is `1` and maximum is `10`.
+### SpeechVolume
 
-### SAPIVolume
-
-Controls the volume of the **SAPI5** speech engine.  
-The default value is `100`, minimum is `1` and maximum is `100`.
+Volume of a Windows voice (screen readers keep their own settings), from `0` to `100`.  
+The default value is `50`, the system's normal volume.
 
 ### CompassAngleOffset
 

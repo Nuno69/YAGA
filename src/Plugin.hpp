@@ -17,7 +17,7 @@ void Game_Init()
     InitializeDialogChoiceHooks();
 
     InitializeVobTracker();
-    Speech::Initialize(Settings::SpeechDefaultEngine);
+    Speech::Initialize(Settings::SpeechBackend, Settings::SpeechRate, Settings::SpeechVolume);
 }
 
 void Game_Exit()
@@ -34,6 +34,7 @@ void Game_Loop()
     if (ogame->singleStep)
         return;
 
+    Speech::SayPendingWarning();
     SpatialCues::BeginFrame();
     Raycast();
 
