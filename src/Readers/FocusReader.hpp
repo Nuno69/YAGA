@@ -32,7 +32,7 @@ void FocusReaderLoop()
         Speech::Read(npc->GetName(0));
         if (npc->IsDead())
         {
-            Speech::Read(L"Is dead");
+            Speech::Read(Loc::T(L"Is dead", L"Nie żyje"));
         }
         return;
     }

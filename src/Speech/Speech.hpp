@@ -27,38 +27,45 @@ void Initialize(const int engineId)
 
 void StopReading()
 {
-    engine->StopReading();
+    if (engine)
+        engine->StopReading();
+}
+
+// Every spoken line goes through here, so it is also written to YAGA.log.
+int Emit(const std::wstring &text, const int interrupt)
+{
+    YagaLog::Write(L"[speech] " + text);
+    if (!engine)
+        return 0;
+
+    return engine->Read(text.c_str(), interrupt);
 }
 
 // Read methods
 
 int Read(const char *str, const int interrupt = 1)
 {
-    const auto text = ToWString(str);
-    return engine->Read(text.c_str(), interrupt);
+    return Emit(ToWString(str), interrupt);
 }
 
 int Read(const wchar_t *str, const int interrupt = 1)
 {
-    std::wcout << str << std::endl;
-    return engine->Read(str, interrupt);
+    return Emit(str, interrupt);
 }
 
 int Read(const std::string &str, const int interrupt = 1)
 {
-    const auto text = ToWString(str);
-    return engine->Read(text.c_str(), interrupt);
+    return Emit(ToWString(str), interrupt);
 }
 
 int Read(const std::wstring &str, const int interrupt = 1)
 {
-    return engine->Read(str.c_str(), interrupt);
+    return Emit(str, interrupt);
 }
 
 int Read(const zSTRING &str, const int interrupt = 1)
 {
-    const auto text = ToWString(str);
-    return engine->Read(text.c_str(), interrupt);
+    return Emit(ToWString(str), interrupt);
 }
 
 // ReadFormat methods

@@ -9,8 +9,8 @@ namespace VobTracker
 {
 struct Category
 {
-    const char *Name;
-    const char *EmptyMessage;
+    const wchar_t *Name[2];         // English, Polish
+    const wchar_t *EmptyMessage[2]; // English, Polish
     float MaxDistance;
     bool (*Matches)(zCVob *);
 };
@@ -39,8 +39,8 @@ bool MatchesNpcCategory(zCVob *vob)
 }
 
 const std::array<Category, 2> Categories = {{
-    {"All", "No tracked objects", 15000.0f, &MatchesAllCategory},
-    {"NPC", "No tracked NPCs", 15000.0f, &MatchesNpcCategory},
+    {{L"All", L"Wszystko"}, {L"No tracked objects", L"Brak obiektów w pobliżu"}, 15000.0f, &MatchesAllCategory},
+    {{L"NPC", L"Postacie"}, {L"No tracked NPCs", L"Brak postaci w pobliżu"}, 15000.0f, &MatchesNpcCategory},
 }};
 
 const Category &GetCurrentCategory()
@@ -168,7 +168,7 @@ void ReadSelectedVob(zCVob *vob)
 {
     if (!vob)
     {
-        Speech::Read(GetCurrentCategory().EmptyMessage);
+        Speech::Read(GetCurrentCategory().EmptyMessage[Loc::Polish ? 1 : 0]);
         return;
     }
 
@@ -180,13 +180,14 @@ void CycleCategory()
     CurrentCategoryIndex = (CurrentCategoryIndex + 1) % static_cast<int>(Categories.size());
     SelectedVob = nullptr;
     RefreshCandidates();
-    Speech::Read(GetCurrentCategory().Name);
+    Speech::Read(GetCurrentCategory().Name[Loc::Polish ? 1 : 0]);
 }
 
 void ToggleRadar()
 {
     RadarEnabled = !RadarEnabled;
-    Speech::Read(RadarEnabled ? "Enabled tracking" : "Disabled tracking");
+    Speech::Read(RadarEnabled ? Loc::T(L"Enabled tracking", L"Śledzenie włączone")
+                              : Loc::T(L"Disabled tracking", L"Śledzenie wyłączone"));
 }
 
 zCVob *MoveSelection(const int direction)
@@ -222,7 +223,7 @@ void PointPlayerAtSelectedVob()
     zCVob *trackedVob = GetSelectedVob();
     if (!trackedVob)
     {
-        Speech::Read(GetCurrentCategory().EmptyMessage);
+        Speech::Read(GetCurrentCategory().EmptyMessage[Loc::Polish ? 1 : 0]);
         return;
     }
 

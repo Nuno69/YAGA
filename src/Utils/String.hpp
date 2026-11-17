@@ -1,13 +1,14 @@
 namespace GOTHIC_NAMESPACE
 {
+// Game texts use the game's code page (Windows-1250 for the Polish release), not necessarily the system one.
 std::wstring ToWString(const char *ansi, int length)
 {
-    const int wideLength = MultiByteToWideChar(CP_ACP, 0, ansi, length, nullptr, 0);
+    const int wideLength = MultiByteToWideChar(Loc::GameCodePage, 0, ansi, length, nullptr, 0);
     if (wideLength == 0)
         return {};
 
     std::wstring result(wideLength, L'\0');
-    MultiByteToWideChar(CP_ACP, 0, ansi, length, &result[0], wideLength);
+    MultiByteToWideChar(Loc::GameCodePage, 0, ansi, length, &result[0], wideLength);
 
     return result;
 }
