@@ -102,7 +102,7 @@ The default value is `0`.
 Press `M` to open the sector map. Arrows move between 50 by 50 metre sectors, `ENTER` describes the selected sector and `SPACE` closes the map and walks the hero to it. `PAGE DOWN` and `PAGE UP` jump between named places (camps, mines, towers, the mountain fortress...) in alphabetical order. A sector with a named place says its name when you enter it with the arrows and on `ENTER`.
 
 - Routes follow the game's own way net, the waypoints NPCs walk on. The goal is the named place of the sector, if it has one, otherwise the reachable waypoint nearest to the centre of the sector.
-- The hero is walked by the engine's NPC movement, which steps around small obstacles. Where it gives up, the navigator walks the hero itself and jumps when the hero stops moving.
+- The hero is walked by the engine's NPC movement, which steps around small obstacles. Where it gives up, the navigator runs the hero itself with the engine's animation controller and jumps or climbs when the hero stops moving. No key is ever pressed or held for the player: doors and ladders are used through the engine's own mob interaction.
 - Ladders on the way are climbed, up or down. Closed doors on the way are opened; locked ones are reported, and so are closed gates. Places behind a gate the game opens by script (the monastery ruins, the fog tower, the Sleeper's temple) lead to the spot in front of it.
 - Legs through deep water are swum. They count four times their length when the route is chosen, so a dry way round wins when there is one. The lake below the intro cliff, which kills a swimming hero, is left out.
 - When the hero is stuck or pushed off the route, the navigator remembers the blocked leg and recalculates the route around it.

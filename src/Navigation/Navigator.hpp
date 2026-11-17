@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <cctype>
 #include <chrono>
-#include <functional>
 #include <map>
 #include <queue>
 #include <set>
@@ -18,9 +17,10 @@ namespace GOTHIC_NAMESPACE
 //
 // Walking hands the hero to the engine's NPC movement (oCMsgMovement EV_GOTOPOS), whose "robust trace" turns around
 // small obstacles. Where that movement cannot go (swimming, or a ledge it gives up on), the navigator drives the hero
-// itself: it faces the waypoint and holds the forward key, with a jump when the hero stops moving. It also opens
-// closed doors in the way, notices when the hero is stuck or pushed off the route, and then recalculates around the
-// blocked leg.
+// itself with the engine's animation controller: it faces the waypoint and runs (_Forward), and jumps or climbs
+// (PC_JumpForward) when the hero stops moving. Doors and ladders are used through the mob interaction functions
+// (StartInteraction, Interact, StopInteraction). No key is ever pressed or held for the player. It also notices when
+// the hero is stuck or pushed off the route, and then recalculates around the blocked leg.
 namespace Navigator
 {
 constexpr float ArriveRadius = 150.0f;       // a waypoint counts as reached within this XZ distance (cm)
@@ -31,7 +31,6 @@ constexpr float StuckWindowMs = 2500.0f;     // no progress for this long counts
 constexpr float StuckMinMove = 40.0f;        // ... where progress means moving at least this far
 constexpr float OffRouteDistance = 1500.0f;  // farther than this from the current leg triggers a recalculation
 constexpr float DoorSearchRadius = 600.0f;   // closed doors this close to the hero are opened when a step fails
-constexpr float DoorPressMs = 500.0f;        // how long action + forward is held to open a door
 constexpr float DoorTimeoutMs = 3000.0f;     // a door that is not open by then is given up on
 constexpr float DriveJumpAfterMs = 1200.0f;  // driving without progress this long: try a jump / climb
 constexpr float DriveJumpHoldMs = 300.0f;
@@ -146,59 +145,30 @@ inline float DriveBest = 0.0f;      // the hero's best distance to the waypoint 
 inline oCMobDoor *DoorBeingOpened = nullptr;
 inline oCMobLadder *LadderInUse = nullptr;
 inline bool LadderMounted = false;
-inline bool LadderPlaced = false; // the hero was turned to the ladder on its use spot
-inline bool LadderHasSpot = false;
-inline zVEC3 LadderSpot;          // where the engine wants a character to stand to use the ladder
 inline bool LadderUp = true;
 inline bool LegWet = false;                          // the current leg goes through deep water
 inline std::map<std::pair<zCWaypoint *, zCWaypoint *>, bool> WetLegs; // cache: does a leg cross deep water
 
-// Logical keys the navigator is holding down (bit per GAME_* key), read by the zCInput_Win32::GetState hook, and the
-// presses not yet reported by GetToggled.
-inline unsigned int InjectedKeys = 0;
-inline unsigned int InjectedToggles = 0;
-// The unhooked GetState, so real key presses can be told apart from injected ones.
-inline std::function<float(unsigned short)> RealKeyState;
+inline bool Running = false; // the navigator started the hero's run with _Forward and has to stop it
 
 // ---------------------------------------------------------------- helpers
 
-bool IsKeyInjected(const unsigned short logicalKey)
+// The hero runs forward through the animation controller, the way the player's own AI does it for the forward key.
+void RunForward()
 {
-    return logicalKey < 32 && (InjectedKeys & (1u << logicalKey)) != 0;
-}
-
-void Inject(const unsigned short logicalKey, const bool down)
-{
-    const unsigned int bit = 1u << logicalKey;
-    if (down)
+    if (player && player->anictrl)
     {
-        if (!(InjectedKeys & bit))
-            InjectedToggles |= bit;
-        InjectedKeys |= bit;
+        player->anictrl->_Forward();
+        Running = true;
     }
-    else
-        InjectedKeys &= ~bit;
 }
 
-void ReleaseKeys()
+// Stop a run the navigator started.
+void Halt()
 {
-    InjectedKeys = 0;
-    InjectedToggles = 0;
-}
-
-// One injected press is reported once, like a real key going down.
-bool TakeInjectedToggle(const unsigned short logicalKey)
-{
-    const unsigned int bit = logicalKey < 32 ? 1u << logicalKey : 0u;
-    if (!(InjectedToggles & bit))
-        return false;
-    InjectedToggles &= ~bit;
-    return true;
-}
-
-float RealState(const unsigned short logicalKey)
-{
-    return RealKeyState ? RealKeyState(logicalKey) : zinput->GetState(logicalKey);
+    if (Running && player && player->anictrl)
+        player->anictrl->_Stand();
+    Running = false;
 }
 
 bool HeroInWater()
@@ -661,7 +631,7 @@ void StartStepTimer()
 void StartDriving(const char *why)
 {
     ClearMovement();
-    ReleaseKeys();
+    Halt();
     StartStepTimer();
     CurrentPhase = Phase::Driving;
     PhaseStartedAt = NowMs();
@@ -719,41 +689,15 @@ oCMobDoor *DoorOnLeg(zCWaypoint *a, zCWaypoint *b)
     return way ? static_cast<oCWay *>(way)->door : nullptr;
 }
 
-// Get on the ladder like a player: face it and press action + forward; then climb with forward or back.
+// Use the ladder the way the engine does for any character: put the hero on its spot (SetIdealPosition), turn it
+// (SetHeading) and start the interaction; then climb with Interact, up or down, until the hero is off at the other
+// end.
 void StartLadder(oCMobLadder *ladder)
 {
     ClearMovement();
-    ReleaseKeys();
+    Halt();
     LadderInUse = ladder;
     LadderMounted = false;
-    LadderPlaced = false;
-    // Stand in front of the ladder, not beside it: the spot 80 cm from it along its facing, on the side that is not
-    // inside a wall. (Asking the engine for its use spot reserves the spot, and then the use itself fails.)
-    const zVEC3 base = ladder->GetPositionWorld();
-    zVEC3 facing = ladder->GetAtVectorWorld();
-    facing[VY] = 0.0f;
-    LadderHasSpot = false;
-    if (facing.LengthApprox() > 0.1f)
-    {
-        facing.Normalize();
-        const zVEC3 lift(0.0f, 100.0f, 0.0f);
-        const zVEC3 hero = HeroPosition();
-        float bestSpot = 0.0f;
-        for (const float side : {1.0f, -1.0f})
-        {
-            const zVEC3 candidate = base + facing * (80.0f * side);
-            if (ogame->GetGameWorld()->TraceRayNearestHit(base + lift, candidate - base, ladder,
-                                                          zTRACERAY_STAT_POLY | zTRACERAY_VOB_IGNORE))
-                continue;
-            const float distance = DistanceXZ(hero, candidate);
-            if (!LadderHasSpot || distance < bestSpot)
-            {
-                LadderSpot = candidate;
-                bestSpot = distance;
-                LadderHasSpot = true;
-            }
-        }
-    }
     CurrentPhase = Phase::Ladder;
     PhaseStartedAt = NowMs();
     ResetStuckWatch();
@@ -764,7 +708,7 @@ void StartLadder(oCMobLadder *ladder)
 void IssueStep()
 {
     ClearMovement();
-    ReleaseKeys();
+    Halt();
     CurrentPhase = Phase::Walking;
     StartStepTimer();
 
@@ -854,7 +798,7 @@ void Stop(StopReason reason)
         return;
 
     Active = false;
-    ReleaseKeys();
+    Halt();
 
     const bool worldStillValid = reason != StopReason::WorldChanged;
     bool arrivedInSector = false;
@@ -1162,11 +1106,14 @@ bool TryOpenDoor()
         return false;
     }
 
-    // Open it the way a player does: face the door and hold action + forward. An EV_USEMOB message would be the NPC
-    // way, but the player's event manager never finishes it.
+    // Open it through the mob interaction: the engine's spot and heading, StartInteraction, then Interact (action and
+    // forward) until the door is open. An EV_USEMOB message would be the NPC way, but the player's event manager never
+    // finishes it.
     ClearMovement();
-    ReleaseKeys();
-    door->SetHeading(player); // the way the engine turns a character before using the mob
+    Halt();
+    door->SetIdealPosition(player);
+    door->SetHeading(player);
+    door->StartInteraction(player);
 
     DoorBeingOpened = door;
     CurrentPhase = Phase::OpeningDoor;
@@ -1221,7 +1168,7 @@ void OnStepFailed(const char *what)
         return;
     }
 
-    ReleaseKeys();
+    Halt();
     std::wstring why = Loc::T(L"Blocked", L"Przeszkoda");
     if (zCVob *gate = GateOnLeg())
     {
@@ -1248,7 +1195,7 @@ void UpdateDriving(const zVEC3 &hero)
             const zVEC3 ahead = hero + direction.Normalize() * 150.0f;
             if (WaterDepthAt(ahead) > DeepWater)
             {
-                ReleaseKeys();
+                Halt();
                 YagaLog::Write("[nav] driving: deep water ahead");
                 BlockCurrentLeg();
                 Recalculate(Loc::T(L"Water ahead", L"Przed tobą woda"));
@@ -1261,11 +1208,10 @@ void UpdateDriving(const zVEC3 &hero)
     oCAniCtrl_Human *ani = player->anictrl;
     const bool swimming = ani && ani->IsInWater();
 
-    // Under water: the jump key dives, and a diving hero kept going forward sinks deeper. Let go of every key so the
-    // hero floats up, then swim on.
+    // Under water: a diving hero kept going forward sinks deeper. Stop so the hero floats up, then swim on.
     if (ani && ani->walkmode == ANI_WALKMODE_DIVE)
     {
-        ReleaseKeys();
+        Halt();
         if (now - StuckReferenceTime > DriveGiveUpMs * 4.0f)
             OnStepFailed("under water");
         return;
@@ -1273,11 +1219,18 @@ void UpdateDriving(const zVEC3 &hero)
 
     player->SetHeadingYWorld(target);
 
-    // A standing jump (forward key released) climbs the ledge in front of the hero; a running one clears a gap.
-    // Never in water: there the jump key dives.
+    // A jump from standing climbs the ledge in front of the hero; one from running clears a gap. The engine's player
+    // jump (PC_JumpForward) picks climb or jump by itself. Never in water, where a jump dives.
     const bool standStill = !swimming && DriveJumps > 0 && DriveClimbing && now < DriveJumpUntil + 800.0f;
-    Inject(GAME_UP, !standStill);
-    Inject(GAME_SMOVE, !swimming && now >= DriveJumpStart && now < DriveJumpUntil);
+    if (standStill)
+        Halt();
+    else
+        RunForward();
+    if (!swimming && DriveJumpStart > 0.0f && now >= DriveJumpStart)
+    {
+        DriveJumpStart = 0.0f;
+        ani->PC_JumpForward();
+    }
 
     // Progress means getting closer to the waypoint, not just moving: jumping on the spot moves the hero too.
     const zVEC3 goal = Path[Index]->GetPositionWorld();
@@ -1333,44 +1286,33 @@ void UpdateLadder(const zVEC3 &hero)
         {
             LadderMounted = true;
             PhaseStartedAt = NowMs();
-            ReleaseKeys();
+            Halt();
             YagaLog::Write("[nav] on the ladder");
             return;
         }
 
-        // Walk to the spot the ladder is used from (in front of it, not beside it), turn the way the engine wants and
-        // use it: action, then forward.
-        const zVEC3 spot = LadderHasSpot ? LadderSpot : LadderInUse->GetPositionWorld();
-        const float toSpot = DistanceXZ(hero, spot);
-        const bool inReach = LadderHasSpot ? toSpot < 50.0f || (elapsed > 3000.0f && toSpot < LadderReachDistance)
-                                           : toSpot < LadderReachDistance;
-        if (inReach)
+        // Walk up to it first.
+        if (DistanceXZ(hero, LadderInUse->GetPositionWorld()) > LadderReachDistance)
         {
-            if (!LadderPlaced)
-            {
-                LadderPlaced = true;
-                PhaseStartedAt = NowMs(); // the mount timeout counts from here
-                LadderInUse->SetIdealPosition(player);
-                YagaLog::Write(std::format("[nav] at the ladder spot {:.0f} {:.0f} ({} cm off), ladder at {:.0f} {:.0f}",
-                                           spot[VX], spot[VZ], static_cast<int>(toSpot),
-                                           LadderInUse->GetPositionWorld()[VX], LadderInUse->GetPositionWorld()[VZ]));
-            }
-            LadderInUse->SetHeading(player);
-            const float cycle = std::fmod(elapsed, 1000.0f); // press again every second
-            Inject(GAME_ACTION, cycle < 700.0f);
-            Inject(GAME_UP, cycle > 150.0f && cycle < 700.0f);
-        }
-        else
-        {
-            zVEC3 look = spot;
+            zVEC3 look = LadderInUse->GetPositionWorld();
             look[VY] = hero[VY];
             player->SetHeadingYWorld(look);
-            Inject(GAME_ACTION, false);
-            Inject(GAME_UP, true);
+            RunForward();
+            if (elapsed > LadderMountMs + 4000.0f)
+            {
+                Halt();
+                LadderInUse = nullptr;
+                OnStepFailed("could not reach the ladder");
+            }
+            return;
         }
-        if (elapsed > LadderMountMs + (inReach ? 0.0f : 4000.0f))
+
+        Halt();
+        LadderInUse->SetIdealPosition(player);
+        LadderInUse->SetHeading(player);
+        LadderInUse->StartInteraction(player);
+        if (player->GetInteractMob() != LadderInUse && elapsed > LadderMountMs)
         {
-            ReleaseKeys();
             LadderInUse = nullptr;
             OnStepFailed("could not get on the ladder");
         }
@@ -1383,14 +1325,13 @@ void UpdateLadder(const zVEC3 &hero)
         if (NowMs() - lastReport > 1000.0f)
         {
             lastReport = NowMs();
-            YagaLog::Write(std::format("[nav] climbing: state {}/{}, height {:.0f}, body state {}", LadderInUse->state,
-                                       LadderInUse->state_num, hero[VY], player->GetBodyState()));
+            YagaLog::Write(std::format("[nav] climbing: state {}/{}, height {:.0f}", LadderInUse->state,
+                                       LadderInUse->state_num, hero[VY]));
         }
-        Inject(GAME_ACTION, true);
-        Inject(LadderUp ? GAME_UP : GAME_DOWN, true);
+        LadderInUse->Interact(player, TRUE, LadderUp ? TRUE : FALSE, LadderUp ? FALSE : TRUE, FALSE, FALSE);
         if (elapsed > LadderClimbMs)
         {
-            ReleaseKeys();
+            LadderInUse->StopInteraction(player);
             LadderInUse = nullptr;
             OnStepFailed("stuck on the ladder");
         }
@@ -1398,7 +1339,6 @@ void UpdateLadder(const zVEC3 &hero)
     }
 
     // Off the ladder at the other end.
-    ReleaseKeys();
     YagaLog::Write(std::format("[nav] off the ladder after {:.1f} s, {} m from {}", elapsed / 1000.0f,
                                Meters(DistanceXZ(hero, Path[Index]->GetPositionWorld())), WaypointName(Path[Index])));
     LadderInUse = nullptr;
@@ -1440,7 +1380,7 @@ bool PlayerWantsControl()
     static const unsigned short movementKeys[] = {GAME_UP,    GAME_DOWN,       GAME_LEFT,
                                                   GAME_RIGHT, GAME_STRAFELEFT, GAME_STRAFERIGHT};
     for (const unsigned short key : movementKeys)
-        if (RealState(key) > 0.0f)
+        if (zinput->GetState(key) > 0.0f)
             return true;
     return false;
 }
@@ -1509,14 +1449,15 @@ void Update()
     if (CurrentPhase == Phase::OpeningDoor)
     {
         const float elapsed = NowMs() - PhaseStartedAt;
-        const bool pressing = elapsed < DoorPressMs;
-        Inject(GAME_ACTION, pressing);
-        Inject(GAME_UP, pressing && elapsed > 150.0f); // like a player: action held first, then forward
-
         const bool open = DoorBeingOpened && DoorBeingOpened->GetState() != 0;
+        const bool interacting = DoorBeingOpened && player->GetInteractMob() == DoorBeingOpened;
+        if (!open && interacting)
+            DoorBeingOpened->Interact(player, TRUE, TRUE, FALSE, FALSE, FALSE);
+
         if (open || elapsed > DoorTimeoutMs)
         {
-            ReleaseKeys();
+            if (interacting)
+                DoorBeingOpened->StopInteraction(player);
             YagaLog::Write(std::format("[nav] door {} after {:.1f} s", open ? "open" : "still closed",
                                        elapsed / 1000.0f));
             if (open)
@@ -1549,7 +1490,7 @@ void Update()
     {
         if (Within(hero, Path[Index], ArriveRadius))
         {
-            ReleaseKeys();
+            Halt();
             AdvanceWaypoint();
         }
         else
@@ -1588,16 +1529,16 @@ void Update()
         OnStepFailed("no progress");
 }
 
-// The game is paused (menu): release held keys; Update holds them again once the game runs.
+// The game is paused (menu): stop the run; Update starts it again once the game runs.
 void OnPause()
 {
-    ReleaseKeys();
+    Halt();
 }
 
 void Reset()
 {
     Active = false;
-    ReleaseKeys();
+    Halt();
     DoorBeingOpened = nullptr;
     LadderInUse = nullptr;
     WetLegs.clear();

@@ -618,15 +618,14 @@ void Update()
 
 // ---------------------------------------------------------------- driving and recording
 
-// Walks the hero straight at a point with the forward key (jumping when stuck); for exploring ground without
-// waypoints.
+// Runs the hero straight at a point with the engine's animation controller (jumping when stuck); for exploring ground
+// without waypoints.
 namespace Drive
 {
 inline bool Active = false;
 inline zVEC3 Target;
 inline zVEC3 Reference;
 inline float ReferenceAt = 0.0f;
-inline float JumpUntil = 0.0f;
 inline bool Jumped = false;
 
 void Start(const float x, const float z)
@@ -636,7 +635,6 @@ void Start(const float x, const float z)
     Reference = player->GetPositionWorld();
     ReferenceAt = GameMs();
     Jumped = false;
-    JumpUntil = 0.0f;
     Active = true;
     Out(std::format("drive to {:.0f} {:.0f}, {:.0f} cm", x, z, DistanceXZ(Reference, Target)));
 }
@@ -644,7 +642,7 @@ void Start(const float x, const float z)
 void Finish(const char *how)
 {
     Active = false;
-    Navigator::ReleaseKeys();
+    player->anictrl->_Stand();
     const zVEC3 p = player->GetPositionWorld();
     Out(std::format("drive {} at {:.0f} {:.0f} {:.0f}, {:.0f} cm from target", how, p[VX], p[VY], p[VZ],
                     DistanceXZ(p, Target)));
@@ -670,8 +668,7 @@ void Update()
     zVEC3 look = Target;
     look[VY] = hero[VY];
     player->SetHeadingYWorld(look);
-    Navigator::Inject(GAME_UP, true);
-    Navigator::Inject(GAME_SMOVE, GameMs() < JumpUntil);
+    player->anictrl->_Forward();
 
     if (DistanceXZ(hero, Reference) > Navigator::StuckMinMove)
     {
@@ -685,7 +682,8 @@ void Update()
     if (!Jumped && idle > Navigator::DriveJumpAfterMs)
     {
         Jumped = true;
-        JumpUntil = GameMs() + Navigator::DriveJumpHoldMs;
+        if (!player->anictrl->IsInWater())
+            player->anictrl->PC_JumpForward();
     }
     else if (idle > Navigator::DriveGiveUpMs)
         Finish("stuck");
@@ -979,33 +977,72 @@ void Update()
 }
 } // namespace Tour
 
-inline ULONGLONG PushUntil = 0;
 
-// "use UP_AT_MS END_MS [KEY]": holds action from now, the forward key (or KEY: up, down) from UP_AT_MS, releases
-// both at END_MS, then logs the hero's state. For finding how mobs (ladders, doors, winches) react to the keys.
-namespace UseTest
+// Engine-only movement experiments (no keys): "efwd MS" calls _Forward every frame, "ejump" PC_JumpForward,
+// "emob up|down|none" mounts the nearest mob with StartInteraction and feeds Interact every frame.
+namespace EngineTest
 {
-inline bool Active = false;
-inline float StartedAt = 0.0f;
-inline float UpAt = 0.0f;
-inline float EndAt = 0.0f;
-inline unsigned short Key = GAME_UP;
+inline float ForwardUntil = 0.0f;
+inline oCMobInter *Mob = nullptr;
+inline int MobDirection = 0; // 1 up, -1 down, 0 none
+inline float MobUntil = 0.0f;
+inline float NextReport = 0.0f;
+
+oCMobInter *NearestMob()
+{
+    oCMobInter *best = nullptr;
+    float bestDistance = 1500.0f;
+    const zVEC3 hero = player->GetPositionWorld();
+    for (zCListSort<zCVob> *node = ogame->GetGameWorld()->voblist; node; node = node->next)
+    {
+        oCMobInter *mob = zDYNAMIC_CAST<oCMobInter>(node->data);
+        if (mob && hero.Distance(mob->GetPositionWorld()) < bestDistance)
+        {
+            best = mob;
+            bestDistance = hero.Distance(mob->GetPositionWorld());
+        }
+    }
+    return best;
+}
 
 void Update()
 {
-    if (!Active)
-        return;
-    const float t = GameMs() - StartedAt;
-    Navigator::Inject(GAME_ACTION, t < EndAt);
-    Navigator::Inject(Key, t >= UpAt && t < EndAt);
-    if (t >= EndAt)
+    const float now = GameMs();
+    if (ForwardUntil > 0.0f)
     {
-        Active = false;
-        Navigator::ReleaseKeys();
-        CommandDiag();
+        if (now < ForwardUntil)
+            player->anictrl->_Forward();
+        else
+        {
+            ForwardUntil = 0.0f;
+            player->anictrl->_Stand();
+            CommandPos();
+        }
+    }
+
+    if (Mob)
+    {
+        if (now > MobUntil)
+        {
+            Out("emob done");
+            CommandDiag();
+            CommandPos();
+            Mob = nullptr;
+            return;
+        }
+        if (player->GetInteractMob() == Mob && (MobDirection != 2 || Mob->state == 0))
+            Mob->Interact(player, 1, MobDirection != 0 && MobDirection != -1, MobDirection < 0, 0, 0);
+        if (now > NextReport)
+        {
+            NextReport = now + 1000.0f;
+            Out(std::format("emob {} state {}/{} interacting {} body {} y {:.0f}", Mob->GetObjectName().ToChar(),
+                            Mob->state, Mob->state_num, player->GetInteractMob() == Mob, player->GetBodyState(),
+                            player->GetPositionWorld()[VY]));
+        }
     }
 }
-} // namespace UseTest
+} // namespace EngineTest
+
 
 void Run(const std::string &line)
 {
@@ -1200,24 +1237,73 @@ void Run(const std::string &line)
                             GetCompassAngle()));
         }
     }
-    else if (command == "use")
+    else if (command == "efwd")
     {
-        std::string key = "up";
-        UseTest::UpAt = 150.0f;
-        UseTest::EndAt = 1500.0f;
-        in >> UseTest::UpAt >> UseTest::EndAt >> key;
-        UseTest::Key = key == "down" ? GAME_DOWN : GAME_UP;
-        UseTest::StartedAt = GameMs();
-        UseTest::Active = true;
-        Out(std::format("use: action now, {} from {:.0f} ms, release at {:.0f} ms", key, UseTest::UpAt, UseTest::EndAt));
-    }
-    else if (command == "push")
-    {
-        int ms = 1000;
+        float ms = 2000.0f;
         in >> ms;
-        zinput->SetState(GAME_UP, TRUE);
-        PushUntil = GetTickCount64() + ms;
-        Out(std::format("pushing forward for {} ms", ms));
+        EngineTest::ForwardUntil = GameMs() + ms;
+        Out(std::format("efwd {:.0f} ms", ms));
+    }
+    else if (command == "facewp")
+    {
+        std::string name;
+        in >> name;
+        if (zCWaypoint *wp = Navigator::FindWaypoint(name))
+        {
+            zVEC3 look = wp->GetPositionWorld();
+            look[VY] = player->GetPositionWorld()[VY];
+            player->SetHeadingYWorld(look);
+            Out(std::format("facing {}", name));
+        }
+    }
+    else if (command == "ejump")
+    {
+        oCAniCtrl_Human *ani = player->anictrl;
+        std::string how = "pc";
+        in >> how;
+        Out(std::format("ejump {}: canJumpLedge {} canJump {}", how, ani->CanJumpLedge(), ani->CanJump(1)));
+        if (how == "forward")
+            Out(std::format("JumpForward -> {}", ani->JumpForward()));
+        else
+            ani->PC_JumpForward();
+    }
+    else if (command == "emob")
+    {
+        std::string how = "up";
+        in >> how;
+        EngineTest::Mob = EngineTest::NearestMob();
+        if (!EngineTest::Mob)
+        {
+            Out("emob: no mob");
+            return;
+        }
+        EngineTest::MobDirection = how == "up" ? 1 : how == "down" ? -1 : how == "open" ? 2 : 0;
+        EngineTest::MobUntil = GameMs() + 15000.0f;
+        EngineTest::NextReport = 0.0f;
+        EngineTest::Mob->SetIdealPosition(player);
+        EngineTest::Mob->SetHeading(player);
+        EngineTest::Mob->StartInteraction(player);
+        Out(std::format("emob start {} at {:.0f} cm", EngineTest::Mob->GetObjectName().ToChar(),
+                        player->GetPositionWorld().Distance(EngineTest::Mob->GetPositionWorld())));
+    }
+    else if (command == "estop")
+    {
+        std::string how = "stop";
+        in >> how;
+        oCMobInter *mob = player->GetInteractMob();
+        if (!mob)
+            mob = EngineTest::NearestMob();
+        EngineTest::Mob = nullptr;
+        if (mob)
+        {
+            if (how == "end")
+                mob->EndInteraction(player, 1);
+            else if (how == "interrupt")
+                mob->InterruptInteraction(player);
+            else
+                mob->StopInteraction(player);
+        }
+        CommandDiag();
     }
     else if (command == "bench")
     {
@@ -1315,22 +1401,9 @@ void Poll()
     Drive::Update();
     Recorder::Update();
     Tour::Update();
-    UseTest::Update();
+    EngineTest::Update();
 
     const ULONGLONG now = GetTickCount64();
-    if (PushUntil)
-    {
-        if (now < PushUntil)
-            zinput->SetState(GAME_UP, TRUE);
-        else
-        {
-            zinput->SetState(GAME_UP, FALSE);
-            PushUntil = 0;
-            Out("push done");
-            CommandPos();
-        }
-    }
-
     if (now < NextPollAt)
         return;
     NextPollAt = now + 250;

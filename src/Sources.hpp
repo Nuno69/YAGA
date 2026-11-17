@@ -43,7 +43,6 @@
 #include "Hooks/oCMobInter.hpp"
 #include "Hooks/oCNpc.hpp"
 #include "Hooks/zCAIPlayer.hpp"
-#include "Hooks/zCInput.hpp"
 #include "Hooks/zCMenu.hpp"
 #include "Hooks/zCModel.hpp"
 #include "Hooks/zCViewDialogChoice.hpp"
