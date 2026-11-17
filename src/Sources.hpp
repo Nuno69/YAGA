@@ -1,5 +1,6 @@
 // Add your plugin files here
 
+#include "Utils/Log.hpp"
 #include "Utils/String.hpp"
 #include "Utils/Generic.hpp"
 
@@ -7,9 +8,7 @@
 #include "Compass.hpp"
 
 #include "Speech/SpeechEngine.h"
-#include "Speech/SpeechEngineZhengdu.h"
-#include "Speech/SpeechEngineNVDA.h"
-#include "Speech/SpeechEngineSAPI.h"
+#include "Speech/SpeechEnginePrism.h"
 #include "Speech/Speech.hpp"
 
 #include "Readers/CompassReader.hpp"
