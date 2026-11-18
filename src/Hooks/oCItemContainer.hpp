@@ -28,7 +28,7 @@ void oCItemContainer::NextItem_U()
     (this->*Hook_oCItemContainer_NextItem)();
 
     if (!this->IsActive())
-        Speech::Read(L"Right container", 0);
+        Speech::Read(Loc::T(L"Right container", L"Prawy pojemnik"), 0);
 }
 #endif
 
@@ -40,6 +40,6 @@ void oCItemContainer::PrevItem_U()
     (this->*Hook_oCItemContainer_PrevItem)();
 
     if (!this->IsActive())
-        Speech::Read(L"Left container", 0);
+        Speech::Read(Loc::T(L"Left container", L"Lewy pojemnik"), 0);
 }
 } // namespace GOTHIC_NAMESPACE

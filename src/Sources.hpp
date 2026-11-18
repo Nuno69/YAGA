@@ -1,5 +1,7 @@
 // Add your plugin files here
 
+#include "Utils/Log.hpp"
+#include "Utils/Locale.hpp"
 #include "Utils/String.hpp"
 #include "Utils/Generic.hpp"
 
@@ -20,12 +22,20 @@
 #include "Readers/MenuReader.hpp"
 
 #include "SpatialCueManager.hpp"
-#include "Trackers/VobTracker.hpp"
 #include "WallDetection/Raycast.hpp"
 
 #include "BlindCameraModel.hpp"
 #include "VobSoundEmitter.hpp"
+#include "Navigation/Sectors.hpp"
+#include "Navigation/WaynetPatch_G1.hpp"
+#include "Navigation/WaynetPatch.hpp"
+#include "Navigation/Places.hpp"
+#include "Navigation/Places_G1.hpp"
+#include "Navigation/NavMesh.hpp"
+#include "Trackers/VobTracker.hpp"
+#include "Navigation/Navigator.hpp"
 #include "SmartMap.hpp"
+#include "Dev/DevConsole.hpp"
 
 #include "Hooks/oCAIHuman.hpp"
 #include "Hooks/oCWorld.hpp"

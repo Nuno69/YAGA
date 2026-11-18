@@ -9,30 +9,19 @@ float NormalizeCompassAngle(float angle)
     return angle;
 }
 
-std::string GetCompassName(float _angle)
+std::wstring GetCompassName(float _angle)
 {
     const int angle = static_cast<int>(NormalizeCompassAngle(_angle));
     const int sector = static_cast<int>((angle + 22) / 45) % 8;
 
-    switch (sector)
-    {
-    case 0:
-        return std::format("North at {}", angle);
-    case 1:
-        return std::format("North-east at {}", angle);
-    case 2:
-        return std::format("East at {}", angle);
-    case 3:
-        return std::format("South-east at {}", angle);
-    case 4:
-        return std::format("South at {}", angle);
-    case 5:
-        return std::format("South-west at {}", angle);
-    case 6:
-        return std::format("West at {}", angle);
-    default:
-        return std::format("North-west at {}", angle);
-    }
+    static const wchar_t *english[] = {L"North",     L"North-east", L"East", L"South-east",
+                                       L"South",     L"South-west", L"West", L"North-west"};
+    static const wchar_t *polish[] = {L"Północ",     L"Północny wschód", L"Wschód", L"Południowy wschód",
+                                      L"Południe",   L"Południowy zachód", L"Zachód", L"Północny zachód"};
+
+    if (Loc::Polish)
+        return std::format(L"{}, {}", polish[sector], Loc::Degrees(angle));
+    return std::format(L"{} at {}", english[sector], angle);
 }
 
 float GetCompassAngle()

@@ -1,5 +1,3 @@
-#define zMAP_SECTOR_SIZE 5000
-
 namespace GOTHIC_NAMESPACE
 {
 #if ENGINE == Engine_G2A
@@ -17,8 +15,6 @@ void __cdecl sysEvent(void)
 {
 }
 #endif
-
-using SECTOR = POINT;
 
 inline void AddNpcToMap(std::unordered_map<std::string, int> &map, std::string npcName)
 {
@@ -137,29 +133,34 @@ struct zSmartMap
         zCWorld *world = ogame->GetGameWorld();
 
         auto bbox3D = world->GetBspTree()->bspRoot->bbox3D;
-        Min.x = static_cast<LONG>(bbox3D.mins[VX]) / zMAP_SECTOR_SIZE;
-        Min.y = static_cast<LONG>(bbox3D.mins[VZ]) / zMAP_SECTOR_SIZE;
-        Max.x = static_cast<LONG>(bbox3D.maxs[VX]) / zMAP_SECTOR_SIZE + 1;
-        Max.y = static_cast<LONG>(bbox3D.maxs[VZ]) / zMAP_SECTOR_SIZE + 1;
+        Min.x = SectorCoord(bbox3D.mins[VX]);
+        Min.y = SectorCoord(bbox3D.mins[VZ]);
+        Max.x = SectorCoord(bbox3D.maxs[VX]);
+        Max.y = SectorCoord(bbox3D.maxs[VZ]);
 
         UpdateCurrentSector();
     }
 
     static void UpdateCurrentSector()
     {
-        zVEC3 position = player->GetPositionWorld();
-        CurrentSector.x = static_cast<LONG>(position[VX]) / zMAP_SECTOR_SIZE;
-        CurrentSector.y = static_cast<LONG>(position[VZ]) / zMAP_SECTOR_SIZE;
+        CurrentSector = SectorOf(player->GetPositionWorld());
     }
+
+    // Set by SPACE: the map closes and the navigator starts walking to this sector.
+    static inline bool NavigationRequested = false;
 
     static void Open()
     {
         InitVobList();
         UpdateWorldBounds();
+        NavigationRequested = false;
 
-        Speech::ReadFormat("Sector {} {}. Press ENTER to hear details. use arrows to move on the map. Press SPACE to "
-                           "enable navigator.",
-                           CurrentSector.x, CurrentSector.y);
+        PlaceIndex = -1;
+        Speech::Read(Loc::Format(L"Sector {} {}. {}Press ENTER to hear details. Use arrows to move on the map, PAGE UP "
+                                 L"and PAGE DOWN to jump between places. Press SPACE to enable navigator.",
+                                 L"Sektor {} {}. {}Enter: szczegóły. Strzałki: ruch po mapie, Page Up i Page Down: "
+                                 L"kolejne miejsca. Spacja: nawigacja.",
+                                 CurrentSector.x, CurrentSector.y, PlacePrefix(CurrentSector)));
 
         while (true)
         {
@@ -167,6 +168,12 @@ struct zSmartMap
 
             if (zinput->KeyToggled(KEY_ESCAPE) || zinput->KeyToggled(KEY_M))
                 break;
+
+            if (zinput->KeyToggled(KEY_SPACE))
+            {
+                NavigationRequested = true;
+                break;
+            }
 
             HandleEvent();
 
@@ -182,6 +189,25 @@ struct zSmartMap
 
             zsound->DoSoundUpdate();
             sysEvent();
+        }
+
+        // Do not let the key that closed the map reach the game (SPACE draws the weapon, ESCAPE opens the menu).
+        WaitForKeyRelease(KEY_SPACE);
+        WaitForKeyRelease(KEY_ESCAPE);
+        zinput->ClearKeyBuffer();
+
+        if (NavigationRequested)
+            Navigator::StartToSector(CurrentSector);
+    }
+
+    static void WaitForKeyRelease(const int key)
+    {
+        const ULONGLONG deadline = GetTickCount64() + 2000;
+        while (zinput->KeyPressed(key) && GetTickCount64() < deadline)
+        {
+            zinput->ProcessInputEvents();
+            sysEvent();
+            Sleep(10);
         }
     }
 
@@ -219,10 +245,47 @@ struct zSmartMap
                 CurrentSector.y += at.y;
         }
 
+        const std::wstring places = Places::NamesInSector(CurrentSector);
+        std::wstring text;
         if (stop)
-            Speech::ReadFormat("You can't go further, {} {}", CurrentSector.x, CurrentSector.y);
+            text = Loc::Format(L"You can't go further, {} {}", L"Dalej się nie da, {} {}", CurrentSector.x,
+                               CurrentSector.y);
         else
-            Speech::ReadFormat("{} {}", CurrentSector.x, CurrentSector.y);
+            text = std::format(L"{} {}", CurrentSector.x, CurrentSector.y);
+        if (!places.empty())
+            text += L", " + places;
+        Speech::Read(text);
+    }
+
+    // "Stary Obóz, zamek. " before the rest of a message, or nothing.
+    static std::wstring PlacePrefix(const SECTOR &sector)
+    {
+        const std::wstring places = Places::NamesInSector(sector);
+        return places.empty() ? std::wstring() : places + L". ";
+    }
+
+    // PAGE DOWN / PAGE UP walk through the named places in alphabetical order.
+    static inline int PlaceIndex = -1;
+
+    static void JumpToPlace(const int direction)
+    {
+        const std::vector<const Places::Entry *> places = Places::Sorted();
+        if (places.empty())
+        {
+            Speech::Read(Loc::T(L"No named places in this world.", L"W tym świecie nie ma nazwanych miejsc."));
+            return;
+        }
+
+        const int count = static_cast<int>(places.size());
+        if (PlaceIndex < 0)
+            PlaceIndex = direction > 0 ? 0 : count - 1;
+        else
+            PlaceIndex = (PlaceIndex + direction + count) % count;
+
+        const Places::Entry *place = places[PlaceIndex];
+        CurrentSector = place->Sector;
+        Speech::Read(Loc::Format(L"{}, sector {} {}", L"{}, sektor {} {}", Places::Name(*place), CurrentSector.x,
+                                 CurrentSector.y));
     }
 
     static void Move(const int &x, const int &y)
@@ -246,12 +309,15 @@ struct zSmartMap
             Move(0, -1);
         else if (zinput->KeyToggled(KEY_RETURN))
             Details();
+        else if (zinput->KeyToggled(KEY_NEXT))
+            JumpToPlace(+1);
+        else if (zinput->KeyToggled(KEY_PRIOR))
+            JumpToPlace(-1);
     }
 
     static bool IsInCurrentSector(const zVEC3 &position)
     {
-        return int(position[VX] / zMAP_SECTOR_SIZE) == CurrentSector.x &&
-               int(position[VZ] / zMAP_SECTOR_SIZE) == CurrentSector.y;
+        return SameSector(SectorOf(position), CurrentSector);
     }
 
     static void Details()
@@ -298,23 +364,36 @@ struct zSmartMap
             }
         }
 
-        for (int i = 0, end = Waypoints.GetNumInList(); i < end; ++i)
-        {
-            zCWaypoint *wp = Waypoints[i];
-
-            if (IsInCurrentSector(wp->pos))
-                waypoints++;
-        }
+        // Way net waypoints and the navigator's own patch nodes.
+        if (zCWayNet *wayNet = Navigator::GetWayNet())
+            waypoints = static_cast<int>(Navigator::WaypointsInSector(wayNet, CurrentSector).size());
 
         // Messages
-        if (waypoints == 0)
+        std::wstring message = PlacePrefix(CurrentSector);
+
+        // The navigation mesh knows whether there is anything to walk on and whether the hero can get there.
+        if (NavMesh::Ready())
         {
-            Speech::Read(L"Unreachable area.");
+            const std::vector<int> nodes = NavMesh::SectorNodes(CurrentSector);
+            const int heroIsland = NavMesh::IslandOf(NavMesh::NodeAt(player->GetPositionWorld()));
+            bool connected = heroIsland < 0;
+            for (const int node : nodes)
+                connected = connected || NavMesh::IslandOf(node) == heroIsland;
+            if (nodes.empty() && waypoints == 0)
+            {
+                Speech::Read(message + Loc::T(L"Unreachable area.", L"Obszar niedostępny."));
+                return;
+            }
+            if (!nodes.empty() && !connected)
+                message += Loc::T(L"No way there from here. ", L"Stąd nie da się tam dojść. ");
+        }
+        else if (waypoints == 0)
+        {
+            Speech::Read(message + Loc::T(L"Unreachable area.", L"Obszar niedostępny."));
             return;
         }
 
-        std::wstring message;
-        message += L"Characters: ";
+        message += Loc::T(L"Characters: ", L"Postacie: ");
         if (npcMapList.size() > 0)
         {
             for (auto &pair : npcMapList)
@@ -324,17 +403,17 @@ struct zSmartMap
             }
 
             if (others)
-                message += std::format(L"and {} others. ", others);
+                message += Loc::Format(L"and {} others. ", L"i {} innych. ", others);
         }
         else
-            message += L"not detected. ";
+            message += Loc::T(L"not detected. ", L"brak. ");
 
         if (orcs > 0)
-            message += std::format(L"Orcs: {}. ", orcs);
+            message += Loc::Format(L"Orcs: {}. ", L"Orkowie: {}. ", orcs);
         if (monsters > 0)
-            message += std::format(L"Monsters: {}. ", monsters);
+            message += Loc::Format(L"Monsters: {}. ", L"Potwory: {}. ", monsters);
         if (dragons)
-            message += L"Dragons: not detected! ";
+            message += Loc::T(L"Dragons: not detected! ", L"Smoki! ");
 
         // Reading
         Speech::Read(message);
