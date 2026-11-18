@@ -7,8 +7,14 @@ void Read(oCItem *item)
     if (item == nullptr)
         return;
 
+    // "Stary Miecz, 3. Obrażenia: 12. Wymagana siła: 10. Broń jednoręczna. Wartość: 12."
     zSTRING message = item->name;
-    message += ". ";
+    if (item->amount > 1)
+    {
+        message += ", ";
+        message += item->amount;
+    }
+    message += ".";
 
     for (int i = 0; i < 6; i++)
     {
@@ -16,12 +22,13 @@ void Read(oCItem *item)
         if (text.Length() == 0)
             continue;
 
+        message += " ";
         message += text;
 
         const int &count = item->count[i];
         if (count != 0)
         {
-            message += " - ";
+            message += " ";
             message += count;
         }
 

@@ -1,20 +1,32 @@
 namespace GOTHIC_NAMESPACE
 {
-// Reads an item once it is drawn.
+// The item whose description was read last, and how many there were. The game draws the description of the selected
+// item every frame; reading it every time made the screen reader start over each frame ("sssss...strzała").
+inline oCItem *LastReadItem = nullptr;
+inline int LastReadAmount = -1;
+
+// Reads the selected item once: when the selection changes, or when the number of that item changes.
 auto Hook_oCItemContainer_DrawItemInfo =
     Union::CreateHook(SIGNATURE_OF(&oCItemContainer::DrawItemInfo), &oCItemContainer::DrawItemInfo_Union,
                       Union::HookType::Hook_CallPatch);
 void oCItemContainer::DrawItemInfo_Union(oCItem *item, zCWorld *renderWorld)
 {
-    Speech::Read(item);
+    if (item && (item != LastReadItem || item->amount != LastReadAmount))
+    {
+        LastReadItem = item;
+        LastReadAmount = item->amount;
+        Speech::Read(item);
+    }
     (this->*Hook_oCItemContainer_DrawItemInfo)(item, renderWorld);
 }
 
-// Resets all previously read items to null so to read them properly next time.
+// Forgets the item read last, so it is read again when the inventory opens next time.
 auto Hook_oCItemContainer_Close = Union::CreateHook(SIGNATURE_OF(&oCItemContainer::Close),
                                                     &oCItemContainer::Close_Union, Union::HookType::Hook_CallPatch);
 void oCItemContainer::Close_Union()
 {
+    LastReadItem = nullptr;
+    LastReadAmount = -1;
     Speech::StopReading();
     (this->*Hook_oCItemContainer_Close)();
 }
