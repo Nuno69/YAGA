@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstring>
 #include <vector>
 
@@ -35,12 +36,37 @@ bool MatchesAllCategory(zCVob *vob)
 
 bool MatchesNpcCategory(zCVob *vob)
 {
-    return zDYNAMIC_CAST<oCNpc>(vob) != nullptr && vob != player;
+    oCNpc *npc = zDYNAMIC_CAST<oCNpc>(vob);
+    return npc && vob != player && npc->IsHuman();
 }
 
-const std::array<Category, 2> Categories = {{
+// Monsters, and orcs: every character that is not human.
+bool MatchesMonsterCategory(zCVob *vob)
+{
+    oCNpc *npc = zDYNAMIC_CAST<oCNpc>(vob);
+    return npc && vob != player && !npc->IsHuman();
+}
+
+bool MatchesItemCategory(zCVob *vob)
+{
+    return zDYNAMIC_CAST<oCItem>(vob) != nullptr;
+}
+
+// Things to use: chests, beds, fires, doors, ladders, switches.
+bool MatchesObjectCategory(zCVob *vob)
+{
+    return zDYNAMIC_CAST<oCMobInter>(vob) != nullptr;
+}
+
+const std::array<Category, 5> Categories = {{
     {{L"All", L"Wszystko"}, {L"No tracked objects", L"Brak obiektów w pobliżu"}, 15000.0f, &MatchesAllCategory},
-    {{L"NPC", L"Postacie"}, {L"No tracked NPCs", L"Brak postaci w pobliżu"}, 15000.0f, &MatchesNpcCategory},
+    {{L"Characters", L"Postacie"}, {L"No characters nearby", L"Brak postaci w pobliżu"}, 15000.0f,
+     &MatchesNpcCategory},
+    {{L"Monsters", L"Potwory"}, {L"No monsters nearby", L"Brak potworów w pobliżu"}, 15000.0f,
+     &MatchesMonsterCategory},
+    {{L"Items", L"Przedmioty"}, {L"No items nearby", L"Brak przedmiotów w pobliżu"}, 15000.0f, &MatchesItemCategory},
+    {{L"Objects", L"Obiekty"}, {L"No objects nearby", L"Brak obiektów do użycia w pobliżu"}, 15000.0f,
+     &MatchesObjectCategory},
 }};
 
 const Category &GetCurrentCategory()
@@ -164,6 +190,48 @@ zCVob *GetSelectedVob()
     return SelectedVob;
 }
 
+// Where a point is as seen by the hero: ahead, ahead right, right ... ahead left (eight directions).
+std::wstring DirectionFromHero(const zVEC3 &target)
+{
+    const zVEC3 hero = player->GetPositionWorld();
+    zVEC3 at = player->GetAtVectorWorld();
+    zVEC3 right = player->GetRightVectorWorld();
+    const float dx = target[VX] - hero[VX];
+    const float dz = target[VZ] - hero[VZ];
+    const float forward = dx * at[VX] + dz * at[VZ];
+    const float side = dx * right[VX] + dz * right[VZ];
+    const float angle = std::atan2(side, forward) * 180.0f / 3.14159265f; // 0 ahead, 90 right
+    const int sector = (static_cast<int>(std::lround(angle / 45.0f)) + 8) % 8;
+    static const wchar_t *english[8] = {L"ahead",  L"ahead right", L"right", L"behind right",
+                                        L"behind", L"behind left", L"left",  L"ahead left"};
+    static const wchar_t *polish[8] = {L"z przodu", L"z przodu po prawej", L"po prawej", L"z tyłu po prawej",
+                                       L"z tyłu",   L"z tyłu po lewej",    L"po lewej",  L"z przodu po lewej"};
+    return Loc::T(english[sector], polish[sector]);
+}
+
+// Whether a character is hostile to the hero.
+bool IsHostile(zCVob *vob)
+{
+    oCNpc *npc = zDYNAMIC_CAST<oCNpc>(vob);
+    return npc && player && !npc->IsDead() && npc->GetAttitude(player) == NPC_ATT_HOSTILE;
+}
+
+// How close the navigator walks the hero to an object: near enough to talk to a person, pick up an item or use a
+// chest; a monster is approached only to a few metres.
+float StopDistanceFor(zCVob *vob)
+{
+    if (oCNpc *npc = zDYNAMIC_CAST<oCNpc>(vob))
+        return npc->IsHuman() || npc->IsDead() ? 200.0f : 500.0f;
+    if (zDYNAMIC_CAST<oCItem>(vob))
+        return 120.0f;
+    if (zDYNAMIC_CAST<oCMobInter>(vob))
+        return 150.0f;
+    return 200.0f;
+}
+
+// The selected object: its name, then the distance in metres, the direction from the hero, how much higher or lower
+// it is, whether the hero can walk there (and how far the walk is when it is much longer than the straight line),
+// and whether a character is dead or hostile.
 void ReadSelectedVob(zCVob *vob)
 {
     if (!vob)
@@ -172,7 +240,40 @@ void ReadSelectedVob(zCVob *vob)
         return;
     }
 
-    Speech::ReadFormat("{}; {}", GetTrackedVobName(vob).ToChar(), static_cast<int>(GetDistanceToPlayer(vob)));
+    const zVEC3 hero = player->GetPositionWorld();
+    const zVEC3 target = vob->GetPositionWorld();
+    const int meters = static_cast<int>(GetDistanceToPlayer(vob) / 100.0f + 0.5f);
+    std::wstring text = ToWString(GetTrackedVobName(vob)) + L", " + Loc::Meters(meters) + L", " +
+                        DirectionFromHero(target);
+
+    const int rise = static_cast<int>((target[VY] - hero[VY]) / 100.0f);
+    if (rise >= 2)
+        text += Loc::Format(L", {} higher", L", {} wyżej", Loc::Meters(rise));
+    else if (rise <= -2)
+        text += Loc::Format(L", {} lower", L", {} niżej", Loc::Meters(-rise));
+
+    float walk = 0.0f;
+    switch (NavMesh::RouteLength(hero, target, walk))
+    {
+    case NavMesh::Reach::Unreachable:
+        text += Loc::T(L", unreachable", L", nieosiągalne");
+        break;
+    case NavMesh::Reach::Reachable:
+        if (walk > GetDistanceToPlayer(vob) * 1.3f + 500.0f)
+            text += Loc::Format(L", {} to walk", L", drogą {}", Loc::Meters(static_cast<int>(walk / 100.0f + 0.5f)));
+        break;
+    default:
+        break;
+    }
+
+    if (oCNpc *npc = zDYNAMIC_CAST<oCNpc>(vob))
+    {
+        if (npc->IsDead())
+            text += Loc::T(L", dead", L", martwy");
+        else if (IsHostile(vob))
+            text += Loc::T(L", hostile", L", wrogi");
+    }
+    Speech::Read(text);
 }
 
 void CycleCategory()

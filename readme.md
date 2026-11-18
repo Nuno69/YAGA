@@ -124,6 +124,33 @@ Press `M` to open the sector map. Arrows move between 50 by 50 metre sectors, `E
 - `J` speaks the navigation status: target, remaining distance and waypoint.
 - Giving up inside the target sector, or a few metres from the goal, counts as arrival.
 
+### Objects nearby
+
+The tracker lists characters, monsters, items and things to use within 150 metres, nearest first.
+
+Keys:
+- **`T`:** switches the list: everything, characters, monsters, items, objects (chests, beds, fires, doors, ladders).
+- **`]` and `[`:** pick the next or previous object.
+- **`G`:** walks the hero to the picked object.
+- **`Home`:** turns the hero to it.
+- **`R`:** plays a sound on it.
+
+When an object is picked, YAGA says, in order:
+- its name;
+- its distance in metres;
+- where it is from the hero (ahead, ahead right, right, behind right...);
+- how much higher or lower it is;
+- whether the hero can walk there, and the walking distance when it is much longer than the straight line;
+- whether a character is dead or hostile.
+
+`G` uses the same navigator and mesh as the map: it goes round obstacles, climbs ladders and opens doors. The hero stops close enough to act:
+- about 2 metres from a person, so you can talk;
+- about 1 metre from an item, to pick it up;
+- about 1.5 metres from a chest or other object;
+- about 5 metres from a monster.
+
+At the end the hero turns to the object, so the action key works on it at once. A character that walks away is followed. When the object leaves the world, YAGA says "The target is gone."
+
 ### Navigation mesh
 
 The game's way net was made for NPCs. It covers the paths they walk, in 30 separate pieces, and large walkable areas have no waypoints at all. YAGA therefore builds its own map of where the hero can walk: a navigation mesh made with [Recast & Detour](https://github.com/recastnavigation/recastnavigation) (zlib licence).

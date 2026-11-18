@@ -60,7 +60,8 @@ enum class StopReason
     NoRoute,
     GaveUp,
     WorldChanged,
-    Dead
+    Dead,
+    TargetLost // the object walked to left the world
 };
 
 enum class Phase
@@ -91,7 +92,8 @@ enum class TargetKind
     None,
     Sector,
     Waypoint,
-    Position
+    Position,
+    Vob // a character, monster, item or object picked in the tracker; it may move
 };
 
 // How the last navigation ended, for the test tour.
@@ -161,6 +163,12 @@ inline bool LadderMounted = false;
 inline bool LadderUp = true;
 inline bool LegWet = false;                          // the current leg goes through deep water
 inline std::map<std::pair<zCWaypoint *, zCWaypoint *>, bool> WetLegs; // cache: does a leg cross deep water
+inline zCVob *TargetVob = nullptr;    // TargetKind::Vob: the object, with a reference held while it is the target
+inline zVEC3 TargetVobPlanned;        // ... where it was when the route was planned
+inline float TargetVobCheckedAt = 0.0f;
+inline float TargetStopDistance = 0.0f; // ... how close the hero stops
+constexpr float TargetMovedDistance = 300.0f; // a target that moved this far gets a new route
+constexpr float TargetCheckMs = 1000.0f;
 inline bool MeshRoute = false;                    // Path comes from the navigation mesh
 inline std::vector<NavCore::LegKind> LegKinds;    // ... how the leg into each waypoint is walked
 inline std::vector<int> LegTags;                  // ... the ladder of a ladder leg
@@ -626,6 +634,10 @@ std::vector<std::pair<zVEC3, int>> MeshGoals(const int island)
     case TargetKind::Position:
         add(TargetPosition);
         break;
+    case TargetKind::Vob:
+        if (TargetVob)
+            add(TargetVob->GetPositionWorld());
+        break;
     case TargetKind::Sector:
     {
         if (TargetPlaceWaypoint)
@@ -921,6 +933,8 @@ std::wstring DescribeTarget()
         return ToWString(WaypointName(RequestedWaypoint));
     case TargetKind::Position:
         return Loc::Format(L"point {} {}", L"punkt {} {}", Meters(TargetPosition[VX]), Meters(TargetPosition[VZ]));
+    case TargetKind::Vob:
+        return TargetVob ? ToWString(VobTracker::GetTrackedVobName(TargetVob)) : L"-";
     default:
         return L"-";
     }
@@ -941,7 +955,39 @@ bool HeroAtDestination()
         return SameSector(SectorOf(hero), TargetSector);
     if (Kind == TargetKind::Position)
         return DistanceXZ(hero, TargetPosition) < 1500.0f;
+    if (Kind == TargetKind::Vob && TargetVob)
+    {
+        const zVEC3 target = TargetVob->GetPositionWorld();
+        return DistanceXZ(hero, target) < TargetStopDistance + 200.0f && std::abs(hero[VY] - target[VY]) < 300.0f;
+    }
     return false;
+}
+
+// The object the hero is walking to: close enough, and not on another floor.
+bool TargetVobReached()
+{
+    if (Kind != TargetKind::Vob || !TargetVob)
+        return false;
+    const zVEC3 hero = HeroPosition();
+    const zVEC3 target = TargetVob->GetPositionWorld();
+    return DistanceXZ(hero, target) <= TargetStopDistance && std::abs(hero[VY] - target[VY]) < 250.0f;
+}
+
+// Turn the hero to the object, so the game's focus lands on it and the action key uses it.
+void FaceTargetVob()
+{
+    if (!TargetVob || !player)
+        return;
+    zVEC3 look = TargetVob->GetPositionWorld();
+    look[VY] = HeroPosition()[VY];
+    player->SetHeadingYWorld(look);
+}
+
+void ReleaseTargetVob()
+{
+    if (TargetVob)
+        TargetVob->Release();
+    TargetVob = nullptr;
 }
 
 void Stop(StopReason reason)
@@ -986,7 +1032,16 @@ void Stop(StopReason reason)
     switch (reason)
     {
     case StopReason::Arrived:
-        Speech::Read(Loc::Format(L"Arrived, {}.", L"Jesteś na miejscu: {}.", DescribeTarget()));
+        if (Kind == TargetKind::Vob && TargetVob && worldStillValid)
+        {
+            FaceTargetVob();
+            std::wstring text = Loc::Format(L"Arrived at {}.", L"Jesteś przy: {}.", DescribeTarget());
+            if (VobTracker::IsHostile(TargetVob))
+                text += Loc::T(L" Hostile.", L" Wrogi.");
+            Speech::Read(text);
+        }
+        else
+            Speech::Read(Loc::Format(L"Arrived, {}.", L"Jesteś na miejscu: {}.", DescribeTarget()));
         break;
     case StopReason::Cancelled:
         Speech::Read(Loc::T(L"Navigation cancelled.", L"Nawigacja przerwana."));
@@ -1002,6 +1057,9 @@ void Stop(StopReason reason)
                                  L"Nawigacja zatrzymana, nie da się przejść. Do celu {}.",
                                  Loc::Meters(LastOutcome.MetersLeft)));
         break;
+    case StopReason::TargetLost:
+        Speech::Read(Loc::T(L"The target is gone.", L"Cel zniknął."));
+        break;
     case StopReason::WorldChanged:
     case StopReason::Dead:
         break;
@@ -1014,6 +1072,7 @@ void Stop(StopReason reason)
     LegKinds.clear();
     LegTags.clear();
     ReleaseWaypoints(MeshWaypoints);
+    ReleaseTargetVob();
 }
 
 // A navigation that could not even start still counts as finished, so a test tour sees its result.
@@ -1041,6 +1100,8 @@ std::vector<zCWaypoint *> CurrentGoals(zCWayNet *wayNet)
     }
     case TargetKind::Position:
         return WaypointsNear(wayNet, TargetPosition);
+    case TargetKind::Vob:
+        return TargetVob ? WaypointsNear(wayNet, TargetVob->GetPositionWorld()) : std::vector<zCWaypoint *>{};
     case TargetKind::Waypoint:
         return RequestedWaypoint ? std::vector<zCWaypoint *>{RequestedWaypoint} : std::vector<zCWaypoint *>{};
     default:
@@ -1123,6 +1184,12 @@ std::wstring NoRouteMessage()
         else if (!waypoints)
             return Loc::Format(L"No waypoints in {}, unreachable area.",
                                L"Brak punktów trasy w: {}, obszar niedostępny.", DescribeTarget());
+    }
+    if (Kind == TargetKind::Vob && TargetVob)
+    {
+        float walk = 0.0f;
+        if (NavMesh::RouteLength(HeroPosition(), TargetVob->GetPositionWorld(), walk) == NavMesh::Reach::Unreachable)
+            return Loc::Format(L"No way to {} from here.", L"Stąd nie da się dojść do: {}.", DescribeTarget());
     }
     return Loc::Format(L"No route to {}.", L"Brak trasy do: {}.", DescribeTarget());
 }
@@ -1208,6 +1275,69 @@ bool StartToPosition(const zVEC3 &position)
     TargetPosition = position;
     RequestedWaypoint = nullptr;
     return Begin();
+}
+
+// Walk to an object picked in the tracker: a character, a monster, an item or something to use. The navigator holds a
+// reference to it, follows it when it walks away and stops at a distance that suits it (see
+// VobTracker::StopDistanceFor), turned toward it.
+bool StartToVob(zCVob *vob)
+{
+    if (!vob || !player)
+        return false;
+
+    ReleaseTargetVob();
+    vob->AddRef();
+    TargetVob = vob;
+    Kind = TargetKind::Vob;
+    RequestedWaypoint = nullptr;
+    TargetPlaceName.clear();
+    TargetPlaceWaypoint = nullptr;
+    TargetStopDistance = VobTracker::StopDistanceFor(vob);
+    TargetVobPlanned = vob->GetPositionWorld();
+    TargetVobCheckedAt = NowMs();
+    YagaLog::Write(std::format("[nav] walk to {} at {} m, stopping {} m from it",
+                               VobTracker::GetTrackedVobName(vob).ToChar(),
+                               Meters(HeroPosition().Distance(TargetVobPlanned)), Meters(TargetStopDistance)));
+
+    // Already there.
+    if (TargetVobReached())
+    {
+        if (Active)
+        {
+            ClearMovement();
+            Halt();
+            Active = false;
+            Path.clear();
+            Index = 0;
+            MeshRoute = false;
+            ReleaseWaypoints(MeshWaypoints);
+        }
+        FaceTargetVob();
+        Speech::Read(Loc::Format(L"Arrived at {}.", L"Jesteś przy: {}.", DescribeTarget()));
+        RecordFailedStart(StopReason::Arrived);
+        ReleaseTargetVob();
+        return true;
+    }
+
+    if (!Begin())
+    {
+        ReleaseTargetVob();
+        return false;
+    }
+    return true;
+}
+
+// The target walked off: plan again from here, without a word and without counting it as a failure. False when no
+// route was found (the current route is kept then).
+bool FollowTarget()
+{
+    Plan plan;
+    if (!PlanAny(GetWayNet(), HeroPosition(), plan, NavBlocked))
+        return false;
+    LogPlan("target moved", plan, NavBlocked);
+    AdoptPlan(plan);
+    IssueStep();
+    return true;
 }
 
 // Plan again from where the hero stands, keeping the same destination and leaving out blocked legs.
@@ -1595,6 +1725,19 @@ void AdvanceWaypoint()
 
     if (Index >= Path.size())
     {
+        // The end of the route, but the object is not there yet (it walked on, or the route ends short of it).
+        if (Kind == TargetKind::Vob && TargetVob && !TargetVobReached() && !HeroAtDestination())
+        {
+            if (++Recalculations > MaxRecalculations)
+            {
+                Stop(StopReason::GaveUp);
+                return;
+            }
+            TargetVobPlanned = TargetVob->GetPositionWorld();
+            if (!FollowTarget())
+                Stop(StopReason::NoRoute);
+            return;
+        }
         Stop(StopReason::Arrived);
         return;
     }
@@ -1677,6 +1820,36 @@ void Update()
         return;
     }
     LastHitpoints = hitpoints;
+
+    // Walking to an object: it may be gone, reached, or walking away.
+    if (Kind == TargetKind::Vob)
+    {
+        if (!TargetVob || !TargetVob->homeWorld)
+        {
+            Stop(StopReason::TargetLost);
+            return;
+        }
+        if (CurrentPhase != Phase::Ladder && CurrentPhase != Phase::OpeningDoor)
+        {
+            if (TargetVobReached())
+            {
+                Stop(StopReason::Arrived);
+                return;
+            }
+            const float now = NowMs();
+            if (now - TargetVobCheckedAt > TargetCheckMs)
+            {
+                TargetVobCheckedAt = now;
+                const zVEC3 target = TargetVob->GetPositionWorld();
+                if (target.Distance(TargetVobPlanned) > TargetMovedDistance)
+                {
+                    TargetVobPlanned = target;
+                    FollowTarget();
+                    return;
+                }
+            }
+        }
+    }
 
     const zVEC3 hero = HeroPosition();
     const bool engineBusy = HasPendingMessage();
@@ -1794,6 +1967,7 @@ void Reset()
     LegKinds.clear();
     LegTags.clear();
     ReleaseWaypoints(MeshWaypoints);
+    ReleaseTargetVob();
     // Patch nodes belong to the old world's way net.
     WaynetPatch::Clear();
 }
@@ -1806,6 +1980,16 @@ void NavigatorLoop()
 
     if (zinput->KeyToggled(KEY_J))
         Navigator::SpeakStatus();
+
+    // G: walk to the object picked in the tracker ([ and ]).
+    if (zinput->KeyToggled(KEY_G))
+    {
+        if (zCVob *vob = VobTracker::GetSelectedVob())
+            Navigator::StartToVob(vob);
+        else
+            Speech::Read(Loc::T(L"Nothing picked. Pick an object with the bracket keys.",
+                                L"Nic nie wybrano. Wybierz obiekt klawiszami nawiasów kwadratowych."));
+    }
 
     Navigator::Update();
 }

@@ -1205,6 +1205,8 @@ const char *ReasonName(const Navigator::StopReason reason)
         return "WorldChanged";
     case Navigator::StopReason::Dead:
         return "Dead";
+    case Navigator::StopReason::TargetLost:
+        return "TargetLost";
     }
     return "?";
 }

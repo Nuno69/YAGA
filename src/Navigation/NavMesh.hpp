@@ -1092,6 +1092,41 @@ inline bool FindRoute(const int startNode, const zVEC3 &startPos, const int goal
     return NavCore::MakeCorners(*Current->query, graph, path, startPos.n, goalPos.n, corners);
 }
 
+enum class Reach
+{
+    Unknown,   // no mesh, or one of the two points is off it
+    Reachable, // length holds the walking distance
+    Unreachable
+};
+
+// How far the hero walks from one point to another on the mesh (corner to corner, not as the crow flies).
+inline Reach RouteLength(const zVEC3 &from, const zVEC3 &to, float &length)
+{
+    length = 0.0f;
+    if (!Ready())
+        return Reach::Unknown;
+    zVEC3 start;
+    zVEC3 goal;
+    const int startNode = NodeAt(from, &start);
+    const int goalNode = NodeAt(to, &goal);
+    if (startNode < 0 || goalNode < 0)
+        return Reach::Unknown;
+    if (Current->graph.Island(startNode) != Current->graph.Island(goalNode))
+        return Reach::Unreachable;
+    std::vector<NavCore::Corner> corners;
+    int closedGates = 0;
+    if (!FindRoute(startNode, start, goalNode, goal, {}, {}, corners, closedGates))
+        return Reach::Unreachable;
+    zVEC3 previous = start;
+    for (const NavCore::Corner &corner : corners)
+    {
+        const zVEC3 point(corner.pos[0], corner.pos[1], corner.pos[2]);
+        length += previous.Distance(point);
+        previous = point;
+    }
+    return Reach::Reachable;
+}
+
 // Nodes to leave out after the hero failed to get from where it stands toward a point: the polygons the straight
 // line crosses within a few metres, without the one the hero stands on (the next search starts there).
 inline std::vector<int> NodesToBlock(const zVEC3 &hero, const zVEC3 &target)
