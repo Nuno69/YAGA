@@ -11,9 +11,11 @@ namespace GOTHIC_NAMESPACE
 {
 // Route planning and auto-walk.
 //
-// The graph is the game's own way net: the waypoints and ways NPCs walk on. The search is done here (Dijkstra over the
-// way net) instead of with zCWayNet::FindRoute, because a recalculation has to leave out the legs the hero already
-// failed to walk, and the engine search cannot be told to do that.
+// Routes are planned on the navigation mesh (NavMesh.hpp): every surface the hero can walk on, made from the world's
+// collision geometry. Its corners become temporary waypoints, never put into the way net. Until the mesh is ready,
+// or where the hero stands off it, the graph is the game's own way net: the waypoints and ways NPCs walk on. That
+// search is done here (Dijkstra over the way net) instead of with zCWayNet::FindRoute, because a recalculation has to
+// leave out the legs the hero already failed to walk, and the engine search cannot be told to do that.
 //
 // Walking hands the hero to the engine's NPC movement (oCMsgMovement EV_GOTOPOS), whose "robust trace" turns around
 // small obstacles. Where that movement cannot go (swimming, or a ledge it gives up on), the navigator drives the hero
@@ -75,6 +77,13 @@ struct Blocked
 {
     std::set<std::pair<zCWaypoint *, zCWaypoint *>> Legs; // legs the hero failed to walk
     std::set<zCWaypoint *> Starts;                         // waypoints the hero failed to reach from where it stood
+    std::set<int> Nodes;                                   // mesh polygons the hero could not get through
+    std::set<int> LinkTags;                                // ladders the hero could not use
+
+    size_t Count() const
+    {
+        return Legs.size() + Starts.size() + Nodes.size() + LinkTags.size();
+    }
 };
 
 enum class TargetKind
@@ -103,7 +112,11 @@ struct Plan
     zCWaypoint *Target = nullptr;
     float Length = 0.0f; // from the hero through every waypoint, in cm
     double Milliseconds = 0.0;
-    int Reachable = 0; // waypoints the search reached
+    int Reachable = 0; // waypoints the search reached (mesh: polygons of the hero's island)
+    bool Mesh = false; // planned on the navigation mesh: the waypoints are temporary
+    std::vector<NavCore::LegKind> Legs; // mesh: how the leg into each waypoint is walked
+    std::vector<int> Tags;              // mesh: the ladder of a ladder leg
+    int ClosedGates = 0;                // mesh: polygons left out because a gate is down
 };
 
 using Leg = std::pair<zCWaypoint *, zCWaypoint *>;
@@ -148,6 +161,10 @@ inline bool LadderMounted = false;
 inline bool LadderUp = true;
 inline bool LegWet = false;                          // the current leg goes through deep water
 inline std::map<std::pair<zCWaypoint *, zCWaypoint *>, bool> WetLegs; // cache: does a leg cross deep water
+inline bool MeshRoute = false;                    // Path comes from the navigation mesh
+inline std::vector<NavCore::LegKind> LegKinds;    // ... how the leg into each waypoint is walked
+inline std::vector<int> LegTags;                  // ... the ladder of a ladder leg
+inline std::vector<zCWaypoint *> MeshWaypoints;   // ... the temporary waypoints, released with the path
 
 inline bool Running = false; // the navigator started the hero's run with _Forward and has to stop it
 
@@ -566,6 +583,119 @@ bool PlanRoute(zCWayNet *wayNet, const zVEC3 &from, const std::vector<zCWaypoint
     return PlanRouteOnce(wayNet, from, goals, plan, blocked);
 }
 
+// ---------------------------------------------------------------- planning on the navigation mesh
+
+// A mesh corner as a waypoint the walking code can use. It is never put into the way net, so NPC routes and
+// savegames do not see it. Named after its position in metres, for the log.
+zCWaypoint *MakeMeshWaypoint(const float *pos)
+{
+    zCWaypoint *wp = new zCWaypoint();
+    zSTRING name(std::format("MESH_{}_{}", static_cast<int>(pos[0] / 100.0f), static_cast<int>(pos[2] / 100.0f))
+                     .c_str());
+    wp->SetName(name);
+    zVEC3 position(pos[0], pos[1] + 50.0f, pos[2]); // like the way net: half a metre above the ground
+    wp->Init(position);
+    return wp;
+}
+
+void ReleaseWaypoints(std::vector<zCWaypoint *> &waypoints)
+{
+    for (zCWaypoint *wp : waypoints)
+        wp->Release(); // never Free(): that deletes ways and the waypoint vob
+    waypoints.clear();
+}
+
+// Goals on the mesh for the current target, best first: a point and its polygon. For a sector, its named place, then
+// polygons of the sector the hero can reach, nearest to the sector's centre first.
+std::vector<std::pair<zVEC3, int>> MeshGoals(const int island)
+{
+    std::vector<std::pair<zVEC3, int>> goals;
+    const auto add = [&](const zVEC3 &position) {
+        zVEC3 snapped;
+        const int node = NavMesh::NodeAt(position, &snapped);
+        if (node >= 0)
+            goals.emplace_back(snapped, node);
+    };
+
+    switch (Kind)
+    {
+    case TargetKind::Waypoint:
+        if (RequestedWaypoint)
+            add(RequestedWaypoint->GetPositionWorld());
+        break;
+    case TargetKind::Position:
+        add(TargetPosition);
+        break;
+    case TargetKind::Sector:
+    {
+        if (TargetPlaceWaypoint)
+            add(TargetPlaceWaypoint->GetPositionWorld());
+        const zVEC3 center = SectorCenter(TargetSector);
+        int added = 0;
+        for (const int node : NavMesh::SectorNodes(TargetSector))
+        {
+            if (NavMesh::IslandOf(node) != island)
+                continue;
+            zVEC3 point = center;
+            point[VY] = NavMesh::Current->graph.Center(node)[1];
+            goals.emplace_back(NavMesh::ClosestPointOn(node, point), node);
+            if (++added >= 4)
+                break;
+        }
+        break;
+    }
+    default:
+        break;
+    }
+    return goals;
+}
+
+// A route on the navigation mesh from the hero to the current target. False when the mesh is not ready, the hero is
+// not on it, or the target cannot be reached on it.
+bool PlanMeshRoute(const zVEC3 &from, Plan &plan, const Blocked &blocked)
+{
+    const auto started = std::chrono::high_resolution_clock::now();
+    plan = Plan();
+    plan.Mesh = true;
+    if (!NavMesh::Ready())
+        return false;
+
+    zVEC3 start;
+    const int startNode = NavMesh::NodeAt(from, &start);
+    if (startNode < 0)
+    {
+        YagaLog::Write("[nav] the hero is off the navigation mesh");
+        return false;
+    }
+    const int island = NavMesh::IslandOf(startNode);
+    plan.Reachable = NavMesh::Current->graph.IslandSize(island);
+
+    std::vector<NavCore::Corner> corners;
+    bool found = false;
+    for (const auto &[position, node] : MeshGoals(island))
+        if (NavMesh::FindRoute(startNode, start, node, position, blocked.Nodes, blocked.LinkTags, corners,
+                               plan.ClosedGates))
+        {
+            found = true;
+            break;
+        }
+    plan.Milliseconds =
+        std::chrono::duration<double, std::milli>(std::chrono::high_resolution_clock::now() - started).count();
+    if (!found)
+        return false;
+
+    for (const NavCore::Corner &corner : corners)
+    {
+        plan.Waypoints.push_back(MakeMeshWaypoint(corner.pos));
+        plan.Legs.push_back(corner.leg);
+        plan.Tags.push_back(corner.tag);
+    }
+    plan.Start = plan.Waypoints.front();
+    plan.Target = plan.Waypoints.back();
+    plan.Length = RemainingLength(from, plan.Waypoints, 0);
+    return true;
+}
+
 void LogPlan(const char *what, const Plan &plan, const Blocked &blocked)
 {
     std::string names;
@@ -573,13 +703,21 @@ void LogPlan(const char *what, const Plan &plan, const Blocked &blocked)
     {
         if (i)
             names += " > ";
+        if (plan.Mesh && i < plan.Legs.size())
+        {
+            if (plan.Legs[i] == NavCore::LegKind::Swim)
+                names += "~";
+            else if (plan.Legs[i] == NavCore::LegKind::Link)
+                names += "#";
+        }
         names += WaypointName(plan.Waypoints[i]);
     }
 
-    YagaLog::Write(std::format("[nav] {}: start {}, goal {}, {} waypoints, {} m, {} reachable, {} blocked legs, "
-                               "{:.3f} ms",
-                               what, WaypointName(plan.Start), WaypointName(plan.Target), plan.Waypoints.size(),
-                               Meters(plan.Length), plan.Reachable, blocked.Legs.size(), plan.Milliseconds));
+    YagaLog::Write(std::format("[nav] {}: {}, start {}, goal {}, {} waypoints, {} m, {} reachable, {} blocked, "
+                               "{} closed gate polygons, {:.3f} ms",
+                               what, plan.Mesh ? "mesh" : "way net", WaypointName(plan.Start),
+                               WaypointName(plan.Target), plan.Waypoints.size(), Meters(plan.Length), plan.Reachable,
+                               blocked.Count(), plan.ClosedGates, plan.Milliseconds));
     YagaLog::Write("[nav] path: " + names);
 }
 
@@ -712,12 +850,26 @@ void IssueStep()
     CurrentPhase = Phase::Walking;
     StartStepTimer();
 
-    LegWet = Index > 0 ? IsWetLeg(Path[Index - 1], Path[Index])
-                       : CrossesDeepWater(HeroPosition(), Path[0]->GetPositionWorld());
+    if (MeshRoute)
+        LegWet = Index < LegKinds.size() &&
+                 (LegKinds[Index] == NavCore::LegKind::Swim ||
+                  (LegKinds[Index] == NavCore::LegKind::Link && NavMesh::IsWetWay(LegTags[Index])));
+    else
+        LegWet = Index > 0 ? IsWetLeg(Path[Index - 1], Path[Index])
+                           : CrossesDeepWater(HeroPosition(), Path[0]->GetPositionWorld());
 
-    if (!UseEngineRoute && Index > 0)
+    // A ladder: the mesh says which one and which way; on the way net it is found at the leg.
+    if (MeshRoute && Index < LegKinds.size() && LegKinds[Index] == NavCore::LegKind::Link)
+        if (oCMobLadder *ladder = NavMesh::LadderOfTag(LegTags[Index]))
+        {
+            LadderUp = LegTags[Index] % 2 == 0;
+            StartLadder(ladder);
+            return;
+        }
+    if (!MeshRoute && !UseEngineRoute && Index > 0)
         if (oCMobLadder *ladder = LadderOnLeg(Path[Index - 1], Path[Index]))
         {
+            LadderUp = Path[Index]->GetPositionWorld()[VY] >= Path[Index - 1]->GetPositionWorld()[VY];
             StartLadder(ladder);
             return;
         }
@@ -737,7 +889,7 @@ void IssueStep()
     }
 
     // A patch leg marked "jump": NPC movement would stop at the ledge.
-    if (!UseEngineRoute && Index > 0 && WaynetPatch::IsJumpLeg(Path[Index - 1], Path[Index]))
+    if (!MeshRoute && !UseEngineRoute && Index > 0 && WaynetPatch::IsJumpLeg(Path[Index - 1], Path[Index]))
     {
         StartDriving("jump leg");
         return;
@@ -822,14 +974,14 @@ void Stop(StopReason reason)
     LastOutcome.Reason = reason;
     LastOutcome.Seconds = (NowMs() - StartedAt) / 1000.0f;
     LastOutcome.Recalculations = Recalculations;
-    LastOutcome.BlockedLegs = static_cast<int>(NavBlocked.Legs.size());
+    LastOutcome.BlockedLegs = static_cast<int>(NavBlocked.Count());
     LastOutcome.MetersLeft = worldStillValid && player ? Meters(RemainingLength(HeroPosition(), Path, Index)) : 0;
     LastOutcome.ArrivedInSector = arrivedInSector;
     ++Outcomes;
 
-    YagaLog::Write(std::format("[nav] stop reason {} after {:.1f} s, {} recalculations, {} blocked legs, {} m left",
-                               static_cast<int>(reason), LastOutcome.Seconds, Recalculations,
-                               NavBlocked.Legs.size(), LastOutcome.MetersLeft));
+    YagaLog::Write(std::format("[nav] stop reason {} after {:.1f} s, {} recalculations, {} blocked, {} m left",
+                               static_cast<int>(reason), LastOutcome.Seconds, Recalculations, NavBlocked.Count(),
+                               LastOutcome.MetersLeft));
 
     switch (reason)
     {
@@ -858,6 +1010,10 @@ void Stop(StopReason reason)
     Path.clear();
     Index = 0;
     TargetWaypoint = nullptr;
+    MeshRoute = false;
+    LegKinds.clear();
+    LegTags.clear();
+    ReleaseWaypoints(MeshWaypoints);
 }
 
 // A navigation that could not even start still counts as finished, so a test tour sees its result.
@@ -907,20 +1063,75 @@ bool RouteFitsEngine(const std::vector<zCWaypoint *> &waypoints)
     return true;
 }
 
+// The navigation mesh when it is ready and the hero stands on it, otherwise (or when the mesh finds no way) the way
+// net.
+bool PlanAny(zCWayNet *wayNet, const zVEC3 &from, Plan &plan, Blocked &blocked)
+{
+    if (NavMesh::Ready() && PlanMeshRoute(from, plan, blocked))
+        return true;
+    if (!wayNet)
+        return false;
+    const std::vector<zCWaypoint *> goals = CurrentGoals(wayNet);
+    if (goals.empty())
+        return false;
+    return PlanRoute(wayNet, from, goals, plan, blocked);
+}
+
+// Takes over a plan: its waypoints become the path, and the temporary waypoints of the previous mesh path are
+// released.
+void AdoptPlan(const Plan &plan)
+{
+    std::vector<zCWaypoint *> previous = std::move(MeshWaypoints);
+    MeshWaypoints.clear();
+    Path = plan.Waypoints;
+    Index = 0;
+    TargetWaypoint = plan.Target;
+    MeshRoute = plan.Mesh;
+    LegKinds = plan.Legs;
+    LegTags = plan.Tags;
+    if (plan.Mesh)
+        MeshWaypoints = plan.Waypoints;
+    UseEngineRoute = !plan.Mesh && RouteFitsEngine(Path);
+    RetriesOnWaypoint = 0;
+    ReleaseWaypoints(previous);
+}
+
+// Why a target cannot be reached, said when no route was found.
+std::wstring NoRouteMessage()
+{
+    if (Kind == TargetKind::Sector)
+    {
+        zCWayNet *wayNet = GetWayNet();
+        const bool waypoints = wayNet && !WaypointsInSector(wayNet, TargetSector).empty();
+        if (NavMesh::Ready())
+        {
+            const std::vector<int> nodes = NavMesh::SectorNodes(TargetSector);
+            if (nodes.empty() && !waypoints)
+                return Loc::Format(L"{}: unreachable area, nothing to walk on.",
+                                   L"{}: obszar niedostępny, nie ma tam gdzie chodzić.", DescribeTarget());
+            const int heroIsland = NavMesh::IslandOf(NavMesh::NodeAt(HeroPosition()));
+            if (heroIsland >= 0)
+            {
+                bool connected = false;
+                for (const int node : nodes)
+                    connected = connected || NavMesh::IslandOf(node) == heroIsland;
+                if (!connected)
+                    return Loc::Format(L"No way to {} from here.", L"Stąd nie da się dojść do: {}.",
+                                       DescribeTarget());
+            }
+        }
+        else if (!waypoints)
+            return Loc::Format(L"No waypoints in {}, unreachable area.",
+                               L"Brak punktów trasy w: {}, obszar niedostępny.", DescribeTarget());
+    }
+    return Loc::Format(L"No route to {}.", L"Brak trasy do: {}.", DescribeTarget());
+}
+
 bool Begin()
 {
     zCWayNet *wayNet = GetWayNet();
-    if (!player || !wayNet)
+    if (!player || (!wayNet && !NavMesh::Ready()))
         return false;
-
-    const std::vector<zCWaypoint *> goals = CurrentGoals(wayNet);
-    if (goals.empty())
-    {
-        Speech::Read(Loc::Format(L"No waypoints in {}, unreachable area.", L"Brak punktów trasy w: {}, obszar niedostępny.",
-                                 DescribeTarget()));
-        RecordFailedStart(StopReason::NoRoute);
-        return false;
-    }
 
     if (Active)
     {
@@ -933,20 +1144,19 @@ bool Begin()
     ReportedGates.clear();
 
     Plan plan;
-    const bool found = PlanRoute(wayNet, HeroPosition(), goals, plan, NavBlocked);
+    const bool found = PlanAny(wayNet, HeroPosition(), plan, NavBlocked);
     LogPlan(found ? "plan" : "plan failed", plan, NavBlocked);
     if (!found)
     {
-        Speech::Read(Loc::Format(L"No route to {}.", L"Brak trasy do: {}.", DescribeTarget()));
+        if (NavMesh::Building())
+            YagaLog::Write("[nav] the navigation mesh is still being built");
+        Speech::Read(NoRouteMessage());
         RecordFailedStart(StopReason::NoRoute);
         return false;
     }
 
     Active = true;
-    Path = plan.Waypoints;
-    Index = 0;
-    TargetWaypoint = plan.Target;
-    UseEngineRoute = RouteFitsEngine(Path);
+    AdoptPlan(plan);
     NavWorld = ogame->GetGameWorld();
     NavWayNet = wayNet;
     RetriesOnWaypoint = 0;
@@ -1012,7 +1222,7 @@ void Recalculate(const std::wstring &why)
 
     zCWayNet *wayNet = GetWayNet();
     Plan plan;
-    const bool found = PlanRoute(wayNet, HeroPosition(), CurrentGoals(wayNet), plan, NavBlocked);
+    const bool found = PlanAny(wayNet, HeroPosition(), plan, NavBlocked);
     LogPlan(found ? "recalculated" : "recalculation failed", plan, NavBlocked);
     if (!found)
     {
@@ -1022,17 +1232,42 @@ void Recalculate(const std::wstring &why)
 
     Speech::Read(Loc::Format(L"{}, recalculating. {}.", L"{}, przeliczam trasę. {}.", why,
                              Loc::Meters(Meters(plan.Length))));
-    Path = plan.Waypoints;
-    Index = 0;
-    TargetWaypoint = plan.Target;
-    UseEngineRoute = RouteFitsEngine(Path);
-    RetriesOnWaypoint = 0;
+    AdoptPlan(plan);
     IssueStep();
 }
 
 // The hero could not walk the current leg: remember it so the next plan goes around it.
 void BlockCurrentLeg()
 {
+    if (MeshRoute)
+    {
+        // The hero could not swim out there: leave that bank out, so the next plan picks another way out.
+        if (LegWet || HeroInWater())
+        {
+            const std::vector<int> bank = NavMesh::BankToBlock(Path[Index]->GetPositionWorld());
+            for (const int node : bank)
+                NavBlocked.Nodes.insert(node);
+            YagaLog::Write(std::format("[nav] blocked {} polygons of the bank at {}", bank.size(),
+                                       WaypointName(Path[Index])));
+            if (!bank.empty())
+                return;
+        }
+        // A ladder or way net way that did not work: leave that link out.
+        if (Index < LegKinds.size() && LegKinds[Index] == NavCore::LegKind::Link)
+        {
+            NavBlocked.LinkTags.insert(LegTags[Index]);
+            YagaLog::Write(std::format("[nav] blocked {} link {}",
+                                       LegTags[Index] >= NavMesh::WayTagBase ? "way" : "ladder", LegTags[Index]));
+            return;
+        }
+        // The polygons between the hero and the corner it could not reach.
+        const std::vector<int> nodes = NavMesh::NodesToBlock(HeroPosition(), Path[Index]->GetPositionWorld());
+        for (const int node : nodes)
+            NavBlocked.Nodes.insert(node);
+        YagaLog::Write(std::format("[nav] blocked {} mesh polygons toward {}", nodes.size(), WaypointName(Path[Index])));
+        return;
+    }
+
     if (Index > 0)
     {
         NavBlocked.Legs.insert(MakeLeg(Path[Index - 1], Path[Index]));
@@ -1555,6 +1790,10 @@ void Reset()
     TargetPlaceName.clear();
     TargetPlaceWaypoint = nullptr;
     UseEngineRoute = false;
+    MeshRoute = false;
+    LegKinds.clear();
+    LegTags.clear();
+    ReleaseWaypoints(MeshWaypoints);
     // Patch nodes belong to the old world's way net.
     WaynetPatch::Clear();
 }

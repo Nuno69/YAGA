@@ -370,7 +370,24 @@ struct zSmartMap
 
         // Messages
         std::wstring message = PlacePrefix(CurrentSector);
-        if (waypoints == 0)
+
+        // The navigation mesh knows whether there is anything to walk on and whether the hero can get there.
+        if (NavMesh::Ready())
+        {
+            const std::vector<int> nodes = NavMesh::SectorNodes(CurrentSector);
+            const int heroIsland = NavMesh::IslandOf(NavMesh::NodeAt(player->GetPositionWorld()));
+            bool connected = heroIsland < 0;
+            for (const int node : nodes)
+                connected = connected || NavMesh::IslandOf(node) == heroIsland;
+            if (nodes.empty() && waypoints == 0)
+            {
+                Speech::Read(message + Loc::T(L"Unreachable area.", L"Obszar niedostępny."));
+                return;
+            }
+            if (!nodes.empty() && !connected)
+                message += Loc::T(L"No way there from here. ", L"Stąd nie da się tam dojść. ");
+        }
+        else if (waypoints == 0)
         {
             Speech::Read(message + Loc::T(L"Unreachable area.", L"Obszar niedostępny."));
             return;

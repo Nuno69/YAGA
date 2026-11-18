@@ -47,6 +47,7 @@ void Game_Loop()
     if (zinput->KeyToggled(KEY_M))
         zSmartMap::Open();
 
+    NavMesh::Update();
     NavigatorLoop();
     DevConsole::Poll();
 
@@ -79,6 +80,8 @@ void LoadBegin()
 {
     // Waypoints of the old world are about to be freed.
     Navigator::Reset();
+    // So are the objects the navigation mesh points to (ladders, gates).
+    NavMesh::Reset();
 }
 
 void LoadEnd()

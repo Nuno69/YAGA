@@ -21,6 +21,8 @@ inline int NavigatorProgressEvery;
 inline int DevCommands;
 // Language of spoken messages: "auto" (the game's language), "pl" or "en".
 inline std::string Language;
+// 1 = the navigator walks on a navigation mesh built from the world's geometry, 0 = only on the game's way net.
+inline int NavMesh;
 } // namespace Settings
 
 #endif
@@ -42,6 +44,7 @@ void LoadSpeechEngineSettings()
     Settings::NavigatorProgressEvery = zoptions->ReadInt("YAGA", "NavigatorProgressEvery", 5);
     Settings::DevCommands = zoptions->ReadInt("YAGA", "DevCommands", 0);
     Settings::Language = zoptions->ReadString("YAGA", "Language", "auto").ToChar();
+    Settings::NavMesh = zoptions->ReadInt("YAGA", "NavMesh", 1);
 }
 } // namespace GOTHIC_NAMESPACE
 

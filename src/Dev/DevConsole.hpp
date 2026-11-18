@@ -123,9 +123,341 @@ void CommandRoute(const SECTOR &sector)
     Navigator::LogPlan(found ? "route" : "route not found", plan, blocked);
 }
 
+// The navigation mesh: which sectors have something to walk on, which of them the hero's island reaches, the other
+// islands, and whether each named place is on the hero's island.
+void CommandRouteAllMesh()
+{
+    const NavCore::Graph &graph = NavMesh::Current->graph;
+    const int heroIsland = NavMesh::IslandOf(NavMesh::NodeAt(player->GetPositionWorld()));
+
+    std::map<std::pair<LONG, LONG>, std::pair<int, int>> sectors; // polygons, polygons on the hero's island
+    std::vector<int> islandSize(graph.IslandCount(), 0);
+    std::vector<zVEC3> islandSum(graph.IslandCount(), zVEC3(0.0f, 0.0f, 0.0f));
+    for (int node = 0; node < graph.Count(); ++node)
+    {
+        const float *c = graph.Center(node);
+        const zVEC3 center(c[0], c[1], c[2]);
+        const SECTOR sector = SectorOf(center);
+        auto &entry = sectors[{sector.x, sector.y}];
+        ++entry.first;
+        const int island = graph.Island(node);
+        if (island == heroIsland)
+            ++entry.second;
+        if (island >= 0)
+        {
+            ++islandSize[island];
+            islandSum[island] += center;
+        }
+    }
+
+    std::string unreachable;
+    int reached = 0;
+    for (const auto &[key, counts] : sectors)
+    {
+        if (counts.second)
+            ++reached;
+        else
+            unreachable += std::format("({},{}):{} ", key.first, key.second, counts.first);
+    }
+    Out(std::format("routeall mesh: hero island {} with {} polygons; {} sectors with walkable surface, {} reachable",
+                    heroIsland, heroIsland >= 0 ? graph.IslandSize(heroIsland) : 0, sectors.size(), reached));
+    Out("routeall mesh unreachable sectors: " + unreachable);
+
+    std::vector<int> order;
+    for (int i = 0; i < graph.IslandCount(); ++i)
+        if (i != heroIsland)
+            order.push_back(i);
+    std::sort(order.begin(), order.end(), [&](const int a, const int b) { return islandSize[a] > islandSize[b]; });
+    for (size_t i = 0; i < order.size() && i < 20; ++i)
+    {
+        const int island = order[i];
+        const zVEC3 centre = islandSum[island] * (1.0f / static_cast<float>((std::max)(1, islandSize[island])));
+        const SECTOR sector = SectorOf(centre);
+        Out(std::format("routeall mesh island {}: {} polygons around {:.0f} {:.0f} {:.0f} (sector {} {})", island,
+                        islandSize[island], centre[VX], centre[VY], centre[VZ], sector.x, sector.y));
+    }
+
+    // Sectors the way net reaches but the mesh does not: places the mesh may be missing.
+    if (zCWayNet *wayNet = Navigator::GetWayNet())
+    {
+        std::map<std::pair<LONG, LONG>, int> missed;
+        Navigator::ForEachWaypoint(wayNet, [&](zCWaypoint *wp) {
+            const SECTOR sector = SectorOf(wp->GetPositionWorld());
+            const auto found = sectors.find({sector.x, sector.y});
+            if (found == sectors.end() || found->second.second == 0)
+                ++missed[{sector.x, sector.y}];
+        });
+        std::string list;
+        for (const auto &[key, count] : missed)
+            list += std::format("({},{}):{} ", key.first, key.second, count);
+        Out(std::format("routeall mesh: {} sectors with waypoints but no reachable mesh: {}", missed.size(), list));
+    }
+
+    Places::EnsureResolved();
+    int placesOk = 0;
+    for (const Places::Entry &entry : Places::Entries)
+    {
+        const int node = NavMesh::NodeAt(entry.Waypoint->GetPositionWorld());
+        const bool ok = node >= 0 && graph.Island(node) == heroIsland;
+        placesOk += ok ? 1 : 0;
+        Out(std::format("routeall mesh place {} {}: polygon {} island {}", ok ? "OK" : "CUT", entry.Info->Waypoint,
+                        node, node >= 0 ? graph.Island(node) : -1));
+    }
+    Out(std::format("routeall mesh places: {} of {} on the hero's island", placesOk, Places::Entries.size()));
+}
+
+// The static world mesh as the collector sees it, and the polygon under the hero as the engine's trace finds it.
+void CommandNavGeometry()
+{
+    oCWorld *world = ogame->GetGameWorld();
+    zCMesh *mesh = world->bspTree.mesh;
+    const zVEC3 hero = player->GetPositionWorld();
+    Out(std::format("navgeo: hero {:.0f} {:.0f} {:.0f}; mesh {} numPoly {} numVert {} bbox {:.0f} {:.0f} {:.0f} to "
+                    "{:.0f} {:.0f} {:.0f}; bsp numPolys {} mode {}",
+                    hero[VX], hero[VY], hero[VZ], static_cast<void *>(mesh), mesh ? mesh->numPoly : -1,
+                    mesh ? mesh->numVert : -1, mesh ? mesh->bbox3D.mins[VX] : 0.0f, mesh ? mesh->bbox3D.mins[VY] : 0.0f,
+                    mesh ? mesh->bbox3D.mins[VZ] : 0.0f, mesh ? mesh->bbox3D.maxs[VX] : 0.0f,
+                    mesh ? mesh->bbox3D.maxs[VY] : 0.0f, mesh ? mesh->bbox3D.maxs[VZ] : 0.0f,
+                    world->bspTree.numPolys, static_cast<int>(world->bspTree.bspTreeMode)));
+    const auto describe = [](const char *what, zCPolygon *poly) {
+        if (!poly)
+        {
+            Out(std::format("navgeo {}: none", what));
+            return;
+        }
+        std::string text = std::format("navgeo {}: {} verts, normal {:.2f} {:.2f} {:.2f}, material {}:", what,
+                                       static_cast<int>(poly->polyNumVert), poly->polyPlane.normal[VX],
+                                       poly->polyPlane.normal[VY], poly->polyPlane.normal[VZ],
+                                       poly->material ? poly->material->GetName().ToChar() : "-");
+        for (int k = 0; k < poly->polyNumVert && k < 6; ++k)
+            text += std::format(" ({:.0f} {:.0f} {:.0f})", poly->vertex[k]->position[VX],
+                                poly->vertex[k]->position[VY], poly->vertex[k]->position[VZ]);
+        Out(text);
+    };
+    const int flags = zTRACERAY_STAT_POLY | zTRACERAY_VOB_IGNORE | zTRACERAY_POLY_NORMAL;
+    if (world->TraceRayNearestHit(hero + zVEC3(0.0f, 100.0f, 0.0f), zVEC3(0.0f, -1000.0f, 0.0f), player, flags))
+    {
+        zCPolygon *under = world->traceRayReport.foundPoly;
+        describe("under the hero", under);
+        if (mesh && mesh->polyArray && under)
+        {
+            const long long offset = reinterpret_cast<char *>(under) - reinterpret_cast<char *>(mesh->polyArray);
+            Out(std::format("navgeo: the polygon is {} bytes into polyArray (element size {}, remainder {})", offset,
+                            sizeof(zCPolygon), offset % static_cast<long long>(sizeof(zCPolygon))));
+        }
+    }
+    const std::vector<zCPolygon *> polys = NavMesh::Collector::StaticPolygons(world);
+    for (size_t i = 0; i < polys.size() && i < 3; ++i)
+        describe("static poly", polys[i]);
+    Out(std::format("navgeo: {} static polygons", polys.size()));
+}
+
+// What the engine finds below a point: the height and the polygon or object hit.
+std::string DescribeGroundAt(const zVEC3 &point)
+{
+    oCWorld *world = ogame->GetGameWorld();
+    const int flags = zTRACERAY_STAT_POLY | zTRACERAY_VOB_IGNORE_NO_CD_DYN | zTRACERAY_VOB_IGNORE_CHARACTER |
+                      zTRACERAY_POLY_NORMAL;
+    if (!world->TraceRayNearestHit(point + zVEC3(0.0f, 300.0f, 0.0f), zVEC3(0.0f, -1500.0f, 0.0f), player, flags))
+        return "nothing";
+    const zTTraceRayReport &report = world->traceRayReport;
+    std::string what;
+    if (report.foundVob)
+    {
+        zCVisual *visual = report.foundVob->GetVisual();
+        what = std::format("object {} {}", report.foundVob->GetObjectName().ToChar(),
+                           visual ? visual->GetVisualName().ToChar() : "");
+    }
+    else if (report.foundPoly && report.foundPoly->material)
+        what = std::format("polygon {}", report.foundPoly->material->GetName().ToChar());
+    return std::format("y {:.0f} normal {:.2f} {}", report.foundIntersection[VY], report.foundPolyNormal[VY], what);
+}
+
+// navmesh probe x1 z1 x2 z2: walks the mesh surface from one point toward the other and says where and why it ends.
+void CommandNavProbe(std::istringstream &in)
+{
+    float x1 = 0, z1 = 0, x2 = 0, z2 = 0;
+    if (!(in >> x1 >> z1 >> x2 >> z2) || !NavMesh::Ready())
+    {
+        Out("navmesh probe: usage navmesh probe x1 z1 x2 z2 (mesh must be ready)");
+        return;
+    }
+    // Both ends at the hero's height: stand near the place to probe.
+    const float heroY = player->GetPositionWorld()[VY];
+    zVEC3 a(x1, heroY, z1);
+    zVEC3 b(x2, heroY, z2);
+    zVEC3 snapA;
+    const int start = NavMesh::NodeAt(a, &snapA, 200.0f, 800.0f);
+    zVEC3 snapB;
+    const int end = NavMesh::NodeAt(b, &snapB, 200.0f, 800.0f);
+    Out(std::format("navmesh probe: start {:.0f} {:.0f} {:.0f} polygon {} island {}; end {:.0f} {:.0f} {:.0f} polygon {} "
+                    "island {}",
+                    a[VX], a[VY], a[VZ], start, NavMesh::IslandOf(start), b[VX], b[VY], b[VZ], end,
+                    NavMesh::IslandOf(end)));
+    if (start < 0)
+        return;
+
+    const std::vector<int> along = NavCore::NodesAlong(*NavMesh::Current->query, NavMesh::Current->graph, start,
+                                                       snapA.n, snapB.n, 100000.0f);
+    const int last = along.empty() ? start : along.back();
+    const float *c = NavMesh::Current->graph.Center(last);
+    Out(std::format("navmesh probe: the surface walk crosses {} polygons, the last one centred at {:.0f} {:.0f} {:.0f}",
+                    along.size(), c[0], c[1], c[2]));
+
+    // The mesh along the straight line every 10 cm: where the polygon changes or the mesh has a gap, what the engine
+    // finds below, and the lowest thing above the ground within 2.5 m.
+    oCWorld *world = ogame->GetGameWorld();
+    const float length = DistanceXZ(a, b);
+    const int steps = (std::min)(2000, static_cast<int>(length / 10.0f));
+    int previous = -2;
+    for (int i = 0; i <= steps; ++i)
+    {
+        const float t = steps ? static_cast<float>(i) / steps : 0.0f;
+        const zVEC3 p(a[VX] + (b[VX] - a[VX]) * t, heroY + 100.0f, a[VZ] + (b[VZ] - a[VZ]) * t);
+        zVEC3 snapped;
+        const int node = NavMesh::NodeAt(p, &snapped, 5.0f, 600.0f);
+        if (node == previous)
+            continue;
+        previous = node;
+        std::string ceiling = "none";
+        const int flags = zTRACERAY_STAT_POLY | zTRACERAY_VOB_IGNORE_NO_CD_DYN | zTRACERAY_VOB_IGNORE_CHARACTER;
+        if (world->TraceRayNearestHit(p + zVEC3(0.0f, 300.0f, 0.0f), zVEC3(0.0f, -1500.0f, 0.0f), player, flags))
+        {
+            const float groundY = world->traceRayReport.foundIntersection[VY];
+            if (world->TraceRayNearestHit(zVEC3(p[VX], groundY + 10.0f, p[VZ]), zVEC3(0.0f, 250.0f, 0.0f), player,
+                                          flags))
+            {
+                const zTTraceRayReport &report = world->traceRayReport;
+                ceiling = std::format("{:.0f} cm up: {}", report.foundIntersection[VY] - groundY,
+                                      report.foundVob ? report.foundVob->GetVisual()
+                                                            ? report.foundVob->GetVisual()->GetVisualName().ToChar()
+                                                            : "object"
+                                      : report.foundPoly && report.foundPoly->material
+                                          ? report.foundPoly->material->GetName().ToChar()
+                                          : "?");
+            }
+        }
+        int links = 0, tileX = -1, tileY = -1, edges = -1;
+        NavMesh::Current->graph.Describe(node, links, tileX, tileY, edges);
+        std::string neighbours;
+        for (const int n : NavMesh::Current->graph.Neighbours(node))
+            neighbours += std::format("{} ", n);
+        Out(std::format("navmesh probe {:.0f} {:.0f}: mesh {} island {} area {} tile {} {} edges {} links {} [{}] at "
+                        "{:.0f} | {} | ceiling {}",
+                        p[VX], p[VZ], node, NavMesh::IslandOf(node),
+                        node >= 0 ? NavMesh::Current->graph.AreaOf(node) : -1, tileX, tileY, edges, links,
+                        neighbours, snapped[VY], DescribeGroundAt(p), ceiling));
+    }
+}
+
+// navmesh [info] | rebuild | export [file] [input] | probe x1 z1 x2 z2 | geometry
+void CommandNavMesh(std::istringstream &in)
+{
+    std::string what;
+    in >> what;
+    if (what == "geometry")
+    {
+        CommandNavGeometry();
+        return;
+    }
+    if (what == "probe")
+    {
+        CommandNavProbe(in);
+        return;
+    }
+    if (what == "gates" && NavMesh::Ready())
+    {
+        // Every gate: its mover state, where it is now and where it moves, and how many of its polygons it blocks now.
+        const NavMesh::State &state = *NavMesh::Current;
+        for (size_t g = 0; g < state.gates.size(); ++g)
+        {
+            const NavMesh::GateInfo &gate = state.gates[g];
+            int nodes = 0, down = 0;
+            for (const auto &[node, index] : state.gateNodes)
+                if (index == static_cast<int>(g))
+                {
+                    ++nodes;
+                    down += NavMesh::GateDown(gate, node) ? 1 : 0;
+                }
+            zCMover *mover = static_cast<zCMover *>(gate.vob);
+            Out(std::format("navmesh gate {} state {} now y {:.0f}..{:.0f}, moves within y {:.0f}..{:.0f}, at {:.0f} "
+                            "{:.0f}: {} polygons, {} blocked",
+                            gate.vob->GetObjectName().ToChar(), static_cast<int>(mover->moverState),
+                            gate.vob->bbox3D.mins[VY], gate.vob->bbox3D.maxs[VY], gate.range.mins[VY],
+                            gate.range.maxs[VY], gate.vob->GetPositionWorld()[VX], gate.vob->GetPositionWorld()[VZ],
+                            nodes, down));
+        }
+        return;
+    }
+    if (what == "polys")
+    {
+        // navmesh polys x0 z0 x1 z1 y0 y1: static polygons in a box, with their flags and material.
+        float x0 = 0, z0 = 0, x1 = 0, z1 = 0, y0 = 0, y1 = 0;
+        in >> x0 >> z0 >> x1 >> z1 >> y0 >> y1;
+        int shown = 0;
+        for (zCPolygon *poly : NavMesh::Collector::StaticPolygons(ogame->GetGameWorld()))
+        {
+            float lo[3] = {1e9f, 1e9f, 1e9f}, hi[3] = {-1e9f, -1e9f, -1e9f};
+            for (int k = 0; k < poly->polyNumVert; ++k)
+                for (int a = 0; a < 3; ++a)
+                {
+                    lo[a] = (std::min)(lo[a], poly->vertex[k]->position[a]);
+                    hi[a] = (std::max)(hi[a], poly->vertex[k]->position[a]);
+                }
+            if (hi[0] < x0 || lo[0] > x1 || hi[2] < z0 || lo[2] > z1 || hi[1] < y0 || lo[1] > y1)
+                continue;
+            zCMaterial *m = poly->material;
+            Out(std::format("navmesh poly: y {:.0f}..{:.0f} normal {:.2f} portal {} occluder {} sector {} lod {} "
+                            "ghost {} indoorOutdoor {} material {} group {} noCollDet {}",
+                            lo[1], hi[1], poly->polyPlane.normal[VY], static_cast<int>(poly->flags.portalPoly),
+                            static_cast<int>(poly->flags.occluder), static_cast<int>(poly->flags.sectorPoly),
+                            static_cast<int>(poly->flags.lodFlag), static_cast<int>(poly->flags.ghostOccluder),
+                            static_cast<int>(poly->flags.portalIndoorOutdoor), m ? m->GetName().ToChar() : "-",
+                            m ? static_cast<int>(m->matGroup) : -1, m ? static_cast<int>(m->noCollDet) : -1));
+            if (++shown >= 40)
+                break;
+        }
+        return;
+    }
+    if (what == "rebuild")
+    {
+        NavMesh::Rebuild();
+        Out("navmesh: cache removed, rebuilding");
+        return;
+    }
+    if (what == "export")
+    {
+        std::string file = "yaga_navmesh.obj";
+        std::string withInput;
+        in >> file >> withInput;
+        const bool ok = NavMesh::Export(ToWString(WaynetPatch::GameFolder() + "\\" + file), withInput == "input");
+        Out(std::format("navmesh export {}: {}", file, ok ? "written" : "failed"));
+        return;
+    }
+
+    if (!NavMesh::Ready())
+    {
+        Out(std::format("navmesh: not ready{}", NavMesh::Building() ? ", still building" : ""));
+        return;
+    }
+    const NavCore::Graph &graph = NavMesh::Current->graph;
+    const zVEC3 hero = player->GetPositionWorld();
+    zVEC3 snapped;
+    const int node = NavMesh::NodeAt(hero, &snapped);
+    const int island = graph.Island(node);
+    Out(std::format("navmesh {}: {} polygons, {} islands, {} ladder links; hero on polygon {} area {} island {} ({} "
+                    "polygons), {:.0f} cm from the mesh",
+                    NavMesh::Current->world, graph.Count(), graph.IslandCount(), graph.Links().size() / 2, node,
+                    node >= 0 ? graph.AreaOf(node) : -1, island, graph.IslandSize(island),
+                    node >= 0 ? hero.Distance(snapped) : -1.0f));
+}
+
 // Graph check without walking: one search from the hero, then which sectors (and way net components) it reaches.
 void CommandRouteAll()
 {
+    if (NavMesh::Ready())
+        CommandRouteAllMesh();
+
     zCWayNet *wayNet = Navigator::GetWayNet();
     const zVEC3 hero = player->GetPositionWorld();
     Navigator::Blocked blocked;
@@ -1075,6 +1407,8 @@ void Run(const std::string &line)
     }
     else if (command == "routeall")
         CommandRouteAll();
+    else if (command == "navmesh")
+        CommandNavMesh(in);
     else if (command == "navwp")
     {
         std::string name;
