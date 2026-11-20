@@ -8,6 +8,7 @@
 
 // Custom includes
 #include <format>
+#include <set>
 #include <unordered_map>
 
 #ifdef __G1
